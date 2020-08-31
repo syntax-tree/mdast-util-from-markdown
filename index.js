@@ -43,7 +43,6 @@ function compiler() {
       codeFenced: open(codeFlow),
       codeFencedFenceInfo: buffer,
       codeFencedFenceMeta: buffer,
-      // To do: can we use `codeFlowLine` or so instead of `onentercodeindented`.
       codeIndented: open(codeFlow, buffer),
       codeText: open(codeText, buffer),
       data: onenterdata,
@@ -55,7 +54,6 @@ function compiler() {
       emphasis: open(emphasis),
       hardBreakEscape: open(hardBreak),
       hardBreakTrailing: open(hardBreak),
-      // To do: can we use `htmlFlowLine` or so instead of `buffer`.
       htmlFlow: open(html, buffer),
       htmlText: open(html, buffer),
       image: open(image, onenterimage),
