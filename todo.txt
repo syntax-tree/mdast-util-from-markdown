@@ -1,0 +1,14 @@
+mm:
+  Add separate link w/ resource, link w/ optional reference token types
+  Should list item tokens exist?
+
+mdast:
+  gfm: table / tableRow / tableCell / delete, checked list items
+  frontmatter: yaml, toml
+  footnotes: footnoteDefinition, footnote, footnoteReference
+
+ast changes:
+  heading.depth => rank
+  blockquote => blockQuote
+  html => htmlFlow, htmlText?
+  inlineCode => codeText?

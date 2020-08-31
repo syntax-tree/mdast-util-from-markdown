@@ -1,0 +1,85 @@
+{
+  "name": "mdast-util-from-markdown",
+  "version": "0.0.0",
+  "description": "mdast utility to parse markdown",
+  "license": "MIT",
+  "keywords": [
+    "unist",
+    "mdast",
+    "mdast-util",
+    "util",
+    "utility",
+    "markdown",
+    "markup",
+    "parse",
+    "syntax",
+    "tree",
+    "ast"
+  ],
+  "repository": "syntax-tree/mdast-util-from-markdown",
+  "bugs": "https://github.com/syntax-tree/mdast-util-from-markdown/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "mdast-util-to-string": "^1.0.0",
+    "micromark": "~2.1.0",
+    "parse-entities": "^2.0.0"
+  },
+  "devDependencies": {
+    "browserify": "^16.0.0",
+    "gzip-size-cli": "^3.0.0",
+    "nyc": "^15.0.0",
+    "prettier": "^2.0.0",
+    "remark-cli": "^8.0.0",
+    "remark-preset-wooorm": "^7.0.0",
+    "tape": "^5.0.0",
+    "tinyify": "^3.0.0",
+    "xo": "^0.33.0"
+  },
+  "scripts": {
+    "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
+    "generate-size": "browserify . -p tinyify -s mdast-util-from-markdown -o mdast-util-from-markdown.min.js; gzip-size mdast-util-from-markdown.min.js",
+    "generate": "npm run generate-size",
+    "test-api": "node test",
+    "test-coverage": "nyc --reporter lcov tape test/index.js",
+    "test": "npm run format && npm run generate && npm run test-coverage"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 100,
+    "functions": 100,
+    "branches": 100
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "semi": false,
+    "trailingComma": "none"
+  },
+  "xo": {
+    "prettier": true,
+    "esnext": false,
+    "rules": {
+      "complexity": "off",
+      "unicorn/prefer-number-properties": "off",
+      "unicorn/prefer-optional-catch-binding": "off",
+      "unicorn/prefer-set-has": "off"
+    }
+  },
+  "remarkConfig": {
+    "plugins": [
+      "preset-wooorm"
+    ]
+  }
+}
