@@ -4,8 +4,13 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var unified = require('unified')
-var parse = require('remark-parse')
+var remarkParse = require('remark-parse')
+var rehypeParse = require('rehype-parse')
+var rehypeStringify = require('rehype-stringify')
 var visit = require('unist-util-visit')
+var toHast = require('mdast-util-to-hast')
+var toHtml = require('hast-util-to-html')
+var commonmark = require('commonmark.json')
 var fromMarkdown = require('..')
 
 var join = path.join
@@ -798,8 +803,37 @@ test('fixtures', function (t) {
   }
 })
 
+test('commonmark', function (t) {
+  commonmark.forEach(each)
+
+  t.end()
+
+  function each(example, index) {
+    var html = toHtml(
+      toHast(fromMarkdown(example.markdown.slice(0, -1)), {
+        allowDangerousHtml: true,
+        commonmark: true
+      }),
+      {
+        allowDangerousHtml: true,
+        entities: {useNamedReferences: true},
+        closeSelfClosing: true
+      }
+    )
+
+    var reformat = unified()
+      .use(rehypeParse, {fragment: true})
+      .use(rehypeStringify)
+
+    var actual = reformat.processSync(html).toString()
+    var expected = reformat.processSync(example.html.slice(0, -1)).toString()
+
+    t.equal(actual, expected, example.section + ' (' + index + ')')
+  }
+})
+
 function remarkLegacyParse(doc) {
-  var processor = unified().use(parse, {commonmark: true}).use(clean)
+  var processor = unified().use(remarkParse, {commonmark: true}).use(clean)
   return processor.runSync(processor.parse(doc))
 }
 

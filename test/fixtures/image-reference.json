@@ -55,9 +55,6 @@
         },
         {
           "type": "imageReference",
-          "identifier": "e",
-          "label": "e",
-          "referenceType": "shortcut",
           "alt": "e",
           "position": {
             "start": {
@@ -70,7 +67,10 @@
               "column": 17,
               "offset": 79
             }
-          }
+          },
+          "label": "e",
+          "identifier": "e",
+          "referenceType": "shortcut"
         },
         {
           "type": "text",
@@ -90,9 +90,6 @@
         },
         {
           "type": "imageReference",
-          "identifier": "f",
-          "label": "f",
-          "referenceType": "collapsed",
           "alt": "f",
           "position": {
             "start": {
@@ -105,7 +102,10 @@
               "column": 25,
               "offset": 87
             }
-          }
+          },
+          "label": "f",
+          "identifier": "f",
+          "referenceType": "collapsed"
         },
         {
           "type": "text",
@@ -125,9 +125,6 @@
         },
         {
           "type": "imageReference",
-          "identifier": "h",
-          "label": "h",
-          "referenceType": "full",
           "alt": "g",
           "position": {
             "start": {
@@ -140,7 +137,10 @@
               "column": 34,
               "offset": 96
             }
-          }
+          },
+          "label": "h",
+          "identifier": "h",
+          "referenceType": "full"
         }
       ],
       "position": {

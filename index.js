@@ -125,7 +125,6 @@ function compiler() {
   var characterReferenceType
   var expectingFirstListItemValue
   var atHardBreak
-  var inImage
   var inReference
   var referenceType
 
@@ -319,7 +318,6 @@ function compiler() {
 
     function enter(token) {
       var node = create(token)
-
       context.children.push(node)
       context = node
       stack.push(node)
@@ -399,8 +397,10 @@ function compiler() {
     context.value = data
   }
 
-  function onexitdefinitionlabelstring() {
-    var data = resume()
+  function onexitdefinitionlabelstring(token) {
+    // Discard label, use the source content instead.
+    resume()
+    var data = this.sliceSerialize(token)
     context.label = data
     context.identifier = normalizeIdentifier(data).toLowerCase()
   }
@@ -503,7 +503,6 @@ function compiler() {
 
   function onenterimage() {
     buffer()
-    inImage = true
   }
 
   function onexitlink() {
@@ -551,10 +550,10 @@ function compiler() {
     // Assume a reference.
     inReference = true
 
-    if (inImage) {
+    // If we’re in a fragment, we’re in an image and buffering.
+    if (context.type === 'fragment') {
       data = resume()
       context.alt = data
-      inImage = undefined
     }
   }
 
@@ -576,8 +575,9 @@ function compiler() {
     referenceType = 'collapsed'
   }
 
-  function onexitreferencestring() {
-    var data = resume()
+  function onexitreferencestring(token) {
+    resume()
+    var data = this.sliceSerialize(token)
     context.label = data
     context.identifier = normalizeIdentifier(data).toLowerCase()
     referenceType = 'full'
@@ -659,11 +659,11 @@ function compiler() {
   }
 
   function image() {
-    return {type: 'image', title: null, url: null, alt: null}
+    return {type: 'image', title: null, url: '', alt: null}
   }
 
   function link() {
-    return {type: 'link', title: null, url: null, children: []}
+    return {type: 'link', title: null, url: '', children: []}
   }
 
   function list(token) {

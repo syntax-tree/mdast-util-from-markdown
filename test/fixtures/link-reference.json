@@ -55,9 +55,6 @@
         },
         {
           "type": "linkReference",
-          "identifier": "e",
-          "label": "e",
-          "referenceType": "shortcut",
           "children": [
             {
               "type": "text",
@@ -87,7 +84,10 @@
               "column": 16,
               "offset": 75
             }
-          }
+          },
+          "label": "e",
+          "identifier": "e",
+          "referenceType": "shortcut"
         },
         {
           "type": "text",
@@ -107,9 +107,6 @@
         },
         {
           "type": "linkReference",
-          "identifier": "f",
-          "label": "f",
-          "referenceType": "collapsed",
           "children": [
             {
               "type": "text",
@@ -139,7 +136,10 @@
               "column": 23,
               "offset": 82
             }
-          }
+          },
+          "label": "f",
+          "identifier": "f",
+          "referenceType": "collapsed"
         },
         {
           "type": "text",
@@ -159,9 +159,6 @@
         },
         {
           "type": "linkReference",
-          "identifier": "h",
-          "label": "h",
-          "referenceType": "full",
           "children": [
             {
               "type": "text",
@@ -191,7 +188,10 @@
               "column": 31,
               "offset": 90
             }
-          }
+          },
+          "label": "h",
+          "identifier": "h",
+          "referenceType": "full"
         }
       ],
       "position": {
