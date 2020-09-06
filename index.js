@@ -15,110 +15,118 @@ var parser = require('micromark/dist/parse')
 var preprocessor = require('micromark/dist/preprocess')
 var postprocessor = require('micromark/dist/postprocess')
 
-function fromMarkdown(value, encoding) {
-  return compiler()(
+function fromMarkdown(value, encoding, options) {
+  if (typeof encoding !== 'string') {
+    options = encoding
+    encoding = undefined
+  }
+
+  return compiler(options)(
     postprocessor()(
       flatMap(
         flatMap([value, codes.eof], preprocessor(), encoding),
-        parser().document().write
+        parser(options).document().write
       )
     )
   )
 }
 
 // Note this compiler only understand complete buffering, not streaming.
-function compiler() {
-  var context = {type: 'root', children: []}
-  var stack = [context]
+function compiler(options) {
+  var settings = options || {}
+  var stack = [{type: 'root', children: []}]
 
-  var handlers = {
-    enter: {
-      autolink: open(link),
-      autolinkProtocol: onenterdata,
-      autolinkEmail: onenterdata,
-      atxHeading: open(heading),
-      blockQuote: open(blockQuote),
-      characterEscape: onenterdata,
-      characterReference: onenterdata,
-      codeFenced: open(codeFlow),
-      codeFencedFenceInfo: buffer,
-      codeFencedFenceMeta: buffer,
-      codeIndented: open(codeFlow, buffer),
-      codeText: open(codeText, buffer),
-      data: onenterdata,
-      codeFlowValue: onenterdata,
-      definition: open(definition),
-      definitionDestinationString: buffer,
-      definitionLabelString: buffer,
-      definitionTitleString: buffer,
-      emphasis: open(emphasis),
-      hardBreakEscape: open(hardBreak),
-      hardBreakTrailing: open(hardBreak),
-      htmlFlow: open(html, buffer),
-      htmlText: open(html, buffer),
-      image: open(image, onenterimage),
-      link: open(link),
-      listItem: open(listItem),
-      listItemValue: onenterlistitemvalue,
-      listOrdered: open(list, onenterlistordered),
-      listUnordered: open(list),
-      paragraph: open(paragraph),
-      reference: onenterreference,
-      referenceString: buffer,
-      resourceDestinationString: buffer,
-      resourceTitleString: buffer,
-      setextHeading: open(heading),
-      strong: open(strong),
-      thematicBreak: open(thematicBreak)
+  var handlers = configure(
+    {
+      enter: {
+        autolink: opener(link),
+        autolinkProtocol: onenterdata,
+        autolinkEmail: onenterdata,
+        atxHeading: opener(heading),
+        blockQuote: opener(blockQuote),
+        characterEscape: onenterdata,
+        characterReference: onenterdata,
+        codeFenced: opener(codeFlow),
+        codeFencedFenceInfo: buffer,
+        codeFencedFenceMeta: buffer,
+        codeIndented: opener(codeFlow, buffer),
+        codeText: opener(codeText, buffer),
+        data: onenterdata,
+        codeFlowValue: onenterdata,
+        definition: opener(definition),
+        definitionDestinationString: buffer,
+        definitionLabelString: buffer,
+        definitionTitleString: buffer,
+        emphasis: opener(emphasis),
+        hardBreakEscape: opener(hardBreak),
+        hardBreakTrailing: opener(hardBreak),
+        htmlFlow: opener(html, buffer),
+        htmlText: opener(html, buffer),
+        image: opener(image, onenterimage),
+        link: opener(link),
+        listItem: opener(listItem),
+        listItemValue: onenterlistitemvalue,
+        listOrdered: opener(list, onenterlistordered),
+        listUnordered: opener(list),
+        paragraph: opener(paragraph),
+        reference: onenterreference,
+        referenceString: buffer,
+        resourceDestinationString: buffer,
+        resourceTitleString: buffer,
+        setextHeading: opener(heading),
+        strong: opener(strong),
+        thematicBreak: opener(thematicBreak)
+      },
+      exit: {
+        atxHeading: closer(),
+        atxHeadingSequence: onexitatxheadingsequence,
+        autolink: closer(),
+        autolinkEmail: onexitautolinkemail,
+        autolinkProtocol: onexitautolinkprotocol,
+        blockQuote: closer(),
+        characterEscapeValue: onexitdata,
+        characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
+        characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
+        characterReferenceValue: closer(onexitcharacterreferencevalue),
+        codeFenced: closer(onexitcodefenced),
+        codeFencedFence: onexitcodefencedfence,
+        codeFencedFenceInfo: onexitcodefencedfenceinfo,
+        codeFencedFenceMeta: onexitcodefencedfencemeta,
+        codeFlowValue: onexitdata,
+        codeIndented: closer(onexitcodeindented),
+        codeText: closer(onexitcodetext),
+        data: onexitdata,
+        definition: closer(),
+        definitionDestinationString: onexitdefinitiondestinationstring,
+        definitionLabelString: onexitdefinitionlabelstring,
+        definitionTitleString: onexitdefinitiontitlestring,
+        emphasis: closer(),
+        hardBreakEscape: closer(onexithardbreak),
+        hardBreakTrailing: closer(onexithardbreak),
+        htmlFlow: closer(onexithtmlflow),
+        htmlText: closer(onexithtmltext),
+        image: closer(onexitimage),
+        label: onexitlabel,
+        labelText: onexitlabeltext,
+        lineEnding: onexitlineending,
+        link: closer(onexitlink),
+        listItem: closer(),
+        listOrdered: closer(),
+        listUnordered: closer(),
+        paragraph: closer(),
+        referenceString: onexitreferencestring,
+        resourceDestinationString: onexitresourcedestinationstring,
+        resourceTitleString: onexitresourcetitlestring,
+        resource: onexitresource,
+        setextHeading: closer(onexitsetextheading),
+        setextHeadingLineSequence: onexitsetextheadinglinesequence,
+        setextHeadingText: onexitsetextheadingtext,
+        strong: closer(),
+        thematicBreak: closer()
+      }
     },
-    exit: {
-      atxHeading: close(),
-      atxHeadingSequence: onexitatxheadingsequence,
-      autolink: close(),
-      autolinkEmail: onexitautolinkemail,
-      autolinkProtocol: onexitautolinkprotocol,
-      blockQuote: close(),
-      characterEscapeValue: onexitdata,
-      characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
-      characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
-      characterReferenceValue: close(onexitcharacterreferencevalue),
-      codeFenced: close(onexitcodefenced),
-      codeFencedFence: onexitcodefencedfence,
-      codeFencedFenceInfo: onexitcodefencedfenceinfo,
-      codeFencedFenceMeta: onexitcodefencedfencemeta,
-      codeFlowValue: onexitdata,
-      codeIndented: close(onexitcodeindented),
-      codeText: close(onexitcodetext),
-      data: onexitdata,
-      definition: close(),
-      definitionDestinationString: onexitdefinitiondestinationstring,
-      definitionLabelString: onexitdefinitionlabelstring,
-      definitionTitleString: onexitdefinitiontitlestring,
-      emphasis: close(),
-      hardBreakEscape: close(onexithardbreak),
-      hardBreakTrailing: close(onexithardbreak),
-      htmlFlow: close(onexithtmlflow),
-      htmlText: close(onexithtmltext),
-      image: close(onexitimage),
-      label: onexitlabel,
-      labelText: onexitlabeltext,
-      lineEnding: onexitlineending,
-      link: close(onexitlink),
-      listItem: close(),
-      listOrdered: close(),
-      listUnordered: close(),
-      paragraph: close(),
-      referenceString: onexitreferencestring,
-      resourceDestinationString: onexitresourcedestinationstring,
-      resourceTitleString: onexitresourcetitlestring,
-      resource: onexitresource,
-      setextHeading: close(onexitsetextheading),
-      setextHeadingLineSequence: onexitsetextheadinglinesequence,
-      setextHeadingText: onexitsetextheadingtext,
-      strong: close(),
-      thematicBreak: close()
-    }
-  }
+    settings.mdastExtensions || []
+  )
 
   var flowCodeInside
   var setextHeadingSlurpLineEnding
@@ -165,12 +173,22 @@ function compiler() {
       handler = handlers[events[index][0]]
 
       if (own.call(handler, events[index][1].type)) {
-        handler[events[index][1].type].call(events[index][2], events[index][1])
+        handler[events[index][1].type].call(
+          {
+            handlers: handlers,
+            enter: enter,
+            exit: exit,
+            buffer: buffer,
+            resume: resume,
+            sliceSerialize: events[index][2].sliceSerialize
+          },
+          events[index][1]
+        )
       }
     }
 
     // Figure out `root` position.
-    context.position = {
+    stack[0].position = {
       start: point(
         length ? events[0][1].start : {line: 1, column: 1, offset: 0}
       ),
@@ -181,7 +199,7 @@ function compiler() {
       )
     }
 
-    return context
+    return stack[0]
   }
 
   function prepareList(events, start, length) {
@@ -313,41 +331,43 @@ function compiler() {
     return {line: d.line, column: d.column, offset: d.offset}
   }
 
-  function open(create, and) {
-    return enter
+  function opener(create, and) {
+    return open
 
-    function enter(token) {
-      var node = create(token)
-      context.children.push(node)
-      context = node
-      stack.push(node)
-      node.position = {start: point(token.start)}
-
+    function open(token) {
+      enter(create(token), token)
       if (and) and.call(this, token)
     }
   }
 
   function buffer() {
-    var node = {type: 'fragment', children: []}
-    context = node
-    stack.push(node)
+    stack.push({type: 'fragment', children: []})
   }
 
-  function close(and) {
-    return exit
+  function enter(node, token) {
+    stack[stack.length - 1].children.push(node)
+    stack.push(node)
+    node.position = {start: point(token.start)}
+    return node
+  }
 
-    function exit(token) {
-      var tail
+  function closer(and) {
+    return close
+
+    function close(token) {
       if (and) and.call(this, token)
-      tail = stack.pop()
-      tail.position.end = point(token.end)
-      context = stack[stack.length - 1]
+      exit(token)
     }
+  }
+
+  function exit(token) {
+    var node = stack.pop()
+    node.position.end = point(token.end)
+    return node
   }
 
   function resume() {
     var value = toString(stack.pop())
-    context = stack[stack.length - 1]
     return value
   }
 
@@ -371,12 +391,12 @@ function compiler() {
 
   function onexitcodefencedfenceinfo() {
     var data = resume()
-    context.lang = data
+    stack[stack.length - 1].lang = data
   }
 
   function onexitcodefencedfencemeta() {
     var data = resume()
-    context.meta = data
+    stack[stack.length - 1].meta = data
   }
 
   function onexitcodefencedfence() {
@@ -388,36 +408,36 @@ function compiler() {
 
   function onexitcodefenced() {
     var data = resume()
-    context.value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, '')
+    stack[stack.length - 1].value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, '')
     flowCodeInside = undefined
   }
 
   function onexitcodeindented() {
     var data = resume()
-    context.value = data
+    stack[stack.length - 1].value = data
   }
 
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
     resume()
     var data = this.sliceSerialize(token)
-    context.label = data
-    context.identifier = normalizeIdentifier(data).toLowerCase()
+    stack[stack.length - 1].label = data
+    stack[stack.length - 1].identifier = normalizeIdentifier(data).toLowerCase()
   }
 
   function onexitdefinitiontitlestring() {
     var data = resume()
-    context.title = data
+    stack[stack.length - 1].title = data
   }
 
   function onexitdefinitiondestinationstring() {
     var data = resume()
-    context.url = data
+    stack[stack.length - 1].url = data
   }
 
   function onexitatxheadingsequence(token) {
-    if (!context.depth) {
-      context.depth = this.sliceSerialize(token).length
+    if (!stack[stack.length - 1].depth) {
+      stack[stack.length - 1].depth = this.sliceSerialize(token).length
     }
   }
 
@@ -426,7 +446,7 @@ function compiler() {
   }
 
   function onexitsetextheadinglinesequence(token) {
-    context.depth =
+    stack[stack.length - 1].depth =
       this.sliceSerialize(token).charCodeAt(0) === codes.equalsTo ? 1 : 2
   }
 
@@ -435,17 +455,16 @@ function compiler() {
   }
 
   function onenterdata(token) {
-    var siblings = context.children
+    var siblings = stack[stack.length - 1].children
     var tail = siblings[siblings.length - 1]
 
     if (!tail || tail.type !== 'text') {
       // Add a new text node.
       tail = text()
       tail.position = {start: point(token.start)}
-      context.children.push(tail)
+      stack[stack.length - 1].children.push(tail)
     }
 
-    context = tail
     stack.push(tail)
   }
 
@@ -453,10 +472,11 @@ function compiler() {
     var tail = stack.pop()
     tail.value += this.sliceSerialize(token)
     tail.position.end = point(token.end)
-    context = stack[stack.length - 1]
   }
 
   function onexitlineending(token) {
+    var context = stack[stack.length - 1]
+
     // If we’re at a hard break, include the line ending in there.
     if (atHardBreak) {
       context.children[context.children.length - 1].position.end = point(
@@ -488,17 +508,17 @@ function compiler() {
 
   function onexithtmlflow() {
     var data = resume()
-    context.value = data
+    stack[stack.length - 1].value = data
   }
 
   function onexithtmltext() {
     var data = resume()
-    context.value = data
+    stack[stack.length - 1].value = data
   }
 
   function onexitcodetext() {
     var data = resume()
-    context.value = data
+    stack[stack.length - 1].value = data
   }
 
   function onenterimage() {
@@ -506,6 +526,8 @@ function compiler() {
   }
 
   function onexitlink() {
+    var context = stack[stack.length - 1]
+
     // To do: clean.
     if (inReference) {
       context.type += 'Reference'
@@ -522,6 +544,8 @@ function compiler() {
   }
 
   function onexitimage() {
+    var context = stack[stack.length - 1]
+
     // To do: clean.
     if (inReference) {
       context.type += 'Reference'
@@ -539,7 +563,10 @@ function compiler() {
 
   function onexitlabeltext(token) {
     var data = this.sliceSerialize(token)
-    var ctx = context.type === 'fragment' ? stack[stack.length - 2] : context
+    var ctx =
+      stack[stack.length - 1].type === 'fragment'
+        ? stack[stack.length - 2]
+        : stack[stack.length - 1]
     ctx.label = data
     ctx.identifier = normalizeIdentifier(data).toLowerCase()
   }
@@ -551,20 +578,20 @@ function compiler() {
     inReference = true
 
     // If we’re in a fragment, we’re in an image and buffering.
-    if (context.type === 'fragment') {
+    if (stack[stack.length - 1].type === 'fragment') {
       data = resume()
-      context.alt = data
+      stack[stack.length - 1].alt = data
     }
   }
 
   function onexitresourcedestinationstring() {
     var data = resume()
-    context.url = data
+    stack[stack.length - 1].url = data
   }
 
   function onexitresourcetitlestring() {
     var data = resume()
-    context.title = data
+    stack[stack.length - 1].title = data
   }
 
   function onexitresource() {
@@ -578,8 +605,8 @@ function compiler() {
   function onexitreferencestring(token) {
     resume()
     var data = this.sliceSerialize(token)
-    context.label = data
-    context.identifier = normalizeIdentifier(data).toLowerCase()
+    stack[stack.length - 1].label = data
+    stack[stack.length - 1].identifier = normalizeIdentifier(data).toLowerCase()
     referenceType = 'full'
   }
 
@@ -602,18 +629,18 @@ function compiler() {
       value = decode(data)
     }
 
-    context.value += value
+    stack[stack.length - 1].value += value
     characterReferenceType = undefined
   }
 
   function onexitautolinkprotocol(token) {
     onexitdata.call(this, token)
-    context.url = this.sliceSerialize(token)
+    stack[stack.length - 1].url = this.sliceSerialize(token)
   }
 
   function onexitautolinkemail(token) {
     onexitdata.call(this, token)
-    context.url = 'mailto:' + this.sliceSerialize(token)
+    stack[stack.length - 1].url = 'mailto:' + this.sliceSerialize(token)
   }
 
   //
@@ -699,5 +726,32 @@ function compiler() {
 
   function thematicBreak() {
     return {type: 'thematicBreak'}
+  }
+}
+
+function configure(handlers, extensions) {
+  var length = extensions.length
+  var index = -1
+
+  while (++index < length) {
+    extension(handlers, extensions[index])
+  }
+
+  return handlers
+}
+
+function extension(handlers, extension) {
+  var hook
+  var left
+  var right
+  var type
+
+  for (hook in extension) {
+    left = own.call(handlers, hook) ? handlers[hook] : (handlers[hook] = {})
+    right = extension[hook]
+
+    for (type in right) {
+      left[type] = right[type]
+    }
   }
 }
