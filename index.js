@@ -419,10 +419,11 @@ function compiler(options) {
 
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
-    resume()
-    var data = this.sliceSerialize(token)
-    stack[stack.length - 1].label = data
-    stack[stack.length - 1].identifier = normalizeIdentifier(data).toLowerCase()
+    var label = resume()
+    stack[stack.length - 1].label = label
+    stack[stack.length - 1].identifier = normalizeIdentifier(
+      this.sliceSerialize(token)
+    ).toLowerCase()
   }
 
   function onexitdefinitiontitlestring() {
@@ -562,13 +563,14 @@ function compiler(options) {
   }
 
   function onexitlabeltext(token) {
-    var data = this.sliceSerialize(token)
     var ctx =
       stack[stack.length - 1].type === 'fragment'
         ? stack[stack.length - 2]
         : stack[stack.length - 1]
-    ctx.label = data
-    ctx.identifier = normalizeIdentifier(data).toLowerCase()
+    ctx.label = toString(stack[stack.length - 1])
+    ctx.identifier = normalizeIdentifier(
+      this.sliceSerialize(token)
+    ).toLowerCase()
   }
 
   function onexitlabel() {
@@ -603,10 +605,11 @@ function compiler(options) {
   }
 
   function onexitreferencestring(token) {
-    resume()
-    var data = this.sliceSerialize(token)
-    stack[stack.length - 1].label = data
-    stack[stack.length - 1].identifier = normalizeIdentifier(data).toLowerCase()
+    var label = resume()
+    stack[stack.length - 1].label = label
+    stack[stack.length - 1].identifier = normalizeIdentifier(
+      this.sliceSerialize(token)
+    ).toLowerCase()
     referenceType = 'full'
   }
 
