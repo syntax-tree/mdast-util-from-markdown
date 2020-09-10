@@ -34,7 +34,6 @@ function fromMarkdown(value, encoding, options) {
 // Note this compiler only understand complete buffering, not streaming.
 function compiler(options) {
   var settings = options || {}
-  var stack = [{type: 'root', children: []}]
 
   var handlers = configure(
     {
@@ -139,6 +138,7 @@ function compiler(options) {
   return compile
 
   function compile(events) {
+    var stack = [{type: 'root', children: []}]
     var index = -1
     var listStack = []
     var length
@@ -175,6 +175,7 @@ function compiler(options) {
       if (own.call(handler, events[index][1].type)) {
         handler[events[index][1].type].call(
           {
+            stack: stack,
             handlers: handlers,
             enter: enter,
             exit: exit,
@@ -335,18 +336,18 @@ function compiler(options) {
     return open
 
     function open(token) {
-      enter(create(token), token)
+      enter.call(this, create(token), token)
       if (and) and.call(this, token)
     }
   }
 
   function buffer() {
-    stack.push({type: 'fragment', children: []})
+    this.stack.push({type: 'fragment', children: []})
   }
 
   function enter(node, token) {
-    stack[stack.length - 1].children.push(node)
-    stack.push(node)
+    this.stack[this.stack.length - 1].children.push(node)
+    this.stack.push(node)
     node.position = {start: point(token.start)}
     return node
   }
@@ -356,18 +357,18 @@ function compiler(options) {
 
     function close(token) {
       if (and) and.call(this, token)
-      exit(token)
+      exit.call(this, token)
     }
   }
 
   function exit(token) {
-    var node = stack.pop()
+    var node = this.stack.pop()
     node.position.end = point(token.end)
     return node
   }
 
   function resume() {
-    var value = toString(stack.pop())
+    var value = toString(this.stack.pop())
     return value
   }
 
@@ -381,7 +382,7 @@ function compiler(options) {
 
   function onenterlistitemvalue(token) {
     if (expectingFirstListItemValue) {
-      stack[stack.length - 2].start = parseInt(
+      this.stack[this.stack.length - 2].start = parseInt(
         this.sliceSerialize(token),
         constants.numericBaseDecimal
       )
@@ -390,55 +391,60 @@ function compiler(options) {
   }
 
   function onexitcodefencedfenceinfo() {
-    var data = resume()
-    stack[stack.length - 1].lang = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].lang = data
   }
 
   function onexitcodefencedfencemeta() {
-    var data = resume()
-    stack[stack.length - 1].meta = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].meta = data
   }
 
   function onexitcodefencedfence() {
     // Exit if this is the closing fence.
     if (flowCodeInside) return
-    buffer()
+    this.buffer()
     flowCodeInside = true
   }
 
   function onexitcodefenced() {
-    var data = resume()
-    stack[stack.length - 1].value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, '')
+    var data = this.resume()
+    this.stack[this.stack.length - 1].value = data.replace(
+      /^(\r?\n|\r)|(\r?\n|\r)$/g,
+      ''
+    )
     flowCodeInside = undefined
   }
 
   function onexitcodeindented() {
-    var data = resume()
-    stack[stack.length - 1].value = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].value = data
   }
 
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
-    var label = resume()
-    stack[stack.length - 1].label = label
-    stack[stack.length - 1].identifier = normalizeIdentifier(
+    var label = this.resume()
+    this.stack[this.stack.length - 1].label = label
+    this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
   }
 
   function onexitdefinitiontitlestring() {
-    var data = resume()
-    stack[stack.length - 1].title = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].title = data
   }
 
   function onexitdefinitiondestinationstring() {
-    var data = resume()
-    stack[stack.length - 1].url = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].url = data
   }
 
   function onexitatxheadingsequence(token) {
-    if (!stack[stack.length - 1].depth) {
-      stack[stack.length - 1].depth = this.sliceSerialize(token).length
+    if (!this.stack[this.stack.length - 1].depth) {
+      this.stack[this.stack.length - 1].depth = this.sliceSerialize(
+        token
+      ).length
     }
   }
 
@@ -447,7 +453,7 @@ function compiler(options) {
   }
 
   function onexitsetextheadinglinesequence(token) {
-    stack[stack.length - 1].depth =
+    this.stack[this.stack.length - 1].depth =
       this.sliceSerialize(token).charCodeAt(0) === codes.equalsTo ? 1 : 2
   }
 
@@ -456,27 +462,27 @@ function compiler(options) {
   }
 
   function onenterdata(token) {
-    var siblings = stack[stack.length - 1].children
+    var siblings = this.stack[this.stack.length - 1].children
     var tail = siblings[siblings.length - 1]
 
     if (!tail || tail.type !== 'text') {
       // Add a new text node.
       tail = text()
       tail.position = {start: point(token.start)}
-      stack[stack.length - 1].children.push(tail)
+      this.stack[this.stack.length - 1].children.push(tail)
     }
 
-    stack.push(tail)
+    this.stack.push(tail)
   }
 
   function onexitdata(token) {
-    var tail = stack.pop()
+    var tail = this.stack.pop()
     tail.value += this.sliceSerialize(token)
     tail.position.end = point(token.end)
   }
 
   function onexitlineending(token) {
-    var context = stack[stack.length - 1]
+    var context = this.stack[this.stack.length - 1]
 
     // If we’re at a hard break, include the line ending in there.
     if (atHardBreak) {
@@ -508,26 +514,26 @@ function compiler(options) {
   }
 
   function onexithtmlflow() {
-    var data = resume()
-    stack[stack.length - 1].value = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].value = data
   }
 
   function onexithtmltext() {
-    var data = resume()
-    stack[stack.length - 1].value = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].value = data
   }
 
   function onexitcodetext() {
-    var data = resume()
-    stack[stack.length - 1].value = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].value = data
   }
 
   function onenterimage() {
-    buffer()
+    this.buffer()
   }
 
   function onexitlink() {
-    var context = stack[stack.length - 1]
+    var context = this.stack[this.stack.length - 1]
 
     // To do: clean.
     if (inReference) {
@@ -545,7 +551,7 @@ function compiler(options) {
   }
 
   function onexitimage() {
-    var context = stack[stack.length - 1]
+    var context = this.stack[this.stack.length - 1]
 
     // To do: clean.
     if (inReference) {
@@ -564,10 +570,10 @@ function compiler(options) {
 
   function onexitlabeltext(token) {
     var ctx =
-      stack[stack.length - 1].type === 'fragment'
-        ? stack[stack.length - 2]
-        : stack[stack.length - 1]
-    ctx.label = toString(stack[stack.length - 1])
+      this.stack[this.stack.length - 1].type === 'fragment'
+        ? this.stack[this.stack.length - 2]
+        : this.stack[this.stack.length - 1]
+    ctx.label = toString(this.stack[this.stack.length - 1])
     ctx.identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
@@ -580,20 +586,20 @@ function compiler(options) {
     inReference = true
 
     // If we’re in a fragment, we’re in an image and buffering.
-    if (stack[stack.length - 1].type === 'fragment') {
-      data = resume()
-      stack[stack.length - 1].alt = data
+    if (this.stack[this.stack.length - 1].type === 'fragment') {
+      data = this.resume()
+      this.stack[this.stack.length - 1].alt = data
     }
   }
 
   function onexitresourcedestinationstring() {
-    var data = resume()
-    stack[stack.length - 1].url = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].url = data
   }
 
   function onexitresourcetitlestring() {
-    var data = resume()
-    stack[stack.length - 1].title = data
+    var data = this.resume()
+    this.stack[this.stack.length - 1].title = data
   }
 
   function onexitresource() {
@@ -605,9 +611,9 @@ function compiler(options) {
   }
 
   function onexitreferencestring(token) {
-    var label = resume()
-    stack[stack.length - 1].label = label
-    stack[stack.length - 1].identifier = normalizeIdentifier(
+    var label = this.resume()
+    this.stack[this.stack.length - 1].label = label
+    this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
     referenceType = 'full'
@@ -632,18 +638,19 @@ function compiler(options) {
       value = decode(data)
     }
 
-    stack[stack.length - 1].value += value
+    this.stack[this.stack.length - 1].value += value
     characterReferenceType = undefined
   }
 
   function onexitautolinkprotocol(token) {
     onexitdata.call(this, token)
-    stack[stack.length - 1].url = this.sliceSerialize(token)
+    this.stack[this.stack.length - 1].url = this.sliceSerialize(token)
   }
 
   function onexitautolinkemail(token) {
     onexitdata.call(this, token)
-    stack[stack.length - 1].url = 'mailto:' + this.sliceSerialize(token)
+    this.stack[this.stack.length - 1].url =
+      'mailto:' + this.sliceSerialize(token)
   }
 
   //
