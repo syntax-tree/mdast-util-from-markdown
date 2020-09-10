@@ -63,7 +63,7 @@ Now, running `node example` yields (positional info removed for brevity):
 
 ## API
 
-### `fromMarkdown(doc[, encoding])`
+### `fromMarkdown(doc[, encoding][, options])`
 
 Parse markdown to a **[mdast][]** tree.
 
@@ -77,6 +77,10 @@ Value to parse (`string` or [`Buffer`][buffer]).
 
 [Character encoding][encoding] to understand `doc` as when it’s a
 [`Buffer`][buffer] (`string`, default: `'utf8'`).
+
+###### `options.mdastExtensions`
+
+Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
 
 ##### Returns
 
