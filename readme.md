@@ -96,6 +96,8 @@ When going to HTML, use this utility in combination with
     — the smallest commonmark-compliant markdown parser that exists
 *   [`remarkjs/remark`](https://github.com/remarkjs/remark)
     — markdown processor powered by plugins
+*   [`syntax-tree/mdast-util-to-markdown`](https://github.com/syntax-tree/mdast-util-to-markdown)
+    — serialize mdast to markdown
 
 ## Contribute
 
