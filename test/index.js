@@ -62,6 +62,67 @@ test('mdast-util-from-markdown', function (t) {
     'should parse a paragraph'
   )
 
+  t.equal(
+    fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f])).children[0]
+      .children[0].value,
+    'brávo',
+    'should support buffers'
+  )
+
+  t.equal(
+    fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
+      .children[0].children[0].value,
+    'brC!vo',
+    'should support encoding'
+  )
+
+  t.deepEqual(
+    fromMarkdown('a\nb', {
+      mdastExtensions: [
+        {
+          // Unknown objects are used, but have no effect.
+          unknown: undefined,
+          enter: {lineEnding: lineEndingAsHardBreakEnter},
+          exit: {lineEnding: lineEndingAsHardBreakExit}
+        }
+      ]
+    }).children[0].children,
+    [
+      {
+        type: 'text',
+        value: 'a',
+        position: {
+          start: {line: 1, column: 1, offset: 0},
+          end: {line: 1, column: 2, offset: 1}
+        }
+      },
+      {
+        type: 'break',
+        position: {
+          start: {line: 1, column: 2, offset: 1},
+          end: {line: 2, column: 1, offset: 2}
+        }
+      },
+      {
+        type: 'text',
+        value: 'b',
+        position: {
+          start: {line: 2, column: 1, offset: 2},
+          end: {line: 2, column: 2, offset: 3}
+        }
+      }
+    ],
+    'should support extensions'
+  )
+
+  function lineEndingAsHardBreakEnter(token) {
+    this.enter({type: 'break'}, token)
+  }
+
+  function lineEndingAsHardBreakExit(token) {
+    this.exit(token)
+  }
+
   t.deepEqual(
     fromMarkdown('<tel:123>').children[0],
     {
