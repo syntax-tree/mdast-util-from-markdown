@@ -34,9 +34,15 @@ function fromMarkdown(value, encoding, options) {
 // Note this compiler only understand complete buffering, not streaming.
 function compiler(options) {
   var settings = options || {}
-
-  var handlers = configure(
+  var config = configure(
     {
+      canContainEols: [
+        'emphasis',
+        'fragment',
+        'heading',
+        'paragraph',
+        'strong'
+      ],
       enter: {
         autolink: opener(link),
         autolinkProtocol: onenterdata,
@@ -170,13 +176,13 @@ function compiler(options) {
     length = events.length - 1
 
     while (++index < length) {
-      handler = handlers[events[index][0]]
+      handler = config[events[index][0]]
 
       if (own.call(handler, events[index][1].type)) {
         handler[events[index][1].type].call(
           {
             stack: stack,
-            handlers: handlers,
+            config: config,
             enter: enter,
             exit: exit,
             buffer: buffer,
@@ -497,13 +503,7 @@ function compiler(options) {
       return
     }
 
-    if (
-      context.type === 'emphasis' ||
-      context.type === 'fragment' ||
-      context.type === 'heading' ||
-      context.type === 'paragraph' ||
-      context.type === 'strong'
-    ) {
+    if (config.canContainEols.indexOf(context.type) !== -1) {
       onenterdata.call(this, token)
       onexitdata.call(this, token)
     }
@@ -739,29 +739,30 @@ function compiler(options) {
   }
 }
 
-function configure(handlers, extensions) {
+function configure(config, extensions) {
   var length = extensions.length
   var index = -1
 
   while (++index < length) {
-    extension(handlers, extensions[index])
+    extension(config, extensions[index])
   }
 
-  return handlers
+  return config
 }
 
-function extension(handlers, extension) {
-  var hook
+function extension(config, extension) {
+  var key
   var left
   var right
-  var type
 
-  for (hook in extension) {
-    left = own.call(handlers, hook) ? handlers[hook] : (handlers[hook] = {})
-    right = extension[hook]
+  for (key in extension) {
+    left = own.call(config, key) ? config[key] : (config[key] = {})
+    right = extension[key]
 
-    for (type in right) {
-      left[type] = right[type]
+    if (key === 'canContainEols') {
+      config[key] = [].concat(left, right)
+    } else {
+      Object.assign(left, right)
     }
   }
 }

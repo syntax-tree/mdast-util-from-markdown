@@ -80,6 +80,7 @@
       "complexity": "off",
       "guard-for-in": "off",
       "unicorn/no-fn-reference-in-iterator": "off",
+      "unicorn/prefer-includes": "off",
       "unicorn/prefer-number-properties": "off",
       "unicorn/prefer-optional-catch-binding": "off",
       "unicorn/prefer-set-has": "off"

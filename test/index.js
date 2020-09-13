@@ -82,6 +82,8 @@ test('mdast-util-from-markdown', function (t) {
         {
           // Unknown objects are used, but have no effect.
           unknown: undefined,
+          // `canContainEols` is an array.
+          canContainEols: 'someType',
           enter: {lineEnding: lineEndingAsHardBreakEnter},
           exit: {lineEnding: lineEndingAsHardBreakExit}
         }
