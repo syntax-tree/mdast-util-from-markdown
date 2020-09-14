@@ -90,6 +90,8 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
 
 *   [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
     — support frontmatter (YAML, TOML, etc)
+*   [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
+    — support GFM autolink literals
 *   [`syntax-tree/mdast-util-gfm-strikethrough`](https://github.com/syntax-tree/mdast-util-gfm-strikethrough)
     — support GFM strikethrough
 
