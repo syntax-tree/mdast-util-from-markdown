@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "mdast-util-to-string": "^1.0.0",
-    "micromark": "~2.3.0",
+    "micromark": "~2.4.0",
     "parse-entities": "^2.0.0"
   },
   "devDependencies": {
