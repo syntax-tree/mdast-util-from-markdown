@@ -89,11 +89,17 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
 ## List of extensions
 
 *   [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
-    — support frontmatter (YAML, TOML, etc)
+    — parse frontmatter (YAML, TOML, more)
+*   [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
+    — parse GFM
 *   [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
-    — support GFM autolink literals
+    — parse GFM autolink literals
 *   [`syntax-tree/mdast-util-gfm-strikethrough`](https://github.com/syntax-tree/mdast-util-gfm-strikethrough)
-    — support GFM strikethrough
+    — parse GFM strikethrough
+*   [`syntax-tree/mdast-util-gfm-table`](https://github.com/syntax-tree/mdast-util-gfm-table)
+    — parse GFM tables
+*   [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
+    — parse GFM task list items
 
 ## Security
 
