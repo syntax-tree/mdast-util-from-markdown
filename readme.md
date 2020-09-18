@@ -78,6 +78,11 @@ Value to parse (`string` or [`Buffer`][buffer]).
 [Character encoding][encoding] to understand `doc` as when it’s a
 [`Buffer`][buffer] (`string`, default: `'utf8'`).
 
+###### `options.extensions`
+
+Array of syntax extensions (`Array.<MicromarkSyntaxExtension>`, default: `[]`).
+Passed to [`micromark` as `extensions`][micromark-extensions].
+
 ###### `options.mdastExtensions`
 
 Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
@@ -183,3 +188,5 @@ abide by its terms.
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
 [sanitize]: https://github.com/syntax-tree/hast-util-sanitize
+
+[micromark-extensions]: https://github.com/micromark/micromark#optionsextensions
