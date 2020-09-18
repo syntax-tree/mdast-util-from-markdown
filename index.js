@@ -139,13 +139,7 @@ function compiler(options) {
     settings.mdastExtensions || []
   )
 
-  var flowCodeInside
-  var setextHeadingSlurpLineEnding
-  var characterReferenceType
-  var expectingFirstListItemValue
-  var atHardBreak
-  var inReference
-  var referenceType
+  var data = {}
 
   return compile
 
@@ -193,7 +187,9 @@ function compiler(options) {
             exit: exit,
             buffer: buffer,
             resume: resume,
-            sliceSerialize: events[index][2].sliceSerialize
+            sliceSerialize: events[index][2].sliceSerialize,
+            setData: setData,
+            getData: getData
           },
           events[index][1]
         )
@@ -340,6 +336,14 @@ function compiler(options) {
     return length
   }
 
+  function setData(key, value) {
+    data[key] = value
+  }
+
+  function getData(key) {
+    return data[key]
+  }
+
   function point(d) {
     return {line: d.line, column: d.column, offset: d.offset}
   }
@@ -389,16 +393,16 @@ function compiler(options) {
   //
 
   function onenterlistordered() {
-    expectingFirstListItemValue = true
+    setData('expectingFirstListItemValue', true)
   }
 
   function onenterlistitemvalue(token) {
-    if (expectingFirstListItemValue) {
+    if (getData('expectingFirstListItemValue')) {
       this.stack[this.stack.length - 2].start = parseInt(
         this.sliceSerialize(token),
         constants.numericBaseDecimal
       )
-      expectingFirstListItemValue = undefined
+      setData('expectingFirstListItemValue')
     }
   }
 
@@ -414,9 +418,9 @@ function compiler(options) {
 
   function onexitcodefencedfence() {
     // Exit if this is the closing fence.
-    if (flowCodeInside) return
+    if (getData('flowCodeInside')) return
     this.buffer()
-    flowCodeInside = true
+    setData('flowCodeInside', true)
   }
 
   function onexitcodefenced() {
@@ -425,7 +429,7 @@ function compiler(options) {
       /^(\r?\n|\r)|(\r?\n|\r)$/g,
       ''
     )
-    flowCodeInside = undefined
+    setData('flowCodeInside')
   }
 
   function onexitcodeindented() {
@@ -461,7 +465,7 @@ function compiler(options) {
   }
 
   function onexitsetextheadingtext() {
-    setextHeadingSlurpLineEnding = true
+    setData('setextHeadingSlurpLineEnding', true)
   }
 
   function onexitsetextheadinglinesequence(token) {
@@ -470,7 +474,7 @@ function compiler(options) {
   }
 
   function onexitsetextheading() {
-    setextHeadingSlurpLineEnding = undefined
+    setData('setextHeadingSlurpLineEnding')
   }
 
   function onenterdata(token) {
@@ -497,15 +501,15 @@ function compiler(options) {
     var context = this.stack[this.stack.length - 1]
 
     // If we’re at a hard break, include the line ending in there.
-    if (atHardBreak) {
+    if (getData('atHardBreak')) {
       context.children[context.children.length - 1].position.end = point(
         token.end
       )
-      atHardBreak = undefined
+      setData('atHardBreak')
       return
     }
 
-    if (setextHeadingSlurpLineEnding) {
+    if (getData('setextHeadingSlurpLineEnding')) {
       return
     }
 
@@ -516,7 +520,7 @@ function compiler(options) {
   }
 
   function onexithardbreak() {
-    atHardBreak = true
+    setData('atHardBreak', true)
   }
 
   function onexithtmlflow() {
@@ -542,9 +546,9 @@ function compiler(options) {
     var context = this.stack[this.stack.length - 1]
 
     // To do: clean.
-    if (inReference) {
+    if (getData('inReference')) {
       context.type += 'Reference'
-      context.referenceType = referenceType || 'shortcut'
+      context.referenceType = getData('referenceType') || 'shortcut'
       delete context.url
       delete context.title
     } else {
@@ -553,16 +557,16 @@ function compiler(options) {
       delete context.referenceType
     }
 
-    referenceType = undefined
+    setData('referenceType')
   }
 
   function onexitimage() {
     var context = this.stack[this.stack.length - 1]
 
     // To do: clean.
-    if (inReference) {
+    if (getData('inReference')) {
       context.type += 'Reference'
-      context.referenceType = referenceType || 'shortcut'
+      context.referenceType = getData('referenceType') || 'shortcut'
       delete context.url
       delete context.title
     } else {
@@ -571,7 +575,7 @@ function compiler(options) {
       delete context.referenceType
     }
 
-    referenceType = undefined
+    setData('referenceType')
   }
 
   function onexitlabeltext(token) {
@@ -589,7 +593,7 @@ function compiler(options) {
     var data
 
     // Assume a reference.
-    inReference = true
+    setData('inReference', true)
 
     // If we’re in a fragment, we’re in an image and buffering.
     if (this.stack[this.stack.length - 1].type === 'fragment') {
@@ -609,11 +613,11 @@ function compiler(options) {
   }
 
   function onexitresource() {
-    inReference = undefined
+    setData('inReference')
   }
 
   function onenterreference() {
-    referenceType = 'collapsed'
+    setData('referenceType', 'collapsed')
   }
 
   function onexitreferencestring(token) {
@@ -622,30 +626,31 @@ function compiler(options) {
     this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
-    referenceType = 'full'
+    setData('referenceType', 'full')
   }
 
   function onexitcharacterreferencemarker(token) {
-    characterReferenceType = token.type
+    setData('characterReferenceType', token.type)
   }
 
   function onexitcharacterreferencevalue(token) {
     var data = this.sliceSerialize(token)
+    var type = getData('characterReferenceType')
     var value
 
-    if (characterReferenceType) {
+    if (type) {
       value = safeFromInt(
         data,
-        characterReferenceType === types.characterReferenceMarkerNumeric
+        type === types.characterReferenceMarkerNumeric
           ? constants.numericBaseDecimal
           : constants.numericBaseHexadecimal
       )
+      setData('characterReferenceType')
     } else {
       value = decode(data)
     }
 
     this.stack[this.stack.length - 1].value += value
-    characterReferenceType = undefined
   }
 
   function onexitautolinkprotocol(token) {
