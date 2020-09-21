@@ -93,6 +93,8 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
 
 ## List of extensions
 
+*   [`syntax-tree/mdast-util-footnote`](https://github.com/syntax-tree/mdast-util-footnote)
+    — parse footnotes
 *   [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
     — parse frontmatter (YAML, TOML, more)
 *   [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
