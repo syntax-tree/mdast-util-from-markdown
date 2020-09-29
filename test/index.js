@@ -824,6 +824,7 @@ test('fixtures', function (t) {
   // These are different (in a good way) from remark.
   var fixesRemark = [
     'attention',
+    'blockquote',
     'code-indented',
     'definition',
     'hard-break-escape',

@@ -8,12 +8,11 @@ var codes = require('micromark/dist/character/codes')
 var constants = require('micromark/dist/constant/constants')
 var own = require('micromark/dist/constant/has-own-property')
 var types = require('micromark/dist/constant/types')
-var flatMap = require('micromark/dist/util/flat-map')
 var normalizeIdentifier = require('micromark/dist/util/normalize-identifier')
 var safeFromInt = require('micromark/dist/util/safe-from-int')
 var parser = require('micromark/dist/parse')
 var preprocessor = require('micromark/dist/preprocess')
-var postprocessor = require('micromark/dist/postprocess')
+var postprocess = require('micromark/dist/postprocess')
 
 function fromMarkdown(value, encoding, options) {
   if (typeof encoding !== 'string') {
@@ -22,11 +21,8 @@ function fromMarkdown(value, encoding, options) {
   }
 
   return compiler(options)(
-    postprocessor()(
-      flatMap(
-        flatMap([value, codes.eof], preprocessor(), encoding),
-        parser(options).document().write
-      )
+    postprocess(
+      parser(options).document().write(preprocessor()(value, encoding, true))
     )
   )
 }
@@ -155,8 +151,6 @@ function compiler(options) {
     while (++index < events.length) {
       event = events[index]
 
-      if (!event) break
-
       // We preprocess lists to add `listItem` tokens, and to infer whether
       // items the list itself are spread out.
       if (
@@ -173,7 +167,7 @@ function compiler(options) {
     }
 
     index = -1
-    length = events.length - 1
+    length = events.length
 
     while (++index < length) {
       handler = config[events[index][0]]
