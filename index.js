@@ -66,7 +66,8 @@ function compiler(options) {
         htmlFlowData: onenterdata,
         htmlText: opener(html, buffer),
         htmlTextData: onenterdata,
-        image: opener(image, onenterimage),
+        image: opener(image),
+        label: buffer,
         link: opener(link),
         listItem: opener(listItem),
         listItemValue: onenterlistitemvalue,
@@ -538,10 +539,6 @@ function compiler(options) {
     this.stack[this.stack.length - 1].value = data
   }
 
-  function onenterimage() {
-    this.buffer()
-  }
-
   function onexitlink() {
     var context = this.stack[this.stack.length - 1]
 
@@ -579,26 +576,24 @@ function compiler(options) {
   }
 
   function onexitlabeltext(token) {
-    var ctx =
-      this.stack[this.stack.length - 1].type === 'fragment'
-        ? this.stack[this.stack.length - 2]
-        : this.stack[this.stack.length - 1]
-    ctx.label = toString(this.stack[this.stack.length - 1])
-    ctx.identifier = normalizeIdentifier(
+    this.stack[this.stack.length - 2].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
   }
 
   function onexitlabel() {
-    var data
+    var fragment = this.stack[this.stack.length - 1]
+    var value = this.resume()
+
+    this.stack[this.stack.length - 1].label = value
 
     // Assume a reference.
     setData('inReference', true)
 
-    // If we’re in a fragment, we’re in an image and buffering.
-    if (this.stack[this.stack.length - 1].type === 'fragment') {
-      data = this.resume()
-      this.stack[this.stack.length - 1].alt = data
+    if (this.stack[this.stack.length - 1].type === 'link') {
+      this.stack[this.stack.length - 1].children = fragment.children
+    } else {
+      this.stack[this.stack.length - 1].alt = value
     }
   }
 
