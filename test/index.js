@@ -825,6 +825,7 @@ test('fixtures', function (t) {
   var fixesRemark = [
     'attention',
     'blockquote',
+    'character-references-everywhere',
     'code-indented',
     'definition',
     'hard-break-escape',
