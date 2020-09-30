@@ -286,7 +286,12 @@ function compiler(options) {
 
               tailEvent[1].type = types.lineEnding
               lineIndex = tailIndex
-            } else if (tailEvent[1].type === types.linePrefix) {
+            } else if (
+              tailEvent[1].type === types.linePrefix ||
+              tailEvent[1].type === types.blockQuotePrefix ||
+              tailEvent[1].type === types.blockQuotePrefixWhitespace ||
+              tailEvent[1].type === types.blockQuoteMarker
+            ) {
               // Empty
             } else {
               break
