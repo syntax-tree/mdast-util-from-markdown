@@ -290,7 +290,8 @@ function compiler(options) {
               tailEvent[1].type === types.linePrefix ||
               tailEvent[1].type === types.blockQuotePrefix ||
               tailEvent[1].type === types.blockQuotePrefixWhitespace ||
-              tailEvent[1].type === types.blockQuoteMarker
+              tailEvent[1].type === types.blockQuoteMarker ||
+              tailEvent[1].type === types.listItemIndent
             ) {
               // Empty
             } else {
