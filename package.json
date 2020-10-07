@@ -39,7 +39,7 @@
     "commonmark.json": "^0.29.0",
     "gzip-size-cli": "^3.0.0",
     "hast-util-to-html": "^7.0.0",
-    "mdast-util-to-hast": "^9.0.0",
+    "mdast-util-to-hast": "^10.0.0",
     "nyc": "^15.0.0",
     "prettier": "^2.0.0",
     "rehype-parse": "^7.0.0",
