@@ -107,6 +107,8 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
     — parse GFM tables
 *   [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
     — parse GFM task list items
+*   [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
+    — parse math
 
 ## Security
 
