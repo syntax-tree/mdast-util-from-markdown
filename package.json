@@ -27,16 +27,20 @@
     "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
+  "types": "index.d.ts",
   "dependencies": {
+    "@types/mdast": "^3.0.0",
     "mdast-util-to-string": "^1.0.0",
-    "micromark": "~2.9.0",
+    "micromark": "~2.10.0",
     "parse-entities": "^2.0.0"
   },
   "devDependencies": {
     "browserify": "^16.0.0",
     "commonmark.json": "^0.29.0",
+    "dtslint": "^4.0.0",
     "gzip-size-cli": "^3.0.0",
     "hast-util-to-html": "^7.0.0",
     "mdast-util-to-hast": "^10.0.0",
@@ -57,7 +61,8 @@
     "generate": "npm run generate-size",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test/index.js",
-    "test": "npm run format && npm run generate && npm run test-coverage"
+    "test-types": "dtslint .",
+    "test": "npm run format && npm run generate && npm run test-coverage && npm run test-types"
   },
   "nyc": {
     "check-coverage": true,
