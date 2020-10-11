@@ -10,22 +10,22 @@ import {Type} from 'micromark/dist/constant/types'
 
 export = fromMarkdown
 
-declare namespace fromMarkdown {}
+declare namespace fromMarkdown {
+  interface MdastExtension {
+    enter: Record<Type, (token: Token) => void>
+    exit: Record<Type, (token: Token) => void>
+  }
 
-interface MdastExtension {
-  enter: Record<Type, (token: Token) => void>
-  exit: Record<Type, (token: Token) => void>
+  interface Options {
+    extensions?: SyntaxExtension[]
+    mdastExtensions?: MdastExtension[]
+  }
 }
 
-interface Options {
-  extensions?: SyntaxExtension[]
-  mdastExtensions?: MdastExtension[]
-}
-
-declare function fromMarkdown(value: string | Buffer, options?: Options): Root
+declare function fromMarkdown(value: string | Buffer, options?: fromMarkdown.Options): Root
 
 declare function fromMarkdown(
   value: string | Buffer,
   encoding?: BufferEncoding,
-  options?: Options
+  options?: fromMarkdown.Options
 ): Root
