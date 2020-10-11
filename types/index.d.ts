@@ -22,7 +22,10 @@ declare namespace fromMarkdown {
   }
 }
 
-declare function fromMarkdown(value: string | Buffer, options?: fromMarkdown.Options): Root
+declare function fromMarkdown(
+  value: string | Buffer,
+  options?: fromMarkdown.Options
+): Root
 
 declare function fromMarkdown(
   value: string | Buffer,
