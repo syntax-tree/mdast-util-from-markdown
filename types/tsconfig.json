@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "lib": [
+            "ES5"
+        ],
+        "strict": true,
+        "baseUrl": ".",
+        "paths": {
+            "mdast-util-from-markdown": [
+                "./index.d.ts"
+            ]
+        }
+    }
+}
