@@ -8,7 +8,7 @@
         "baseUrl": ".",
         "paths": {
             "mdast-util-from-markdown": [
-                "index.d.ts"
+                "./index.d.ts"
             ]
         }
     }
