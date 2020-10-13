@@ -4,10 +4,8 @@ var fs = require('fs')
 var path = require('path')
 var test = require('tape')
 var unified = require('unified')
-var remarkParse = require('remark-parse')
 var rehypeParse = require('rehype-parse')
 var rehypeStringify = require('rehype-stringify')
-var visit = require('unist-util-visit')
 var toHast = require('mdast-util-to-hast')
 var toHtml = require('hast-util-to-html')
 var commonmark = require('commonmark.json')
@@ -821,24 +819,6 @@ test('mdast-util-from-markdown', function (t) {
 test('fixtures', function (t) {
   var base = join('test', 'fixtures')
 
-  // These are different (in a good way) from remark.
-  var fixesRemark = [
-    'attention',
-    'blockquote',
-    'character-references-everywhere',
-    'code-indented',
-    'definition',
-    'hard-break-escape',
-    'hard-break-prefix',
-    'heading-setext',
-    'html-text',
-    'image-reference',
-    'image-resource',
-    'link-reference',
-    'link-resource',
-    'list'
-  ]
-
   fs.readdirSync(base)
     .filter((d) => path.extname(d) === '.md')
     .forEach((d) => each(path.basename(d, path.extname(d))))
@@ -849,7 +829,6 @@ test('fixtures', function (t) {
     var fp = join(base, stem + '.json')
     var doc = fs.readFileSync(join(base, stem + '.md'))
     var actual = fromMarkdown(doc)
-    var remarkTree = remarkLegacyParse(String(doc))
     var expected
 
     try {
@@ -861,10 +840,6 @@ test('fixtures', function (t) {
     }
 
     t.deepEqual(actual, expected, stem)
-
-    if (fixesRemark.includes(stem)) return
-
-    t.deepEqual(actual, remarkTree, stem + ' (remark)')
   }
 })
 
@@ -896,37 +871,3 @@ test('commonmark', function (t) {
     t.equal(actual, expected, example.section + ' (' + index + ')')
   }
 })
-
-function remarkLegacyParse(doc) {
-  var processor = unified().use(remarkParse, {commonmark: true}).use(clean)
-  return processor.runSync(processor.parse(doc))
-}
-
-function clean() {
-  return transform
-
-  function transform(tree) {
-    visit(tree, (node, index, parent) => {
-      var siblings = parent ? parent.children : []
-      var previous = siblings[index - 1]
-
-      // Drop don’t do indent anymore.
-      delete node.position.indent
-
-      // Collapse text nodes.
-      if (previous && node.type === previous.type && node.type === 'text') {
-        previous.value += node.value
-
-        siblings.splice(index, 1)
-
-        if (previous.position && node.position) {
-          previous.position.end = node.position.end
-        }
-
-        return index
-      }
-    })
-
-    return JSON.parse(JSON.stringify(tree))
-  }
-}

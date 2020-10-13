@@ -48,8 +48,8 @@
     "prettier": "^2.0.0",
     "rehype-parse": "^7.0.0",
     "rehype-stringify": "^8.0.0",
-    "remark-cli": "^8.0.0",
-    "remark-preset-wooorm": "^7.0.0",
+    "remark-cli": "^9.0.0-alpha.1",
+    "remark-preset-wooorm": "^8.0.0",
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
     "unified": "^9.0.0",
@@ -89,7 +89,10 @@
       "unicorn/prefer-number-properties": "off",
       "unicorn/prefer-optional-catch-binding": "off",
       "unicorn/prefer-set-has": "off"
-    }
+    },
+    "ignores": [
+      "types/"
+    ]
   },
   "remarkConfig": {
     "plugins": [
