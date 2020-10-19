@@ -27,6 +27,8 @@
     "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
   ],
   "files": [
+    "dist/",
+    "lib/",
     "index.js",
     "types/index.d.ts"
   ],
@@ -38,6 +40,8 @@
     "parse-entities": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
     "browserify": "^17.0.0",
     "commonmark.json": "^0.29.0",
     "dtslint": "^4.0.0",
@@ -48,7 +52,7 @@
     "prettier": "^2.0.0",
     "rehype-parse": "^7.0.0",
     "rehype-stringify": "^8.0.0",
-    "remark-cli": "^9.0.0-alpha.1",
+    "remark-cli": "^9.0.0",
     "remark-preset-wooorm": "^8.0.0",
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
@@ -56,9 +60,11 @@
     "xo": "^0.34.0"
   },
   "scripts": {
+    "prepare": "if [ -d \"micromark\" ] ; then\ncd \"micromark\" && git pull\nelse\ngit clone https://github.com/micromark/micromark.git\nfi",
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
+    "generate-dist": "babel lib/ --out-dir dist/ --quiet --retain-lines --plugins ./micromark/script/babel-transform-constants.js; prettier dist/ --loglevel error --write",
     "generate-size": "browserify . -p tinyify -s mdast-util-from-markdown -o mdast-util-from-markdown.min.js; gzip-size mdast-util-from-markdown.min.js",
-    "generate": "npm run generate-size",
+    "generate": "npm run generate-dist && npm run generate-size",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test/index.js",
     "test-types": "dtslint types",
