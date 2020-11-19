@@ -1,0 +1,3 @@
+[submodule "micromark"]
+	path = micromark
+	url = https://github.com/micromark/micromark

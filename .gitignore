@@ -1,7 +1,6 @@
 .nyc_output/
 coverage/
 dist/
-micromark/
 node_modules/
 *.log
 .DS_Store
