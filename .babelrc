@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    [
+      "babel-plugin-inline-constants",
+      {
+        "modules": [
+          "micromark/lib/character/codes",
+          "micromark/lib/constant/constants",
+          "micromark/lib/constant/types"
+        ]
+      }
+    ]
+  ]
+}
