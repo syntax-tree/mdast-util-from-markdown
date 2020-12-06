@@ -123,6 +123,52 @@ test('mdast-util-from-markdown', function (t) {
     this.exit(token)
   }
 
+  t.throws(
+    function () {
+      fromMarkdown('a', {
+        mdastExtensions: [
+          {enter: {paragraph: brokenParagraph}, exit: {paragraph: noop}}
+        ]
+      })
+
+      function brokenParagraph(token) {
+        this.enter({type: 'paragraph', children: []}, token)
+      }
+
+      function noop() {}
+    },
+    /Cannot close document, a token \(`paragraph`, 1:1-1:2\) is still open/,
+    'should crash if a token is opened but not closed'
+  )
+
+  t.throws(
+    function () {
+      fromMarkdown('a', {
+        mdastExtensions: [{enter: {paragraph: brokenParagraph}}]
+      })
+
+      function brokenParagraph(token) {
+        this.exit(token)
+      }
+    },
+    /Cannot close `paragraph` \(1:1-1:2\): it’s not open/,
+    'should crash when closing a token that isn’t open'
+  )
+
+  t.throws(
+    function () {
+      fromMarkdown('a', {
+        mdastExtensions: [{exit: {paragraph: brokenParagraph}}]
+      })
+
+      function brokenParagraph(token) {
+        this.exit(Object.assign({}, token, {type: 'lol'}))
+      }
+    },
+    /Cannot close `lol` \(1:1-1:2\): a different token \(`paragraph`, 1:1-1:2\) is open/,
+    'should crash when closing a token when a different one is open'
+  )
+
   t.deepEqual(
     fromMarkdown('<tel:123>').children[0],
     {
