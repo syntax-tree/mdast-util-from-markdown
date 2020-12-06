@@ -145,9 +145,9 @@ abide by its terms.
 
 <!-- Definitions -->
 
-[build-badge]: https://img.shields.io/travis/syntax-tree/mdast-util-from-markdown.svg
+[build-badge]: https://github.com/syntax-tree/mdast-util-from-markdown/workflows/main/badge.svg
 
-[build]: https://travis-ci.org/syntax-tree/mdast-util-from-markdown
+[build]: https://github.com/syntax-tree/mdast-util-from-markdown/actions
 
 [coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/mdast-util-from-markdown.svg
 
