@@ -63,7 +63,7 @@
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
     "generate-dist": "babel lib/ --out-dir dist/ --quiet --retain-lines; prettier dist/ --loglevel error --write",
-    "generate-size": "browserify . -p tinyify -s mdast-util-from-markdown -o mdast-util-from-markdown.min.js; gzip-size mdast-util-from-markdown.min.js",
+    "generate-size": "browserify . -p tinyify -s mdast-util-from-markdown -o mdast-util-from-markdown.min.js; gzip-size mdast-util-from-markdown.min.js --raw",
     "generate": "npm run generate-dist && npm run generate-size",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov tape test/index.js",
@@ -90,6 +90,7 @@
     "rules": {
       "complexity": "off",
       "guard-for-in": "off",
+      "unicorn/explicit-length-check": "off",
       "unicorn/no-fn-reference-in-iterator": "off",
       "unicorn/prefer-includes": "off",
       "unicorn/prefer-number-properties": "off",

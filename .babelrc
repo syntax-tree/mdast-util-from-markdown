@@ -4,9 +4,9 @@
       "babel-plugin-inline-constants",
       {
         "modules": [
-          "micromark/lib/character/codes",
-          "micromark/lib/constant/constants",
-          "micromark/lib/constant/types"
+          "micromark/dist/character/codes",
+          "micromark/dist/constant/constants",
+          "micromark/dist/constant/types"
         ]
       }
     ]
