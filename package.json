@@ -46,7 +46,7 @@
     "browserify": "^17.0.0",
     "commonmark.json": "^0.29.0",
     "dtslint": "^4.0.0",
-    "gzip-size-cli": "^3.0.0",
+    "gzip-size-cli": "^4.0.0",
     "hast-util-to-html": "^7.0.0",
     "mdast-util-to-hast": "^10.0.0",
     "nyc": "^15.0.0",
@@ -58,7 +58,7 @@
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
     "unified": "^9.0.0",
-    "xo": "^0.34.0"
+    "xo": "^0.35.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
