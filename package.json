@@ -37,7 +37,8 @@
     "@types/mdast": "^3.0.0",
     "mdast-util-to-string": "^2.0.0",
     "micromark": "~2.10.0",
-    "parse-entities": "^2.0.0"
+    "parse-entities": "^2.0.0",
+    "unist-util-stringify-position": "^2.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
