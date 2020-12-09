@@ -111,6 +111,14 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
     — parse GFM task list items
 *   [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
     — parse math
+*   [`syntax-tree/mdast-util-mdx`](https://github.com/syntax-tree/mdast-util-mdx)
+    — parse MDX or MDX.js
+*   [`syntax-tree/mdast-util-mdx-expression`](https://github.com/syntax-tree/mdast-util-mdx-expression)
+    — parse MDX or MDX.js expressions
+*   [`syntax-tree/mdast-util-mdx-jsx`](https://github.com/syntax-tree/mdast-util-mdx-jsx)
+    — parse MDX or MDX.js JSX
+*   [`syntax-tree/mdast-util-mdxjs-esm`](https://github.com/syntax-tree/mdast-util-mdxjs-esm)
+    — parse MDX.js ESM
 
 ## Security
 
