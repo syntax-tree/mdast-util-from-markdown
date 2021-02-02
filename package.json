@@ -59,7 +59,7 @@
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
     "unified": "^9.0.0",
-    "xo": "^0.36.0"
+    "xo": "^0.37.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
@@ -92,11 +92,10 @@
       "complexity": "off",
       "guard-for-in": "off",
       "unicorn/explicit-length-check": "off",
-      "unicorn/no-fn-reference-in-iterator": "off",
+      "unicorn/no-array-callback-reference": "off",
       "unicorn/prefer-includes": "off",
       "unicorn/prefer-number-properties": "off",
-      "unicorn/prefer-optional-catch-binding": "off",
-      "unicorn/prefer-set-has": "off"
+      "unicorn/prefer-optional-catch-binding": "off"
     },
     "ignores": [
       "types/"
