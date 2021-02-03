@@ -123,6 +123,36 @@ test('mdast-util-from-markdown', function (t) {
     this.exit(token)
   }
 
+  t.deepEqual(
+    fromMarkdown('*a*', {
+      mdastExtensions: [{transforms: [transform]}]
+    }).children[0].children,
+    [
+      {
+        type: 'strong',
+        children: [
+          {
+            type: 'text',
+            value: 'a',
+            position: {
+              start: {line: 1, column: 2, offset: 1},
+              end: {line: 1, column: 3, offset: 2}
+            }
+          }
+        ],
+        position: {
+          start: {line: 1, column: 1, offset: 0},
+          end: {line: 1, column: 4, offset: 3}
+        }
+      }
+    ],
+    'should support `transforms` in extensions'
+  )
+
+  function transform(tree) {
+    tree.children[0].children[0].type = 'strong'
+  }
+
   t.throws(
     function () {
       fromMarkdown('a', {
