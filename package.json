@@ -45,9 +45,8 @@
     "unist-util-stringify-position": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
-    "babel-plugin-inline-constants": "^3.0.0",
+    "@rollup/plugin-babel": "^5.3.0",
     "commonmark.json": "^0.30.0",
     "dtslint": "^4.1.0",
     "hast-util-to-html": "^8.0.0",
@@ -67,9 +66,7 @@
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "generate-dist": "babel lib/ --out-dir dist/ --quiet --retain-lines; prettier dist/*.js --loglevel error --write",
-    "generate-size": "rollup -c",
-    "generate": "npm run generate-dist && npm run generate-size",
+    "generate": "rollup -c; prettier dist/*.js --loglevel error --write",
     "test-api": "node test",
     "test-coverage": "nyc --reporter lcov node test/index.js",
     "test-types": "dtslint types",
@@ -100,7 +97,12 @@
       "unicorn/no-array-callback-reference": "off",
       "unicorn/prefer-includes": "off",
       "unicorn/prefer-number-properties": "off",
-      "unicorn/prefer-optional-catch-binding": "off"
+      "unicorn/prefer-optional-catch-binding": "off",
+      "unicorn/no-array-for-each": "off",
+      "import/extensions": [
+        "error",
+        "always"
+      ]
     },
     "ignores": [
       "types/"
