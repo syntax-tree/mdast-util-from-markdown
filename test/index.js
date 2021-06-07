@@ -1,19 +1,17 @@
-'use strict'
+import {readdirSync, readFileSync, writeFileSync} from 'node:fs'
+import {join as _join, extname, basename} from 'node:path'
+import test from 'tape'
+import unified from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeStringify from 'rehype-stringify'
+import {toHast} from 'mdast-util-to-hast'
+import {toHtml} from 'hast-util-to-html'
+import {commonmark} from 'commonmark.json'
+import fromMarkdown from '../lib/index.js'
 
-var fs = require('fs')
-var path = require('path')
-var test = require('tape')
-var unified = require('unified')
-var rehypeParse = require('rehype-parse')
-var rehypeStringify = require('rehype-stringify')
-var toHast = require('mdast-util-to-hast')
-var toHtml = require('hast-util-to-html')
-var commonmark = require('commonmark.json')
-var fromMarkdown = require('..')
+const join = _join
 
-var join = path.join
-
-test('mdast-util-from-markdown', function (t) {
+test('mdast-util-from-markdown', (t) => {
   t.equal(typeof fromMarkdown, 'function', 'should expose a function')
 
   t.deepEqual(
@@ -154,7 +152,7 @@ test('mdast-util-from-markdown', function (t) {
   }
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [
           {enter: {paragraph: brokenParagraph}, exit: {paragraph: noop}}
@@ -172,7 +170,7 @@ test('mdast-util-from-markdown', function (t) {
   )
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [{enter: {paragraph: brokenParagraph}}]
       })
@@ -186,7 +184,7 @@ test('mdast-util-from-markdown', function (t) {
   )
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [{exit: {paragraph: brokenParagraph}}]
       })
@@ -892,40 +890,39 @@ test('mdast-util-from-markdown', function (t) {
   t.end()
 })
 
-test('fixtures', function (t) {
-  var base = join('test', 'fixtures')
+test('fixtures', (t) => {
+  const base = join('test', 'fixtures')
 
-  fs.readdirSync(base)
-    .filter((d) => path.extname(d) === '.md')
-    .forEach((d) => each(path.basename(d, path.extname(d))))
+  for (const d of readdirSync(base).filter((d) => extname(d) === '.md'))
+    each(basename(d, extname(d)))
 
   t.end()
 
   function each(stem) {
-    var fp = join(base, stem + '.json')
-    var doc = fs.readFileSync(join(base, stem + '.md'))
-    var actual = fromMarkdown(doc)
-    var expected
+    const fp = join(base, stem + '.json')
+    const doc = readFileSync(join(base, stem + '.md'))
+    const actual = fromMarkdown(doc)
+    let expected
 
     try {
-      expected = JSON.parse(fs.readFileSync(fp))
+      expected = JSON.parse(readFileSync(fp))
     } catch (_) {
       // New fixture.
       expected = actual
-      fs.writeFileSync(fp, JSON.stringify(actual, null, 2) + '\n')
+      writeFileSync(fp, JSON.stringify(actual, null, 2) + '\n')
     }
 
     t.deepEqual(actual, expected, stem)
   }
 })
 
-test('commonmark', function (t) {
+test('commonmark', (t) => {
   commonmark.forEach(each)
 
   t.end()
 
   function each(example, index) {
-    var html = toHtml(
+    const html = toHtml(
       toHast(fromMarkdown(example.markdown.slice(0, -1)), {
         allowDangerousHtml: true,
         commonmark: true
@@ -937,12 +934,12 @@ test('commonmark', function (t) {
       }
     )
 
-    var reformat = unified()
+    const reformat = unified()
       .use(rehypeParse, {fragment: true})
       .use(rehypeStringify)
 
-    var actual = reformat.processSync(html).toString()
-    var expected = reformat.processSync(example.html.slice(0, -1)).toString()
+    const actual = reformat.processSync(html).toString()
+    const expected = reformat.processSync(example.html.slice(0, -1)).toString()
 
     t.equal(actual, expected, example.section + ' (' + index + ')')
   }

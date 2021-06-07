@@ -1,3 +1,1 @@
-'use strict'
-
-module.exports = require('./dist')
+export * from './dist/index.js'
