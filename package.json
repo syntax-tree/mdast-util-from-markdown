@@ -53,7 +53,7 @@
     "gzip-size-cli": "^5.0.0",
     "hast-util-to-html": "^8.0.0",
     "mdast-util-to-hast": "^11.0.0",
-    "micromark-build": "^1.0.0-alpha.1",
+    "micromark-build": "^1.0.0-alpha.3",
     "prettier": "^2.0.0",
     "rehype-parse": "^7.0.0",
     "rehype-stringify": "^8.0.0",
@@ -81,16 +81,8 @@
   "xo": {
     "prettier": true,
     "rules": {
-      "no-var": "off",
-      "prefer-arrow-callback": "off",
       "complexity": "off",
-      "guard-for-in": "off",
-      "unicorn/prefer-switch": "off",
-      "unicorn/explicit-length-check": "off",
-      "unicorn/no-array-callback-reference": "off",
-      "unicorn/prefer-includes": "off",
-      "unicorn/prefer-number-properties": "off",
-      "unicorn/prefer-optional-catch-binding": "off"
+      "unicorn/prefer-switch": "off"
     },
     "ignores": [
       "types/"

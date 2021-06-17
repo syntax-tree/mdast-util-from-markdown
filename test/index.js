@@ -9,9 +9,9 @@ import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
 import {fromMarkdown} from '../dev/index.js'
 
-var join = path.join
+const join = path.join
 
-test('mdast-util-from-markdown', function (t) {
+test('mdast-util-from-markdown', (t) => {
   t.equal(typeof fromMarkdown, 'function', 'should expose a function')
 
   t.deepEqual(
@@ -152,7 +152,7 @@ test('mdast-util-from-markdown', function (t) {
   }
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [
           {enter: {paragraph: brokenParagraph}, exit: {paragraph: noop}}
@@ -170,7 +170,7 @@ test('mdast-util-from-markdown', function (t) {
   )
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [{enter: {paragraph: brokenParagraph}}]
       })
@@ -184,7 +184,7 @@ test('mdast-util-from-markdown', function (t) {
   )
 
   t.throws(
-    function () {
+    () => {
       fromMarkdown('a', {
         mdastExtensions: [{exit: {paragraph: brokenParagraph}}]
       })
@@ -890,8 +890,8 @@ test('mdast-util-from-markdown', function (t) {
   t.end()
 })
 
-test('fixtures', function (t) {
-  var base = join('test', 'fixtures')
+test('fixtures', (t) => {
+  const base = join('test', 'fixtures')
   const files = fs.readdirSync(base).filter((d) => path.extname(d) === '.md')
   let index = -1
 
@@ -903,14 +903,14 @@ test('fixtures', function (t) {
   t.end()
 
   function each(stem) {
-    var fp = join(base, stem + '.json')
-    var doc = fs.readFileSync(join(base, stem + '.md'))
-    var actual = fromMarkdown(doc)
-    var expected
+    const fp = join(base, stem + '.json')
+    const doc = fs.readFileSync(join(base, stem + '.md'))
+    const actual = fromMarkdown(doc)
+    let expected
 
     try {
       expected = JSON.parse(fs.readFileSync(fp))
-    } catch (_) {
+    } catch {
       // New fixture.
       expected = actual
       fs.writeFileSync(fp, JSON.stringify(actual, null, 2) + '\n')
@@ -920,7 +920,7 @@ test('fixtures', function (t) {
   }
 })
 
-test('commonmark', function (t) {
+test('commonmark', (t) => {
   let index = -1
 
   while (++index < commonmark.length) {
@@ -930,7 +930,7 @@ test('commonmark', function (t) {
   t.end()
 
   function each(example, index) {
-    var html = toHtml(
+    const html = toHtml(
       toHast(fromMarkdown(example.markdown.slice(0, -1)), {
         allowDangerousHtml: true,
         commonmark: true
@@ -942,12 +942,12 @@ test('commonmark', function (t) {
       }
     )
 
-    var reformat = unified()
+    const reformat = unified()
       .use(rehypeParse, {fragment: true})
       .use(rehypeStringify)
 
-    var actual = reformat.processSync(html).toString()
-    var expected = reformat.processSync(example.html.slice(0, -1)).toString()
+    const actual = reformat.processSync(html).toString()
+    const expected = reformat.processSync(example.html.slice(0, -1)).toString()
 
     if (actual !== expected) {
       console.log('yyy', [example, actual, expected])

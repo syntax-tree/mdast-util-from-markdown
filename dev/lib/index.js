@@ -26,9 +26,8 @@ export function fromMarkdown(value, encoding, options) {
 }
 
 // Note this compiler only understand complete buffering, not streaming.
-function compiler(options) {
-  var settings = options || {}
-  var config = configure(
+function compiler(options = {}) {
+  const config = configure(
     {
       transforms: [],
       canContainEols: [
@@ -132,23 +131,19 @@ function compiler(options) {
         thematicBreak: closer()
       }
     },
-    settings.mdastExtensions || []
+    options.mdastExtensions || []
   )
 
-  var data = {}
+  const data = {}
 
   return compile
 
   function compile(events) {
-    var tree = {type: 'root', children: []}
-    var stack = [tree]
-    var tokenStack = []
-    var listStack = []
-    var index = -1
-    var handler
-    var listStart
-
-    var context = {
+    let tree = {type: 'root', children: []}
+    const stack = [tree]
+    const tokenStack = []
+    const listStack = []
+    const context = {
       stack,
       tokenStack,
       config,
@@ -159,6 +154,7 @@ function compiler(options) {
       setData,
       getData
     }
+    let index = -1
 
     while (++index < events.length) {
       // We preprocess lists to add `listItem` tokens, and to infer whether
@@ -170,8 +166,7 @@ function compiler(options) {
         if (events[index][0] === 'enter') {
           listStack.push(index)
         } else {
-          listStart = listStack.pop(index)
-          index = prepareList(events, listStart, index)
+          index = prepareList(events, listStack.pop(index), index)
         }
       }
     }
@@ -179,7 +174,7 @@ function compiler(options) {
     index = -1
 
     while (++index < events.length) {
-      handler = config[events[index][0]]
+      const handler = config[events[index][0]]
 
       if (own.call(handler, events[index][1].type)) {
         handler[events[index][1].type].call(
@@ -192,7 +187,7 @@ function compiler(options) {
       }
     }
 
-    if (tokenStack.length) {
+    if (tokenStack.length > 0) {
       throw new Error(
         'Cannot close document, a token (`' +
           tokenStack[tokenStack.length - 1].type +
@@ -208,10 +203,10 @@ function compiler(options) {
     // Figure out `root` position.
     tree.position = {
       start: point(
-        events.length ? events[0][1].start : {line: 1, column: 1, offset: 0}
+        events.length > 0 ? events[0][1].start : {line: 1, column: 1, offset: 0}
       ),
       end: point(
-        events.length
+        events.length > 0
           ? events[events.length - 2][1].end
           : {line: 1, column: 1, offset: 0}
       )
@@ -226,19 +221,16 @@ function compiler(options) {
   }
 
   function prepareList(events, start, length) {
-    var index = start - 1
-    var containerBalance = -1
-    var listSpread = false
-    var listItem
-    var tailIndex
-    var lineIndex
-    var tailEvent
-    var event
-    var firstBlankLineIndex
-    var atMarker
+    let index = start - 1
+    let containerBalance = -1
+    let listSpread = false
+    let listItem
+    let lineIndex
+    let firstBlankLineIndex
+    let atMarker
 
     while (++index <= length) {
-      event = events[index]
+      const event = events[index]
 
       if (
         event[1].type === types.listUnordered ||
@@ -287,11 +279,11 @@ function compiler(options) {
             event[1].type === types.listOrdered))
       ) {
         if (listItem) {
-          tailIndex = index
+          let tailIndex = index
           lineIndex = undefined
 
           while (tailIndex--) {
-            tailEvent = events[tailIndex]
+            const tailEvent = events[tailIndex]
 
             if (
               tailEvent[1].type === types.lineEnding ||
@@ -399,8 +391,8 @@ function compiler(options) {
   }
 
   function exit(token) {
-    var node = this.stack.pop()
-    var open = this.tokenStack.pop()
+    const node = this.stack.pop()
+    const open = this.tokenStack.pop()
 
     if (!open) {
       throw new Error(
@@ -442,7 +434,7 @@ function compiler(options) {
 
   function onenterlistitemvalue(token) {
     if (getData('expectingFirstListItemValue')) {
-      this.stack[this.stack.length - 2].start = parseInt(
+      this.stack[this.stack.length - 2].start = Number.parseInt(
         this.sliceSerialize(token),
         constants.numericBaseDecimal
       )
@@ -451,12 +443,12 @@ function compiler(options) {
   }
 
   function onexitcodefencedfenceinfo() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].lang = data
   }
 
   function onexitcodefencedfencemeta() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].meta = data
   }
 
@@ -468,7 +460,7 @@ function compiler(options) {
   }
 
   function onexitcodefenced() {
-    var data = this.resume()
+    const data = this.resume()
 
     this.stack[this.stack.length - 1].value = data.replace(
       /^(\r?\n|\r)|(\r?\n|\r)$/g,
@@ -479,13 +471,13 @@ function compiler(options) {
   }
 
   function onexitcodeindented() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].value = data.replace(/(\r?\n|\r)$/g, '')
   }
 
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
-    var label = this.resume()
+    const label = this.resume()
     this.stack[this.stack.length - 1].label = label
     this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
@@ -493,12 +485,12 @@ function compiler(options) {
   }
 
   function onexitdefinitiontitlestring() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].title = data
   }
 
   function onexitdefinitiondestinationstring() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].url = data
   }
 
@@ -523,8 +515,8 @@ function compiler(options) {
   }
 
   function onenterdata(token) {
-    var siblings = this.stack[this.stack.length - 1].children
-    var tail = siblings[siblings.length - 1]
+    const siblings = this.stack[this.stack.length - 1].children
+    let tail = siblings[siblings.length - 1]
 
     if (!tail || tail.type !== 'text') {
       // Add a new text node.
@@ -537,13 +529,13 @@ function compiler(options) {
   }
 
   function onexitdata(token) {
-    var tail = this.stack.pop()
+    const tail = this.stack.pop()
     tail.value += this.sliceSerialize(token)
     tail.position.end = point(token.end)
   }
 
   function onexitlineending(token) {
-    var context = this.stack[this.stack.length - 1]
+    const context = this.stack[this.stack.length - 1]
 
     // If we’re at a hard break, include the line ending in there.
     if (getData('atHardBreak')) {
@@ -556,7 +548,7 @@ function compiler(options) {
 
     if (
       !getData('setextHeadingSlurpLineEnding') &&
-      config.canContainEols.indexOf(context.type) > -1
+      config.canContainEols.includes(context.type)
     ) {
       onenterdata.call(this, token)
       onexitdata.call(this, token)
@@ -568,22 +560,22 @@ function compiler(options) {
   }
 
   function onexithtmlflow() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].value = data
   }
 
   function onexithtmltext() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].value = data
   }
 
   function onexitcodetext() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].value = data
   }
 
   function onexitlink() {
-    var context = this.stack[this.stack.length - 1]
+    const context = this.stack[this.stack.length - 1]
 
     // To do: clean.
     if (getData('inReference')) {
@@ -601,7 +593,7 @@ function compiler(options) {
   }
 
   function onexitimage() {
-    var context = this.stack[this.stack.length - 1]
+    const context = this.stack[this.stack.length - 1]
 
     // To do: clean.
     if (getData('inReference')) {
@@ -625,8 +617,8 @@ function compiler(options) {
   }
 
   function onexitlabel() {
-    var fragment = this.stack[this.stack.length - 1]
-    var value = this.resume()
+    const fragment = this.stack[this.stack.length - 1]
+    const value = this.resume()
 
     this.stack[this.stack.length - 1].label = value
 
@@ -641,12 +633,12 @@ function compiler(options) {
   }
 
   function onexitresourcedestinationstring() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].url = data
   }
 
   function onexitresourcetitlestring() {
-    var data = this.resume()
+    const data = this.resume()
     this.stack[this.stack.length - 1].title = data
   }
 
@@ -659,7 +651,7 @@ function compiler(options) {
   }
 
   function onexitreferencestring(token) {
-    var label = this.resume()
+    const label = this.resume()
     this.stack[this.stack.length - 1].label = label
     this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
       this.sliceSerialize(token)
@@ -672,10 +664,9 @@ function compiler(options) {
   }
 
   function onexitcharacterreferencevalue(token) {
-    var data = this.sliceSerialize(token)
-    var type = getData('characterReferenceType')
-    var value
-    var tail
+    const data = this.sliceSerialize(token)
+    const type = getData('characterReferenceType')
+    let value
 
     if (type) {
       value = parseNumericCharacterReference(
@@ -689,7 +680,7 @@ function compiler(options) {
       value = decodeEntity(data)
     }
 
-    tail = this.stack.pop()
+    const tail = this.stack.pop()
     tail.value += value
     tail.position.end = point(token.end)
   }
@@ -792,7 +783,7 @@ function compiler(options) {
 }
 
 function configure(config, extensions) {
-  var index = -1
+  let index = -1
 
   while (++index < extensions.length) {
     extension(config, extensions[index])
@@ -802,16 +793,17 @@ function configure(config, extensions) {
 }
 
 function extension(config, extension) {
-  var key
-  var left
+  let key
 
   for (key in extension) {
-    left = own.call(config, key) ? config[key] : (config[key] = {})
+    if (own.call(extension, key)) {
+      const left = own.call(config, key) ? config[key] : (config[key] = {})
 
-    if (key === 'canContainEols' || key === 'transforms') {
-      config[key] = [].concat(left, extension[key])
-    } else {
-      Object.assign(left, extension[key])
+      if (key === 'canContainEols' || key === 'transforms') {
+        config[key] = [].concat(left, extension[key])
+      } else {
+        Object.assign(left, extension[key])
+      }
     }
   }
 }
