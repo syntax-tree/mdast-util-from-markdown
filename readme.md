@@ -12,6 +12,9 @@
 
 ## Install
 
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
+Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
+
 [npm][]:
 
 ```sh
@@ -29,12 +32,12 @@ Say we have the following markdown file, `example.md`:
 And our script, `example.js`, looks as follows:
 
 ```js
-var fs = require('fs')
-var fromMarkdown = require('mdast-util-from-markdown')
+import fs from 'node:fs'
+import {fromMarkdown} from 'mdast-util-from-markdown'
 
-var doc = fs.readFileSync('example.md')
+const doc = fs.readFileSync('example.md')
 
-var tree = fromMarkdown(doc)
+const tree = fromMarkdown(doc)
 
 console.log(tree)
 ```
@@ -62,6 +65,9 @@ Now, running `node example` yields (positional info removed for brevity):
 ```
 
 ## API
+
+This package exports the following identifier: `fromMarkdown`.
+There is no default export.
 
 ### `fromMarkdown(doc[, encoding][, options])`
 

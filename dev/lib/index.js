@@ -1,24 +1,18 @@
-'use strict'
+import {toString} from 'mdast-util-to-string'
+import {parse} from 'micromark/lib/parse.js'
+import {preprocess} from 'micromark/lib/preprocess.js'
+import {postprocess} from 'micromark/lib/postprocess.js'
+import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
+import {codes} from 'micromark-util-symbol/codes.js'
+import {values} from 'micromark-util-symbol/values.js'
+import {constants} from 'micromark-util-symbol/constants.js'
+import {types} from 'micromark-util-symbol/types.js'
+import {decodeEntity} from 'parse-entities/decode-entity.js'
+import {stringifyPosition} from 'unist-util-stringify-position'
 
-module.exports = fromMarkdown
+const own = {}.hasOwnProperty
 
-// These three are compiled away in the `dist/`
-var codes = require('micromark/dist/character/codes')
-var constants = require('micromark/dist/constant/constants')
-var types = require('micromark/dist/constant/types')
-
-var toString = require('mdast-util-to-string')
-var assign = require('micromark/dist/constant/assign')
-var own = require('micromark/dist/constant/has-own-property')
-var normalizeIdentifier = require('micromark/dist/util/normalize-identifier')
-var safeFromInt = require('micromark/dist/util/safe-from-int')
-var parser = require('micromark/dist/parse')
-var preprocessor = require('micromark/dist/preprocess')
-var postprocess = require('micromark/dist/postprocess')
-var decode = require('parse-entities/decode-entity')
-var stringifyPosition = require('unist-util-stringify-position')
-
-function fromMarkdown(value, encoding, options) {
+export function fromMarkdown(value, encoding, options) {
   if (typeof encoding !== 'string') {
     options = encoding
     encoding = undefined
@@ -26,7 +20,7 @@ function fromMarkdown(value, encoding, options) {
 
   return compiler(options)(
     postprocess(
-      parser(options).document().write(preprocessor()(value, encoding, true))
+      parse(options).document().write(preprocess()(value, encoding, true))
     )
   )
 }
@@ -155,15 +149,15 @@ function compiler(options) {
     var listStart
 
     var context = {
-      stack: stack,
-      tokenStack: tokenStack,
-      config: config,
-      enter: enter,
-      exit: exit,
-      buffer: buffer,
-      resume: resume,
-      setData: setData,
-      getData: getData
+      stack,
+      tokenStack,
+      config,
+      enter,
+      exit,
+      buffer,
+      resume,
+      setData,
+      getData
     }
 
     while (++index < events.length) {
@@ -189,7 +183,10 @@ function compiler(options) {
 
       if (own.call(handler, events[index][1].type)) {
         handler[events[index][1].type].call(
-          assign({sliceSerialize: events[index][2].sliceSerialize}, context),
+          Object.assign(
+            {sliceSerialize: events[index][2].sliceSerialize},
+            context
+          ),
           events[index][1]
         )
       }
@@ -472,16 +469,18 @@ function compiler(options) {
 
   function onexitcodefenced() {
     var data = this.resume()
+
     this.stack[this.stack.length - 1].value = data.replace(
       /^(\r?\n|\r)|(\r?\n|\r)$/g,
       ''
     )
+
     setData('flowCodeInside')
   }
 
   function onexitcodeindented() {
     var data = this.resume()
-    this.stack[this.stack.length - 1].value = data
+    this.stack[this.stack.length - 1].value = data.replace(/(\r?\n|\r)$/g, '')
   }
 
   function onexitdefinitionlabelstring(token) {
@@ -679,7 +678,7 @@ function compiler(options) {
     var tail
 
     if (type) {
-      value = safeFromInt(
+      value = parseNumericCharacterReference(
         data,
         type === types.characterReferenceMarkerNumeric
           ? constants.numericBaseDecimal
@@ -687,7 +686,7 @@ function compiler(options) {
       )
       setData('characterReferenceType')
     } else {
-      value = decode(data)
+      value = decodeEntity(data)
     }
 
     tail = this.stack.pop()
@@ -815,4 +814,40 @@ function extension(config, extension) {
       Object.assign(left, extension[key])
     }
   }
+}
+
+// To do: externalize this from `micromark/lib/compile`
+/**
+ * Turn the number (in string form as either hexa- or plain decimal) coming from
+ * a numeric character reference into a character.
+ *
+ * @param {string} value
+ * @param {number} base
+ * @returns {string}
+ */
+function parseNumericCharacterReference(value, base) {
+  const code = Number.parseInt(value, base)
+
+  if (
+    // C0 except for HT, LF, FF, CR, space
+    code < codes.ht ||
+    code === codes.vt ||
+    (code > codes.cr && code < codes.space) ||
+    // Control character (DEL) of the basic block and C1 controls.
+    (code > codes.tilde && code < 160) ||
+    // Lone high surrogates and low surrogates.
+    /* c8 ignore next */
+    (code > 55295 && code < 57344) ||
+    // Noncharacters.
+    /* c8 ignore next */
+    (code > 64975 && code < 65008) ||
+    (code & 65535) === 65535 ||
+    (code & 65535) === 65534 ||
+    // Out of range
+    code > 1114111
+  ) {
+    return values.replacementCharacter
+  }
+
+  return String.fromCharCode(code)
 }

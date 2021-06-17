@@ -1,15 +1,13 @@
-'use strict'
-
-var fs = require('fs')
-var path = require('path')
-var test = require('tape')
-var unified = require('unified')
-var rehypeParse = require('rehype-parse')
-var rehypeStringify = require('rehype-stringify')
-var toHast = require('mdast-util-to-hast')
-var toHtml = require('hast-util-to-html')
-var commonmark = require('commonmark.json')
-var fromMarkdown = require('..')
+import fs from 'fs'
+import path from 'path'
+import test from 'tape'
+import unified from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeStringify from 'rehype-stringify'
+import {toHast} from 'mdast-util-to-hast'
+import {toHtml} from 'hast-util-to-html'
+import {commonmark} from 'commonmark.json'
+import {fromMarkdown} from '../dev/index.js'
 
 var join = path.join
 
@@ -924,6 +922,7 @@ test('fixtures', function (t) {
 
 test('commonmark', function (t) {
   let index = -1
+
   while (++index < commonmark.length) {
     each(commonmark[index], index)
   }
@@ -949,6 +948,10 @@ test('commonmark', function (t) {
 
     var actual = reformat.processSync(html).toString()
     var expected = reformat.processSync(example.html.slice(0, -1)).toString()
+
+    if (actual !== expected) {
+      console.log('yyy', [example, actual, expected])
+    }
 
     t.equal(actual, expected, example.section + ' (' + index + ')')
   }
