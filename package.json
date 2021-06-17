@@ -47,7 +47,7 @@
     "browserify": "^17.0.0",
     "commonmark.json": "^0.29.0",
     "dtslint": "^4.0.0",
-    "gzip-size-cli": "^4.0.0",
+    "gzip-size-cli": "^5.0.0",
     "hast-util-to-html": "^7.0.0",
     "mdast-util-to-hast": "^10.0.0",
     "nyc": "^15.0.0",
@@ -59,11 +59,11 @@
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
     "unified": "^9.0.0",
-    "xo": "^0.37.0"
+    "xo": "^0.38.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "generate-dist": "babel lib/ --out-dir dist/ --quiet --retain-lines; prettier dist/ --loglevel error --write",
+    "generate-dist": "babel lib/ --out-dir dist/ --quiet --retain-lines; prettier dist/index.js --loglevel error --write",
     "generate-size": "browserify . -p tinyify -s mdast-util-from-markdown -o mdast-util-from-markdown.min.js; gzip-size mdast-util-from-markdown.min.js --raw",
     "generate": "npm run generate-dist && npm run generate-size",
     "test-api": "node test",

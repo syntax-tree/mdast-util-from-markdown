@@ -894,10 +894,13 @@ test('mdast-util-from-markdown', function (t) {
 
 test('fixtures', function (t) {
   var base = join('test', 'fixtures')
+  const files = fs.readdirSync(base).filter((d) => path.extname(d) === '.md')
+  let index = -1
 
-  fs.readdirSync(base)
-    .filter((d) => path.extname(d) === '.md')
-    .forEach((d) => each(path.basename(d, path.extname(d))))
+  while (++index < files.length) {
+    const file = files[index]
+    each(path.basename(file, path.extname(file)))
+  }
 
   t.end()
 
@@ -920,7 +923,10 @@ test('fixtures', function (t) {
 })
 
 test('commonmark', function (t) {
-  commonmark.forEach(each)
+  let index = -1
+  while (++index < commonmark.length) {
+    each(commonmark[index], index)
+  }
 
   t.end()
 
