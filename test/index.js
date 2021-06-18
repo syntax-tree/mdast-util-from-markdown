@@ -1,3 +1,7 @@
+/**
+ * @typedef {import('mdast').Root} Root
+ */
+
 import fs from 'fs'
 import path from 'path'
 import test from 'tape'
@@ -59,6 +63,7 @@ test('mdast-util-from-markdown', (t) => {
   )
 
   t.equal(
+    // @ts-expect-error: it’s fine.
     fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f])).children[0]
       .children[0].value,
     'brávo',
@@ -66,6 +71,7 @@ test('mdast-util-from-markdown', (t) => {
   )
 
   t.equal(
+    // @ts-expect-error: it’s fine.
     fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
       .children[0].children[0].value,
     'brC!vo',
@@ -79,9 +85,17 @@ test('mdast-util-from-markdown', (t) => {
           // Unknown objects are used, but have no effect.
           unknown: undefined,
           // `canContainEols` is an array.
-          canContainEols: 'someType',
-          enter: {lineEnding: lineEndingAsHardBreakEnter},
-          exit: {lineEnding: lineEndingAsHardBreakExit}
+          canContainEols: ['someType'],
+          enter: {
+            lineEnding(token) {
+              this.enter({type: 'break'}, token)
+            }
+          },
+          exit: {
+            lineEnding(token) {
+              this.exit(token)
+            }
+          }
         }
       ]
     }).children[0].children,
@@ -113,17 +127,18 @@ test('mdast-util-from-markdown', (t) => {
     'should support extensions'
   )
 
-  function lineEndingAsHardBreakEnter(token) {
-    this.enter({type: 'break'}, token)
-  }
-
-  function lineEndingAsHardBreakExit(token) {
-    this.exit(token)
-  }
-
   t.deepEqual(
     fromMarkdown('*a*', {
-      mdastExtensions: [{transforms: [transform]}]
+      mdastExtensions: [
+        {
+          transforms: [
+            function (tree) {
+              // @ts-expect-error: it’s fine.
+              tree.children[0].children[0].type = 'strong'
+            }
+          ]
+        }
+      ]
     }).children[0].children,
     [
       {
@@ -147,23 +162,20 @@ test('mdast-util-from-markdown', (t) => {
     'should support `transforms` in extensions'
   )
 
-  function transform(tree) {
-    tree.children[0].children[0].type = 'strong'
-  }
-
   t.throws(
     () => {
       fromMarkdown('a', {
         mdastExtensions: [
-          {enter: {paragraph: brokenParagraph}, exit: {paragraph: noop}}
+          {
+            enter: {
+              paragraph(token) {
+                this.enter({type: 'paragraph', children: []}, token)
+              }
+            },
+            exit: {paragraph() {}}
+          }
         ]
       })
-
-      function brokenParagraph(token) {
-        this.enter({type: 'paragraph', children: []}, token)
-      }
-
-      function noop() {}
     },
     /Cannot close document, a token \(`paragraph`, 1:1-1:2\) is still open/,
     'should crash if a token is opened but not closed'
@@ -172,12 +184,16 @@ test('mdast-util-from-markdown', (t) => {
   t.throws(
     () => {
       fromMarkdown('a', {
-        mdastExtensions: [{enter: {paragraph: brokenParagraph}}]
+        mdastExtensions: [
+          {
+            enter: {
+              paragraph(token) {
+                this.exit(token)
+              }
+            }
+          }
+        ]
       })
-
-      function brokenParagraph(token) {
-        this.exit(token)
-      }
     },
     /Cannot close `paragraph` \(1:1-1:2\): it’s not open/,
     'should crash when closing a token that isn’t open'
@@ -186,12 +202,16 @@ test('mdast-util-from-markdown', (t) => {
   t.throws(
     () => {
       fromMarkdown('a', {
-        mdastExtensions: [{exit: {paragraph: brokenParagraph}}]
+        mdastExtensions: [
+          {
+            exit: {
+              paragraph(token) {
+                this.exit(Object.assign({}, token, {type: 'lol'}))
+              }
+            }
+          }
+        ]
       })
-
-      function brokenParagraph(token) {
-        this.exit(Object.assign({}, token, {type: 'lol'}))
-      }
     },
     /Cannot close `lol` \(1:1-1:2\): a different token \(`paragraph`, 1:1-1:2\) is open/,
     'should crash when closing a token when a different one is open'
@@ -897,19 +917,15 @@ test('fixtures', (t) => {
 
   while (++index < files.length) {
     const file = files[index]
-    each(path.basename(file, path.extname(file)))
-  }
-
-  t.end()
-
-  function each(stem) {
+    const stem = path.basename(file, path.extname(file))
     const fp = join(base, stem + '.json')
     const doc = fs.readFileSync(join(base, stem + '.md'))
     const actual = fromMarkdown(doc)
+    /** @type {Root} */
     let expected
 
     try {
-      expected = JSON.parse(fs.readFileSync(fp))
+      expected = JSON.parse(String(fs.readFileSync(fp)))
     } catch {
       // New fixture.
       expected = actual
@@ -918,29 +934,23 @@ test('fixtures', (t) => {
 
     t.deepEqual(actual, expected, stem)
   }
+
+  t.end()
 })
 
 test('commonmark', (t) => {
   let index = -1
 
   while (++index < commonmark.length) {
-    each(commonmark[index], index)
-  }
-
-  t.end()
-
-  function each(example, index) {
-    const html = toHtml(
-      toHast(fromMarkdown(example.markdown.slice(0, -1)), {
-        allowDangerousHtml: true,
-        commonmark: true
-      }),
-      {
-        allowDangerousHtml: true,
-        entities: {useNamedReferences: true},
-        closeSelfClosing: true
-      }
-    )
+    const example = commonmark[index]
+    const root = fromMarkdown(example.markdown.slice(0, -1))
+    const hast = toHast(root, {allowDangerousHtml: true})
+    // @ts-expect-error: `toHtml` too narrow / `toHast` to loose.
+    const html = toHtml(hast, {
+      allowDangerousHtml: true,
+      entities: {useNamedReferences: true},
+      closeSelfClosing: true
+    })
 
     const reformat = unified()
       .use(rehypeParse, {fragment: true})
@@ -949,10 +959,8 @@ test('commonmark', (t) => {
     const actual = reformat.processSync(html).toString()
     const expected = reformat.processSync(example.html.slice(0, -1)).toString()
 
-    if (actual !== expected) {
-      console.log('yyy', [example, actual, expected])
-    }
-
-    t.equal(actual, expected, example.section + ' (' + index + ')')
+    t.deepLooseEqual(actual, expected, example.section + ' (' + index + ')')
   }
+
+  t.end()
 })
