@@ -10,6 +10,12 @@
 
 **[mdast][]** utility to parse markdown.
 
+## When to use this
+
+Use this if you want to use **[micromark][]** but need an AST.
+Use **[remark][]** instead, which includes both to provide a nice interface and
+hundreds of plugins.
+
 ## Install
 
 This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
@@ -68,6 +74,11 @@ Now, running `node example` yields (positional info removed for brevity):
 
 This package exports the following identifier: `fromMarkdown`.
 There is no default export.
+
+The export map supports the endorsed
+[`development` condition](https://nodejs.org/api/packages.html#packages_resolving_user_conditions).
+Run `node --conditions development module.js` to get instrumented dev code.
+Without this condition, production code is loaded.
 
 ### `fromMarkdown(doc[, encoding][, options])`
 
@@ -128,7 +139,7 @@ Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
 
 ## Security
 
-As Markdown is sometimes used for HTML, and improper use of HTML can open you up
+As markdown is sometimes used for HTML, and improper use of HTML can open you up
 to a [cross-site scripting (XSS)][xss] attack, use of `mdast-util-from-markdown`
 can also be unsafe.
 When going to HTML, use this utility in combination with
@@ -209,4 +220,8 @@ abide by its terms.
 
 [sanitize]: https://github.com/syntax-tree/hast-util-sanitize
 
+[micromark]: https://github.com/micromark/micromark
+
 [micromark-extensions]: https://github.com/micromark/micromark#optionsextensions
+
+[remark]: https://github.com/remarkjs/remark
