@@ -93,10 +93,7 @@
     "rules": {
       "complexity": "off",
       "unicorn/prefer-switch": "off"
-    },
-    "ignores": [
-      "types/"
-    ]
+    }
   },
   "remarkConfig": {
     "plugins": [
