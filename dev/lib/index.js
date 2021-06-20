@@ -68,7 +68,7 @@
  * @property {NormalizedExtension} config
  *   Configuration.
  *
- * @typedef {{mdastExtensions?: Array.<Extension>}} FromMarkdownOptions
+ * @typedef {{mdastExtensions?: Array.<Extension|Array.<Extension>>}} FromMarkdownOptions
  * @typedef {ParseOptions & FromMarkdownOptions} Options
  */
 
@@ -1048,14 +1048,20 @@ function compiler(options = {}) {
 
 /**
  * @param {Extension} combined
- * @param {Array.<Extension>} extensions
+ * @param {Array.<Extension|Array.<Extension>>} extensions
  * @returns {Extension}
  */
 function configure(combined, extensions) {
   let index = -1
 
   while (++index < extensions.length) {
-    extension(combined, extensions[index])
+    const value = extensions[index]
+
+    if (Array.isArray(value)) {
+      configure(combined, value)
+    } else {
+      extension(combined, value)
+    }
   }
 
   return combined
@@ -1072,12 +1078,14 @@ function extension(combined, extension) {
 
   for (key in extension) {
     if (own.call(extension, key)) {
+      const list = key === 'canContainEols' || key === 'transforms'
       const maybe = own.call(combined, key) ? combined[key] : undefined
-      const left = maybe || (combined[key] = {})
+      /* c8 ignore next */
+      const left = maybe || (combined[key] = list ? [] : {})
       const right = extension[key]
 
       if (right) {
-        if (key === 'canContainEols' || key === 'transforms') {
+        if (list) {
           // @ts-expect-error: `left` is an array.
           combined[key] = [...left, ...right]
         } else {

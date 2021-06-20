@@ -128,6 +128,55 @@ test('mdast-util-from-markdown', (t) => {
   )
 
   t.deepEqual(
+    fromMarkdown('a\nb', {
+      mdastExtensions: [
+        [
+          {
+            enter: {
+              lineEnding(token) {
+                this.enter({type: 'break'}, token)
+              }
+            }
+          },
+          {
+            exit: {
+              lineEnding(token) {
+                this.exit(token)
+              }
+            }
+          }
+        ]
+      ]
+    }).children[0].children,
+    [
+      {
+        type: 'text',
+        value: 'a',
+        position: {
+          start: {line: 1, column: 1, offset: 0},
+          end: {line: 1, column: 2, offset: 1}
+        }
+      },
+      {
+        type: 'break',
+        position: {
+          start: {line: 1, column: 2, offset: 1},
+          end: {line: 2, column: 1, offset: 2}
+        }
+      },
+      {
+        type: 'text',
+        value: 'b',
+        position: {
+          start: {line: 2, column: 1, offset: 2},
+          end: {line: 2, column: 2, offset: 3}
+        }
+      }
+    ],
+    'should support multiple extensions'
+  )
+
+  t.deepEqual(
     fromMarkdown('*a*', {
       mdastExtensions: [
         {
