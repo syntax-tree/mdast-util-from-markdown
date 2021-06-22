@@ -1,6 +1,6 @@
 {
   "name": "mdast-util-from-markdown",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "mdast utility to parse markdown",
   "license": "MIT",
   "keywords": [
