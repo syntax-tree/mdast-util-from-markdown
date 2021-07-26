@@ -4,11 +4,13 @@
 
 import fs from 'fs'
 import path from 'path'
+import assert from 'assert'
 import test from 'tape'
 import unified from 'unified'
 import rehypeParse from 'rehype-parse'
 import rehypeStringify from 'rehype-stringify'
 import {toHast} from 'mdast-util-to-hast'
+import {toString} from 'mdast-util-to-string'
 import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
 import {fromMarkdown} from '../dev/index.js'
@@ -63,17 +65,15 @@ test('mdast-util-from-markdown', (t) => {
   )
 
   t.equal(
-    // @ts-expect-error: it’s fine.
-    fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f])).children[0]
-      .children[0].value,
+    toString(fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]))),
     'brávo',
     'should support buffers'
   )
 
   t.equal(
-    // @ts-expect-error: it’s fine.
-    fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
-      .children[0].children[0].value,
+    toString(
+      fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
+    ),
     'brC!vo',
     'should support encoding'
   )
@@ -98,32 +98,39 @@ test('mdast-util-from-markdown', (t) => {
           }
         }
       ]
-    }).children[0].children,
-    [
-      {
-        type: 'text',
-        value: 'a',
-        position: {
-          start: {line: 1, column: 1, offset: 0},
-          end: {line: 1, column: 2, offset: 1}
+    }).children[0],
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'text',
+          value: 'a',
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 1, column: 2, offset: 1}
+          }
+        },
+        {
+          type: 'break',
+          position: {
+            start: {line: 1, column: 2, offset: 1},
+            end: {line: 2, column: 1, offset: 2}
+          }
+        },
+        {
+          type: 'text',
+          value: 'b',
+          position: {
+            start: {line: 2, column: 1, offset: 2},
+            end: {line: 2, column: 2, offset: 3}
+          }
         }
-      },
-      {
-        type: 'break',
-        position: {
-          start: {line: 1, column: 2, offset: 1},
-          end: {line: 2, column: 1, offset: 2}
-        }
-      },
-      {
-        type: 'text',
-        value: 'b',
-        position: {
-          start: {line: 2, column: 1, offset: 2},
-          end: {line: 2, column: 2, offset: 3}
-        }
+      ],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 2, column: 2, offset: 3}
       }
-    ],
+    },
     'should support extensions'
   )
 
@@ -147,32 +154,39 @@ test('mdast-util-from-markdown', (t) => {
           }
         ]
       ]
-    }).children[0].children,
-    [
-      {
-        type: 'text',
-        value: 'a',
-        position: {
-          start: {line: 1, column: 1, offset: 0},
-          end: {line: 1, column: 2, offset: 1}
+    }).children[0],
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'text',
+          value: 'a',
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 1, column: 2, offset: 1}
+          }
+        },
+        {
+          type: 'break',
+          position: {
+            start: {line: 1, column: 2, offset: 1},
+            end: {line: 2, column: 1, offset: 2}
+          }
+        },
+        {
+          type: 'text',
+          value: 'b',
+          position: {
+            start: {line: 2, column: 1, offset: 2},
+            end: {line: 2, column: 2, offset: 3}
+          }
         }
-      },
-      {
-        type: 'break',
-        position: {
-          start: {line: 1, column: 2, offset: 1},
-          end: {line: 2, column: 1, offset: 2}
-        }
-      },
-      {
-        type: 'text',
-        value: 'b',
-        position: {
-          start: {line: 2, column: 1, offset: 2},
-          end: {line: 2, column: 2, offset: 3}
-        }
+      ],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 2, column: 2, offset: 3}
       }
-    ],
+    },
     'should support multiple extensions'
   )
 
@@ -182,32 +196,39 @@ test('mdast-util-from-markdown', (t) => {
         {
           transforms: [
             function (tree) {
-              // @ts-expect-error: it’s fine.
+              assert(tree.children[0].type === 'paragraph')
               tree.children[0].children[0].type = 'strong'
             }
           ]
         }
       ]
-    }).children[0].children,
-    [
-      {
-        type: 'strong',
-        children: [
-          {
-            type: 'text',
-            value: 'a',
-            position: {
-              start: {line: 1, column: 2, offset: 1},
-              end: {line: 1, column: 3, offset: 2}
+    }).children[0],
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'strong',
+          children: [
+            {
+              type: 'text',
+              value: 'a',
+              position: {
+                start: {line: 1, column: 2, offset: 1},
+                end: {line: 1, column: 3, offset: 2}
+              }
             }
+          ],
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 1, column: 4, offset: 3}
           }
-        ],
-        position: {
-          start: {line: 1, column: 1, offset: 0},
-          end: {line: 1, column: 4, offset: 3}
         }
+      ],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 1, column: 4, offset: 3}
       }
-    ],
+    },
     'should support `transforms` in extensions'
   )
 

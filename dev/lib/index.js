@@ -6,7 +6,7 @@
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
  * @typedef {import('micromark-util-types').Value} Value
  * @typedef {Root|Root['children'][number]} Node
- * @typedef {import('unist').Parent} Parent
+ * @typedef {Extract<Node, import('unist').Parent>} Parent
  * @typedef {import('unist').Point} Point
  * @typedef {import('mdast').Break} Break
  * @typedef {import('mdast').Blockquote} Blockquote
@@ -16,8 +16,10 @@
  * @typedef {import('mdast').Heading} Heading
  * @typedef {import('mdast').HTML} HTML
  * @typedef {import('mdast').Image} Image
+ * @typedef {import('mdast').ImageReference} ImageReference
  * @typedef {import('mdast').InlineCode} InlineCode
  * @typedef {import('mdast').Link} Link
+ * @typedef {import('mdast').LinkReference} LinkReference
  * @typedef {import('mdast').List} List
  * @typedef {import('mdast').ListItem} ListItem
  * @typedef {import('mdast').Paragraph} Paragraph
@@ -25,6 +27,9 @@
  * @typedef {import('mdast').Strong} Strong
  * @typedef {import('mdast').Text} Text
  * @typedef {import('mdast').ThematicBreak} ThematicBreak
+ * @typedef {import('mdast').PhrasingContent} PhrasingContent
+ *
+ * @typedef {Parent & {type: 'fragment', children: PhrasingContent[]}} Fragment
  */
 
 /**
@@ -536,10 +541,10 @@ function compiler(options = {}) {
    * @returns {N}
    */
   function enter(node, token) {
-    /** @type {Parent} */
-    // @ts-expect-error: Assume parent.
     const parent = this.stack[this.stack.length - 1]
     assert(parent, 'expected `parent`')
+    assert('children' in parent, 'expected `parent`')
+    // @ts-expect-error: Assume `Node` can exist as a child of `parent`.
     parent.children.push(node)
     this.stack.push(node)
     this.tokenStack.push(token)
@@ -619,7 +624,8 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onenterlistitemvalue(token) {
     if (getData('expectingFirstListItemValue')) {
-      this.stack[this.stack.length - 2].start = Number.parseInt(
+      const ancestor = /** @type {List} */ (this.stack[this.stack.length - 2])
+      ancestor.start = Number.parseInt(
         this.sliceSerialize(token),
         constants.numericBaseDecimal
       )
@@ -630,13 +636,15 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitcodefencedfenceinfo() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].lang = data
+    const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
+    node.lang = data
   }
 
   /** @type {Handle} */
   function onexitcodefencedfencemeta() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].meta = data
+    const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
+    node.meta = data
   }
 
   /** @type {Handle} */
@@ -650,11 +658,9 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitcodefenced() {
     const data = this.resume()
+    const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
 
-    this.stack[this.stack.length - 1].value = data.replace(
-      /^(\r?\n|\r)|(\r?\n|\r)$/g,
-      ''
-    )
+    node.value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, '')
 
     setData('flowCodeInside')
   }
@@ -662,15 +668,18 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitcodeindented() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].value = data.replace(/(\r?\n|\r)$/g, '')
+    const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
+
+    node.value = data.replace(/(\r?\n|\r)$/g, '')
   }
 
   /** @type {Handle} */
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
     const label = this.resume()
-    this.stack[this.stack.length - 1].label = label
-    this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
+    const node = /** @type {Definition} */ (this.stack[this.stack.length - 1])
+    node.label = label
+    node.identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
   }
@@ -678,20 +687,23 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitdefinitiontitlestring() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].title = data
+    const node = /** @type {Definition} */ (this.stack[this.stack.length - 1])
+    node.title = data
   }
 
   /** @type {Handle} */
   function onexitdefinitiondestinationstring() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].url = data
+    const node = /** @type {Definition} */ (this.stack[this.stack.length - 1])
+    node.url = data
   }
 
   /** @type {Handle} */
   function onexitatxheadingsequence(token) {
-    if (!this.stack[this.stack.length - 1].depth) {
-      this.stack[this.stack.length - 1].depth =
-        this.sliceSerialize(token).length
+    const node = /** @type {Heading} */ (this.stack[this.stack.length - 1])
+    if (!node.depth) {
+      // @ts-expect-error: assume valid depth.
+      node.depth = this.sliceSerialize(token).length
     }
   }
 
@@ -702,7 +714,9 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onexitsetextheadinglinesequence(token) {
-    this.stack[this.stack.length - 1].depth =
+    const node = /** @type {Heading} */ (this.stack[this.stack.length - 1])
+
+    node.depth =
       this.sliceSerialize(token).charCodeAt(0) === codes.equalsTo ? 1 : 2
   }
 
@@ -713,11 +727,8 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onenterdata(token) {
-    /** @type {Parent} */
-    // @ts-expect-error: assume parent.
-    const parent = this.stack[this.stack.length - 1]
+    const parent = /** @type {Parent} */ (this.stack[this.stack.length - 1])
     /** @type {Node} */
-    // @ts-expect-error: assume child.
     let tail = parent.children[parent.children.length - 1]
 
     if (!tail || tail.type !== 'text') {
@@ -725,6 +736,7 @@ function compiler(options = {}) {
       tail = text()
       // @ts-expect-error: we’ll add `end` later.
       tail.position = {start: point(token.start)}
+      // @ts-expect-error: Assume `text` can be added to `parent`.
       parent.children.push(tail)
     }
 
@@ -735,6 +747,7 @@ function compiler(options = {}) {
   function onexitdata(token) {
     const tail = this.stack.pop()
     assert(tail, 'expected a `node` to be on the stack')
+    assert('value' in tail, 'expected a `literal` to be on the stack')
     assert(tail.position, 'expected `node` to have an open position')
     tail.value += this.sliceSerialize(token)
     tail.position.end = point(token.end)
@@ -742,13 +755,12 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onexitlineending(token) {
-    /** @type {Parent} */
-    // @ts-expect-error: supposed to be a parent.
     const context = this.stack[this.stack.length - 1]
     assert(context, 'expected `node`')
 
     // If we’re at a hard break, include the line ending in there.
     if (getData('atHardBreak')) {
+      assert('children' in context, 'expected `parent`')
       const tail = context.children[context.children.length - 1]
       assert(tail.position, 'expected tail to have a starting position')
       tail.position.end = point(token.end)
@@ -773,35 +785,43 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexithtmlflow() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].value = data
+    const node = /** @type {HTML} */ (this.stack[this.stack.length - 1])
+    node.value = data
   }
 
   /** @type {Handle} */
   function onexithtmltext() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].value = data
+    const node = /** @type {HTML} */ (this.stack[this.stack.length - 1])
+    node.value = data
   }
 
   /** @type {Handle} */
   function onexitcodetext() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].value = data
+    const node = /** @type {InlineCode} */ (this.stack[this.stack.length - 1])
+    node.value = data
   }
 
   /** @type {Handle} */
   function onexitlink() {
-    const context = this.stack[this.stack.length - 1]
+    const context = /** @type {Link & {identifier: string, label: string}} */ (
+      this.stack[this.stack.length - 1]
+    )
 
     // To do: clean.
     if (getData('inReference')) {
       context.type += 'Reference'
+      // @ts-expect-error: mutate.
       context.referenceType = getData('referenceType') || 'shortcut'
+      // @ts-expect-error: mutate.
       delete context.url
       delete context.title
     } else {
+      // @ts-expect-error: mutate.
       delete context.identifier
+      // @ts-expect-error: mutate.
       delete context.label
-      delete context.referenceType
     }
 
     setData('referenceType')
@@ -809,18 +829,23 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onexitimage() {
-    const context = this.stack[this.stack.length - 1]
+    const context = /** @type {Image & {identifier: string, label: string}} */ (
+      this.stack[this.stack.length - 1]
+    )
 
     // To do: clean.
     if (getData('inReference')) {
       context.type += 'Reference'
+      // @ts-expect-error: mutate.
       context.referenceType = getData('referenceType') || 'shortcut'
+      // @ts-expect-error: mutate.
       delete context.url
       delete context.title
     } else {
+      // @ts-expect-error: mutate.
       delete context.identifier
+      // @ts-expect-error: mutate.
       delete context.label
-      delete context.referenceType
     }
 
     setData('referenceType')
@@ -828,38 +853,49 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onexitlabeltext(token) {
-    this.stack[this.stack.length - 2].identifier = normalizeIdentifier(
+    const ancestor = /** @type {(Link|Image) & {identifier: string}} */ (
+      this.stack[this.stack.length - 2]
+    )
+
+    ancestor.identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
   }
 
   /** @type {Handle} */
   function onexitlabel() {
-    const fragment = this.stack[this.stack.length - 1]
+    const fragment = /** @type {Fragment} */ (this.stack[this.stack.length - 1])
     const value = this.resume()
+    const node =
+      /** @type {(Link|Image) & {identifier: string, label: string}} */ (
+        this.stack[this.stack.length - 1]
+      )
 
-    this.stack[this.stack.length - 1].label = value
+    node.label = value
 
     // Assume a reference.
     setData('inReference', true)
 
-    if (this.stack[this.stack.length - 1].type === 'link') {
-      this.stack[this.stack.length - 1].children = fragment.children
+    if (node.type === 'link') {
+      // @ts-expect-error: Assume static phrasing content.
+      node.children = fragment.children
     } else {
-      this.stack[this.stack.length - 1].alt = value
+      node.alt = value
     }
   }
 
   /** @type {Handle} */
   function onexitresourcedestinationstring() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].url = data
+    const node = /** @type {Link|Image} */ (this.stack[this.stack.length - 1])
+    node.url = data
   }
 
   /** @type {Handle} */
   function onexitresourcetitlestring() {
     const data = this.resume()
-    this.stack[this.stack.length - 1].title = data
+    const node = /** @type {Link|Image} */ (this.stack[this.stack.length - 1])
+    node.title = data
   }
 
   /** @type {Handle} */
@@ -875,8 +911,11 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitreferencestring(token) {
     const label = this.resume()
-    this.stack[this.stack.length - 1].label = label
-    this.stack[this.stack.length - 1].identifier = normalizeIdentifier(
+    const node = /** @type {LinkReference|ImageReference} */ (
+      this.stack[this.stack.length - 1]
+    )
+    node.label = label
+    node.identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
     setData('referenceType', 'full')
@@ -911,6 +950,7 @@ function compiler(options = {}) {
     const tail = this.stack.pop()
     assert(tail, 'expected `node`')
     assert(tail.position, 'expected `node.position`')
+    assert('value' in tail, 'expected `node.value`')
     tail.value += value
     tail.position.end = point(token.end)
   }
@@ -918,14 +958,15 @@ function compiler(options = {}) {
   /** @type {Handle} */
   function onexitautolinkprotocol(token) {
     onexitdata.call(this, token)
-    this.stack[this.stack.length - 1].url = this.sliceSerialize(token)
+    const node = /** @type {Link} */ (this.stack[this.stack.length - 1])
+    node.url = this.sliceSerialize(token)
   }
 
   /** @type {Handle} */
   function onexitautolinkemail(token) {
     onexitdata.call(this, token)
-    this.stack[this.stack.length - 1].url =
-      'mailto:' + this.sliceSerialize(token)
+    const node = /** @type {Link} */ (this.stack[this.stack.length - 1])
+    node.url = 'mailto:' + this.sliceSerialize(token)
   }
 
   //
@@ -955,7 +996,6 @@ function compiler(options = {}) {
       identifier: '',
       // @ts-expect-error: we’ve always used `null`.
       label: null,
-      // @ts-expect-error: we’ve always used `null`.
       title: null,
       url: ''
     }
@@ -990,7 +1030,6 @@ function compiler(options = {}) {
 
   /** @returns {Link} */
   function link() {
-    // @ts-expect-error: we’ve always used `null`.
     return {type: 'link', title: null, url: '', children: []}
   }
 
