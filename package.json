@@ -72,7 +72,7 @@
     "type-coverage": "^2.0.0",
     "typescript": "^4.0.0",
     "unified": "^10.0.0",
-    "xo": "^0.39.0"
+    "xo": "^0.42.0"
   },
   "scripts": {
     "build": "rimraf \"dev/**/*.d.ts\" \"test/**/*.d.ts\" && tsc && type-coverage && micromark-build && esbuild . --bundle --minify | terser | gzip-size --raw",
@@ -93,7 +93,8 @@
     "prettier": true,
     "rules": {
       "complexity": "off",
-      "unicorn/prefer-switch": "off"
+      "unicorn/prefer-switch": "off",
+      "unicorn/prefer-node-protocol": "off"
     }
   },
   "remarkConfig": {
