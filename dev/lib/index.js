@@ -5,9 +5,12 @@
  * @typedef {import('micromark-util-types').Token} Token
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
  * @typedef {import('micromark-util-types').Value} Value
- * @typedef {Root|Root['children'][number]} Node
- * @typedef {Extract<Node, import('unist').Parent>} Parent
+ * @typedef {import('unist').Parent} UnistParent
  * @typedef {import('unist').Point} Point
+ * @typedef {import('mdast').PhrasingContent} PhrasingContent
+ * @typedef {import('mdast').Content} Content
+ * @typedef {Root|Content} Node
+ * @typedef {Extract<Node, UnistParent>} Parent
  * @typedef {import('mdast').Break} Break
  * @typedef {import('mdast').Blockquote} Blockquote
  * @typedef {import('mdast').Code} Code
@@ -27,9 +30,8 @@
  * @typedef {import('mdast').Strong} Strong
  * @typedef {import('mdast').Text} Text
  * @typedef {import('mdast').ThematicBreak} ThematicBreak
- * @typedef {import('mdast').PhrasingContent} PhrasingContent
  *
- * @typedef {Parent & {type: 'fragment', children: PhrasingContent[]}} Fragment
+ * @typedef {UnistParent & {type: 'fragment', children: PhrasingContent[]}} Fragment
  */
 
 /**
@@ -54,7 +56,7 @@
  *
  * @typedef CompileContext
  *   mdast compiler context
- * @property {Array.<Node>} stack
+ * @property {Array.<Node | Fragment>} stack
  * @property {Array.<Token>} tokenStack
  * @property {(key: string, value?: unknown) => void} setData
  *   Set data into the key-value store.
@@ -528,7 +530,6 @@ function compiler(options = {}) {
 
   /** @type {CompileContext['buffer']} */
   function buffer() {
-    // @ts-expect-error: Custom node type to collect text.
     this.stack.push({type: 'fragment', children: []})
   }
 
@@ -575,6 +576,7 @@ function compiler(options = {}) {
   function exit(token) {
     const node = this.stack.pop()
     assert(node, 'expected `node`')
+    assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
     const open = this.tokenStack.pop()
 
     if (!open) {
@@ -702,8 +704,19 @@ function compiler(options = {}) {
   function onexitatxheadingsequence(token) {
     const node = /** @type {Heading} */ (this.stack[this.stack.length - 1])
     if (!node.depth) {
-      // @ts-expect-error: assume valid depth.
-      node.depth = this.sliceSerialize(token).length
+      const depth = this.sliceSerialize(token).length
+
+      assert(
+        depth === 1 ||
+          depth === 2 ||
+          depth === 3 ||
+          depth === 4 ||
+          depth === 5 ||
+          depth === 6,
+        'expected `depth` between `1` and `6`'
+      )
+
+      node.depth = depth
     }
   }
 
@@ -736,7 +749,7 @@ function compiler(options = {}) {
       tail = text()
       // @ts-expect-error: we’ll add `end` later.
       tail.position = {start: point(token.start)}
-      // @ts-expect-error: Assume `text` can be added to `parent`.
+      // @ts-expect-error: Assume `parent` accepts `text`.
       parent.children.push(tail)
     }
 

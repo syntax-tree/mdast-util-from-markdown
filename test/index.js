@@ -1015,7 +1015,7 @@ test('commonmark', (t) => {
     const example = commonmark[index]
     const root = fromMarkdown(example.markdown.slice(0, -1))
     const hast = toHast(root, {allowDangerousHtml: true})
-    // @ts-expect-error: `toHtml` too narrow / `toHast` to loose.
+    assert(hast && hast.type === 'root', 'expected `root`')
     const html = toHtml(hast, {
       allowDangerousHtml: true,
       entities: {useNamedReferences: true},
