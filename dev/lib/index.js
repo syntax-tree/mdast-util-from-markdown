@@ -993,7 +993,6 @@ function compiler(options = {}) {
 
   /** @returns {Code} */
   function codeFlow() {
-    // @ts-expect-error: we’ve always used `null`.
     return {type: 'code', lang: null, meta: null, value: ''}
   }
 
@@ -1007,7 +1006,6 @@ function compiler(options = {}) {
     return {
       type: 'definition',
       identifier: '',
-      // @ts-expect-error: we’ve always used `null`.
       label: null,
       title: null,
       url: ''
@@ -1037,7 +1035,6 @@ function compiler(options = {}) {
 
   /** @returns {Image} */
   function image() {
-    // @ts-expect-error: we’ve always used `null`.
     return {type: 'image', title: null, url: '', alt: null}
   }
 
@@ -1054,7 +1051,6 @@ function compiler(options = {}) {
     return {
       type: 'list',
       ordered: token.type === 'listOrdered',
-      // @ts-expect-error: we’ve always used `null`.
       start: null,
       // @ts-expect-error Patched.
       spread: token._spread,
@@ -1071,7 +1067,6 @@ function compiler(options = {}) {
       type: 'listItem',
       // @ts-expect-error Patched.
       spread: token._spread,
-      // @ts-expect-error: we’ve always used `null`.
       checked: null,
       children: []
     }
