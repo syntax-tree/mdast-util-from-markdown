@@ -46,6 +46,7 @@
     "mdast-util-to-string": "^3.1.0",
     "micromark": "^3.0.0",
     "micromark-util-decode-numeric-character-reference": "^1.0.0",
+    "micromark-util-decode-string": "^1.0.0",
     "micromark-util-normalize-identifier": "^1.0.0",
     "micromark-util-symbol": "^1.0.0",
     "micromark-util-types": "^1.0.0",
