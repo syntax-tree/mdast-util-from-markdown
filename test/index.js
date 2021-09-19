@@ -867,6 +867,40 @@ test('mdast-util-from-markdown', (t) => {
   )
 
   t.deepEqual(
+    fromMarkdown('[`a`][]\n\n[`a`]: b').children[0],
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'linkReference',
+          children: [
+            {
+              type: 'inlineCode',
+              value: 'a',
+              position: {
+                start: {line: 1, column: 2, offset: 1},
+                end: {line: 1, column: 5, offset: 4}
+              }
+            }
+          ],
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 1, column: 8, offset: 7}
+          },
+          identifier: '`a`',
+          label: '`a`',
+          referenceType: 'collapsed'
+        }
+      ],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 1, column: 8, offset: 7}
+      }
+    },
+    'should parse a link (collapsed reference) with inline code in the label'
+  )
+
+  t.deepEqual(
     fromMarkdown('[a][b]\n\n[b]: c').children[0],
     {
       type: 'paragraph',

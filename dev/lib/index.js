@@ -884,7 +884,7 @@ function compiler(options = {}) {
         this.stack[this.stack.length - 1]
       )
 
-    node.label = value
+    node.label = node.identifier
 
     // Assume a reference.
     setData('inReference', true)
