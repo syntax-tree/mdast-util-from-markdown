@@ -85,6 +85,7 @@ import {parse} from 'micromark/lib/parse.js'
 import {preprocess} from 'micromark/lib/preprocess.js'
 import {postprocess} from 'micromark/lib/postprocess.js'
 import {decodeNumericCharacterReference} from 'micromark-util-decode-numeric-character-reference'
+import {decodeString} from 'micromark-util-decode-string'
 import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
 import {codes} from 'micromark-util-symbol/codes.js'
 import {constants} from 'micromark-util-symbol/constants.js'
@@ -866,13 +867,14 @@ function compiler(options = {}) {
 
   /** @type {Handle} */
   function onexitlabeltext(token) {
-    const ancestor = /** @type {(Link|Image) & {identifier: string}} */ (
-      this.stack[this.stack.length - 2]
-    )
+    const ancestor =
+      /** @type {(Link|Image) & {identifier: string, label: string}} */ (
+        this.stack[this.stack.length - 2]
+      )
+    const string = this.sliceSerialize(token)
 
-    ancestor.identifier = normalizeIdentifier(
-      this.sliceSerialize(token)
-    ).toLowerCase()
+    ancestor.label = decodeString(string)
+    ancestor.identifier = normalizeIdentifier(string).toLowerCase()
   }
 
   /** @type {Handle} */
@@ -883,8 +885,6 @@ function compiler(options = {}) {
       /** @type {(Link|Image) & {identifier: string, label: string}} */ (
         this.stack[this.stack.length - 1]
       )
-
-    node.label = value
 
     // Assume a reference.
     setData('inReference', true)
