@@ -577,7 +577,6 @@ function compiler(options = {}) {
   function exit(token) {
     const node = this.stack.pop()
     assert(node, 'expected `node`')
-    assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
     const open = this.tokenStack.pop()
 
     if (!open) {
@@ -602,6 +601,7 @@ function compiler(options = {}) {
       )
     }
 
+    assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
     assert(node.position, 'expected `position` to be defined')
     node.position.end = point(token.end)
     return node
