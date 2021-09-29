@@ -80,10 +80,12 @@
  */
 
 import assert from 'assert'
+import {directiveFromMarkdown} from 'mdast-util-directive'
 import {toString} from 'mdast-util-to-string'
 import {parse} from 'micromark/lib/parse.js'
 import {preprocess} from 'micromark/lib/preprocess.js'
 import {postprocess} from 'micromark/lib/postprocess.js'
+import {directive} from 'micromark-extension-directive'
 import {decodeNumericCharacterReference} from 'micromark-util-decode-numeric-character-reference'
 import {decodeString} from 'micromark-util-decode-string'
 import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
@@ -1137,6 +1139,38 @@ function extension(combined, extension) {
           combined[key] = [...left, ...right]
         } else {
           Object.assign(left, right)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * @param {TemplateStringsArray} strings
+ * @param {...Node} values
+ * @returns {Root}
+ */
+export function md(strings, ...values) {
+  // Interleave strings with `:expression`.
+  const tree = fromMarkdown(strings.join(':expression'), {
+    extensions: [directive()],
+    mdastExtensions: [directiveFromMarkdown]
+  })
+  // Swap `:expression` nodes for values.
+  visit(tree)
+  return tree
+
+  /**
+   * @param {Node} node
+   * @returns {void}
+   */
+  function visit(node) {
+    if ('children' in node) {
+      for (const [i, child] of node.children.entries()) {
+        if (child.type === 'textDirective' && child.name === 'expression') {
+          node.children[i] = /** @type {Content} */ (values.shift())
+        } else {
+          visit(child)
         }
       }
     }

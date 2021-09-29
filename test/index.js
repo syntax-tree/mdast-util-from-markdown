@@ -3,9 +3,9 @@
  */
 
 import assert from 'assert'
-import {Buffer} from 'node:buffer'
 import fs from 'fs'
 import path from 'path'
+import {Buffer} from 'node:buffer'
 import test from 'tape'
 import {unified} from 'unified'
 import rehypeParse from 'rehype-parse'
@@ -14,7 +14,7 @@ import {toHast} from 'mdast-util-to-hast'
 import {toString} from 'mdast-util-to-string'
 import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
-import {fromMarkdown} from '../dev/index.js'
+import {fromMarkdown, md} from '../dev/index.js'
 
 const join = path.join
 
@@ -1010,6 +1010,55 @@ test('mdast-util-from-markdown', (t) => {
       }
     },
     'should parse a thematic break'
+  )
+
+  t.deepEqual(
+    md`*${fromMarkdown('a*b')}*`.children[0],
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'emphasis',
+          children: [
+            {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      value: 'a*b',
+                      position: {
+                        start: {line: 1, column: 1, offset: 0},
+                        end: {line: 1, column: 4, offset: 3}
+                      }
+                    }
+                  ],
+                  position: {
+                    start: {line: 1, column: 1, offset: 0},
+                    end: {line: 1, column: 4, offset: 3}
+                  }
+                }
+              ],
+              position: {
+                start: {line: 1, column: 1, offset: 0},
+                end: {line: 1, column: 4, offset: 3}
+              }
+            }
+          ],
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 1, column: 14, offset: 13}
+          }
+        }
+      ],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 1, column: 14, offset: 13}
+      }
+    },
+    'should substitute an expression'
   )
 
   t.end()

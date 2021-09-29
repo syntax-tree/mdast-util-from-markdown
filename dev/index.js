@@ -9,4 +9,4 @@
  * @typedef {import('./lib/index.js').CompileContext} CompileContext
  */
 
-export {fromMarkdown} from './lib/index.js'
+export {fromMarkdown, md} from './lib/index.js'
