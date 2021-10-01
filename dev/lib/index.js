@@ -80,7 +80,6 @@
  */
 
 import assert from 'assert'
-import {directiveFromMarkdown} from 'mdast-util-directive'
 import {toString} from 'mdast-util-to-string'
 import {parse} from 'micromark/lib/parse.js'
 import {preprocess} from 'micromark/lib/preprocess.js'
@@ -1152,27 +1151,20 @@ function extension(combined, extension) {
  */
 export function md(strings, ...values) {
   // Interleave strings with `:expression`.
-  const tree = fromMarkdown(strings.join(':expression'), {
+  return fromMarkdown(strings.join(':expression'), {
     extensions: [directive()],
-    mdastExtensions: [directiveFromMarkdown]
+    mdastExtensions: [{enter: {directiveText: enter}}]
   })
-  // Swap `:expression` nodes for values.
-  visit(tree)
-  return tree
 
   /**
-   * @param {Node} node
+   * @this {CompileContext}
    * @returns {void}
    */
-  function visit(node) {
-    if ('children' in node) {
-      for (const [i, child] of node.children.entries()) {
-        if (child.type === 'textDirective' && child.name === 'expression') {
-          node.children[i] = /** @type {Content} */ (values.shift())
-        } else {
-          visit(child)
-        }
-      }
-    }
+  function enter() {
+    const parent = this.stack[this.stack.length - 1]
+    assert(parent, 'expected `parent`')
+    assert('children' in parent, 'expected `parent`')
+    // @ts-expect-error: Assume `Node` can exist as a child of `parent`.
+    parent.children.push(values.shift())
   }
 }
