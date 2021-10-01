@@ -2,8 +2,10 @@
  * @typedef {import('micromark-util-types').Encoding} Encoding
  * @typedef {import('micromark-util-types').Event} Event
  * @typedef {import('micromark-util-types').ParseOptions} ParseOptions
+ * @typedef {import('micromark-util-types').State} State
  * @typedef {import('micromark-util-types').Token} Token
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
+ * @typedef {import('micromark-util-types').Tokenizer} Tokenizer
  * @typedef {import('micromark-util-types').Value} Value
  * @typedef {import('unist').Parent} UnistParent
  * @typedef {import('unist').Point} Point
@@ -84,7 +86,6 @@ import {toString} from 'mdast-util-to-string'
 import {parse} from 'micromark/lib/parse.js'
 import {preprocess} from 'micromark/lib/preprocess.js'
 import {postprocess} from 'micromark/lib/postprocess.js'
-import {directive} from 'micromark-extension-directive'
 import {decodeNumericCharacterReference} from 'micromark-util-decode-numeric-character-reference'
 import {decodeString} from 'micromark-util-decode-string'
 import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
@@ -1150,17 +1151,30 @@ function extension(combined, extension) {
  * @returns {Root}
  */
 export function md(strings, ...values) {
-  // Interleave strings with `:expression`.
-  return fromMarkdown(strings.join(':expression'), {
-    extensions: [directive()],
-    mdastExtensions: [{enter: {directiveText: enter}}]
+  // Interleave strings with U+FFFC OBJECT REPLACEMENT CHARACTER.
+  return fromMarkdown(strings.join('\uFFFC'), {
+    extensions: [{text: {0xff_fc: {tokenize}}}],
+    mdastExtensions: [{enter: {expression}}]
   })
+
+  /** @type {Tokenizer} */
+  function tokenize(effects, ok) {
+    return start
+
+    /** @type {State} */
+    function start(code) {
+      effects.enter('expression')
+      effects.consume(code)
+      effects.exit('expression')
+      return ok
+    }
+  }
 
   /**
    * @this {CompileContext}
    * @returns {void}
    */
-  function enter() {
+  function expression() {
     const parent = this.stack[this.stack.length - 1]
     assert(parent, 'expected `parent`')
     assert('children' in parent, 'expected `parent`')

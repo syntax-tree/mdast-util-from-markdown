@@ -1049,13 +1049,13 @@ test('mdast-util-from-markdown', (t) => {
           ],
           position: {
             start: {line: 1, column: 1, offset: 0},
-            end: {line: 1, column: 14, offset: 13}
+            end: {line: 1, column: 4, offset: 3}
           }
         }
       ],
       position: {
         start: {line: 1, column: 1, offset: 0},
-        end: {line: 1, column: 14, offset: 13}
+        end: {line: 1, column: 4, offset: 3}
       }
     },
     'should substitute an expression'
