@@ -2,10 +2,10 @@
  * @typedef {import('mdast').Root} Root
  */
 
-import assert from 'assert'
 import {Buffer} from 'node:buffer'
 import fs from 'fs'
 import path from 'path'
+import assert from 'power-assert'
 import test from 'tape'
 import {unified} from 'unified'
 import rehypeParse from 'rehype-parse'

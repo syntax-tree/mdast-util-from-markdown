@@ -79,7 +79,7 @@
  * @typedef {ParseOptions & FromMarkdownOptions} Options
  */
 
-import assert from 'assert'
+import assert from 'power-assert'
 import {toString} from 'mdast-util-to-string'
 import {parse} from 'micromark/lib/parse.js'
 import {preprocess} from 'micromark/lib/preprocess.js'
