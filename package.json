@@ -73,7 +73,7 @@
     "type-coverage": "^2.0.0",
     "typescript": "^4.0.0",
     "unified": "^10.0.0",
-    "xo": "^0.44.0"
+    "xo": "^0.45.0"
   },
   "scripts": {
     "build": "rimraf \"dev/**/*.d.ts\" \"test/**/*.d.ts\" && tsc && type-coverage && micromark-build && esbuild . --bundle --minify | terser | gzip-size --raw",
