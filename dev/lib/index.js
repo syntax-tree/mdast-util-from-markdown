@@ -31,7 +31,7 @@
  * @typedef {import('mdast').Text} Text
  * @typedef {import('mdast').ThematicBreak} ThematicBreak
  *
- * @typedef {UnistParent & {type: 'fragment', children: PhrasingContent[]}} Fragment
+ * @typedef {UnistParent & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
  */
 
 /**
@@ -50,14 +50,14 @@
  * @typedef {(this: CompileContext, token: Token) => void} Handle
  * @typedef {Record<string, Handle>} Handles
  *   Token types mapping to handles
- * @typedef {Record<string, Record<string, unknown>|Array.<unknown>> & {canContainEols: Array.<string>, transforms: Array.<Transform>, enter: Handles, exit: Handles}} NormalizedExtension
+ * @typedef {Record<string, Record<string, unknown>|Array<unknown>> & {canContainEols: Array<string>, transforms: Array<Transform>, enter: Handles, exit: Handles}} NormalizedExtension
  * @typedef {Partial<NormalizedExtension>} Extension
  *   An mdast extension changes how markdown tokens are turned into mdast.
  *
  * @typedef CompileContext
  *   mdast compiler context
- * @property {Array.<Node | Fragment>} stack
- * @property {Array.<Token>} tokenStack
+ * @property {Array<Node | Fragment>} stack
+ * @property {Array<Token>} tokenStack
  * @property {(key: string, value?: unknown) => void} setData
  *   Set data into the key-value store.
  * @property {<K extends string>(key: K) => CompileData[K]} getData
@@ -75,7 +75,7 @@
  * @property {NormalizedExtension} config
  *   Configuration.
  *
- * @typedef {{mdastExtensions?: Array.<Extension|Array.<Extension>>}} FromMarkdownOptions
+ * @typedef {{mdastExtensions?: Array<Extension|Array<Extension>>}} FromMarkdownOptions
  * @typedef {ParseOptions & FromMarkdownOptions} Options
  */
 
@@ -249,7 +249,7 @@ function compiler(options = {}) {
   return compile
 
   /**
-   * @param {Array.<Event>} events
+   * @param {Array<Event>} events
    * @returns {Root}
    */
   function compile(events) {
@@ -259,7 +259,7 @@ function compiler(options = {}) {
     const stack = [tree]
     /** @type {CompileContext['tokenStack']} */
     const tokenStack = []
-    /** @type {Array.<number>} */
+    /** @type {Array<number>} */
     const listStack = []
     /** @type {Omit<CompileContext, 'sliceSerialize'>} */
     const context = {
@@ -342,7 +342,7 @@ function compiler(options = {}) {
   }
 
   /**
-   * @param {Array.<Event>} events
+   * @param {Array<Event>} events
    * @param {number} start
    * @param {number} length
    * @returns {number}
@@ -1095,7 +1095,7 @@ function compiler(options = {}) {
 
 /**
  * @param {Extension} combined
- * @param {Array.<Extension|Array.<Extension>>} extensions
+ * @param {Array<Extension|Array<Extension>>} extensions
  * @returns {Extension}
  */
 function configure(combined, extensions) {

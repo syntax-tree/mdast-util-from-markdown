@@ -97,12 +97,12 @@ Value to parse (`string` or [`Buffer`][buffer]).
 
 ###### `options.extensions`
 
-Array of syntax extensions (`Array.<MicromarkSyntaxExtension>`, default: `[]`).
+Array of syntax extensions (`Array<MicromarkSyntaxExtension>`, default: `[]`).
 Passed to [`micromark` as `extensions`][micromark-extensions].
 
 ###### `options.mdastExtensions`
 
-Array of mdast extensions (`Array.<MdastExtension>`, default: `[]`).
+Array of mdast extensions (`Array<MdastExtension>`, default: `[]`).
 
 ##### Returns
 
