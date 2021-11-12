@@ -7,6 +7,7 @@
  * @typedef {import('./lib/index.js').Transform} Transform
  * @typedef {import('./lib/index.js').Token} Token
  * @typedef {import('./lib/index.js').CompileContext} CompileContext
+ * @typedef {import('./lib/index.js').OnError} OnError
  */
 
 export {fromMarkdown} from './lib/index.js'

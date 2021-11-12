@@ -54,10 +54,12 @@
  * @typedef {Partial<NormalizedExtension>} Extension
  *   An mdast extension changes how markdown tokens are turned into mdast.
  *
+ * @typedef {(this: Omit<CompileContext, 'sliceSerialize'>, left: Token|undefined, right: Token) => void} OnError
+ *
  * @typedef CompileContext
  *   mdast compiler context
  * @property {Array<Node | Fragment>} stack
- * @property {Array<Token>} tokenStack
+ * @property {Array<[Token, OnError|undefined]>} tokenStack
  * @property {(key: string, value?: unknown) => void} setData
  *   Set data into the key-value store.
  * @property {<K extends string>(key: K) => CompileData[K]} getData
@@ -66,7 +68,7 @@
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
- * @property {<N extends Node>(this: CompileContext, node: N, token: Token) => N} enter
+ * @property {<N extends Node>(this: CompileContext, node: N, token: Token, onError?: OnError) => N} enter
  *   Enter a token.
  * @property {(this: CompileContext, token: Token) => Node} exit
  *   Exit a token.
@@ -309,16 +311,9 @@ function compiler(options = {}) {
     }
 
     if (tokenStack.length > 0) {
-      throw new Error(
-        'Cannot close document, a token (`' +
-          tokenStack[tokenStack.length - 1].type +
-          '`, ' +
-          stringifyPosition({
-            start: tokenStack[tokenStack.length - 1].start,
-            end: tokenStack[tokenStack.length - 1].end
-          }) +
-          ') is still open'
-      )
+      const tail = tokenStack[tokenStack.length - 1]
+      const handler = tail[1] || defaultOnError
+      handler.call(context, undefined, tail[0])
     }
 
     // Figure out `root` position.
@@ -540,16 +535,17 @@ function compiler(options = {}) {
    * @this {CompileContext}
    * @param {N} node
    * @param {Token} token
+   * @param {OnError} [errorHandler]
    * @returns {N}
    */
-  function enter(node, token) {
+  function enter(node, token, errorHandler) {
     const parent = this.stack[this.stack.length - 1]
     assert(parent, 'expected `parent`')
     assert('children' in parent, 'expected `parent`')
     // @ts-expect-error: Assume `Node` can exist as a child of `parent`.
     parent.children.push(node)
     this.stack.push(node)
-    this.tokenStack.push(token)
+    this.tokenStack.push([token, errorHandler])
     // @ts-expect-error: `end` will be patched later.
     node.position = {start: point(token.start)}
     return node
@@ -587,18 +583,9 @@ function compiler(options = {}) {
           stringifyPosition({start: token.start, end: token.end}) +
           '): it’s not open'
       )
-    } else if (open.type !== token.type) {
-      throw new Error(
-        'Cannot close `' +
-          token.type +
-          '` (' +
-          stringifyPosition({start: token.start, end: token.end}) +
-          '): a different token (`' +
-          open.type +
-          '`, ' +
-          stringifyPosition({start: open.start, end: open.end}) +
-          ') is open'
-      )
+    } else if (open[0].type !== token.type) {
+      const handler = open[1] || defaultOnError
+      handler.call(this, token, open[0])
     }
 
     assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
@@ -1140,5 +1127,30 @@ function extension(combined, extension) {
         }
       }
     }
+  }
+}
+
+/** @type {OnError} */
+function defaultOnError(left, right) {
+  if (left) {
+    throw new Error(
+      'Cannot close `' +
+        left.type +
+        '` (' +
+        stringifyPosition({start: left.start, end: left.end}) +
+        '): a different token (`' +
+        right.type +
+        '`, ' +
+        stringifyPosition({start: right.start, end: right.end}) +
+        ') is open'
+    )
+  } else {
+    throw new Error(
+      'Cannot close document, a token (`' +
+        right.type +
+        '`, ' +
+        stringifyPosition({start: right.start, end: right.end}) +
+        ') is still open'
+    )
   }
 }
