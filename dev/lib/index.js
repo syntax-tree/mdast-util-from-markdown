@@ -54,12 +54,13 @@
  * @typedef {Partial<NormalizedExtension>} Extension
  *   An mdast extension changes how markdown tokens are turned into mdast.
  *
- * @typedef {(this: Omit<CompileContext, 'sliceSerialize'>, left: Token|undefined, right: Token) => void} OnError
+ * @typedef {(this: Omit<CompileContext, 'sliceSerialize'>, left: Token|undefined, right: Token) => void} OnEnterError
+ * @typedef {(this: Omit<CompileContext, 'sliceSerialize'>, left: Token, right: Token) => void} OnExitError
  *
  * @typedef CompileContext
  *   mdast compiler context
  * @property {Array<Node | Fragment>} stack
- * @property {Array<[Token, OnError|undefined]>} tokenStack
+ * @property {Array<[Token, OnEnterError|undefined]>} tokenStack
  * @property {(key: string, value?: unknown) => void} setData
  *   Set data into the key-value store.
  * @property {<K extends string>(key: K) => CompileData[K]} getData
@@ -68,9 +69,9 @@
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
- * @property {<N extends Node>(this: CompileContext, node: N, token: Token, onError?: OnError) => N} enter
+ * @property {<N extends Node>(this: CompileContext, node: N, token: Token, onError?: OnEnterError) => N} enter
  *   Enter a token.
- * @property {(this: CompileContext, token: Token) => Node} exit
+ * @property {(this: CompileContext, token: Token, onError?: OnExitError) => Node} exit
  *   Exit a token.
  * @property {TokenizeContext['sliceSerialize']} sliceSerialize
  *   Get the string value of a token.
@@ -535,7 +536,7 @@ function compiler(options = {}) {
    * @this {CompileContext}
    * @param {N} node
    * @param {Token} token
-   * @param {OnError} [errorHandler]
+   * @param {OnEnterError} [errorHandler]
    * @returns {N}
    */
   function enter(node, token, errorHandler) {
@@ -569,8 +570,14 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {CompileContext['exit']} */
-  function exit(token) {
+  /**
+   * @type {CompileContext['exit']}
+   * @this {CompileContext}
+   * @param {Token} token
+   * @param {OnExitError} [onExitError]
+   * @returns {Node}
+   */
+  function exit(token, onExitError) {
     const node = this.stack.pop()
     assert(node, 'expected `node`')
     const open = this.tokenStack.pop()
@@ -584,8 +591,12 @@ function compiler(options = {}) {
           '): it’s not open'
       )
     } else if (open[0].type !== token.type) {
-      const handler = open[1] || defaultOnError
-      handler.call(this, token, open[0])
+      if (onExitError) {
+        onExitError.call(this, token, open[0])
+      } else {
+        const handler = open[1] || defaultOnError
+        handler.call(this, token, open[0])
+      }
     }
 
     assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
@@ -1130,7 +1141,7 @@ function extension(combined, extension) {
   }
 }
 
-/** @type {OnError} */
+/** @type {OnEnterError} */
 function defaultOnError(left, right) {
   if (left) {
     throw new Error(

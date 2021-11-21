@@ -288,6 +288,31 @@ test('mdast-util-from-markdown', (t) => {
     'should crash when closing a token when a different one is open'
   )
 
+  t.throws(
+    () => {
+      fromMarkdown('a', {
+        mdastExtensions: [
+          {
+            exit: {
+              paragraph(token) {
+                this.exit(
+                  Object.assign({}, token, {type: 'lol'}),
+                  function (a, b) {
+                    t.equal(a.type, 'lol')
+                    t.equal(b.type, 'paragraph')
+                    throw new Error('problem')
+                  }
+                )
+              }
+            }
+          }
+        ]
+      })
+    },
+    /problem/,
+    'should crash when closing a token when a different one is open with a custom handler'
+  )
+
   t.deepEqual(
     fromMarkdown('<tel:123>').children[0],
     {
