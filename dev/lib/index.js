@@ -93,7 +93,7 @@ import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
 import {codes} from 'micromark-util-symbol/codes.js'
 import {constants} from 'micromark-util-symbol/constants.js'
 import {types} from 'micromark-util-symbol/types.js'
-import {decodeEntity} from 'parse-entities/decode-entity.js'
+import {decodeNamedCharacterReference} from 'decode-named-character-reference'
 import {stringifyPosition} from 'unist-util-stringify-position'
 
 const own = {}.hasOwnProperty
@@ -953,9 +953,10 @@ function compiler(options = {}) {
       )
       setData('characterReferenceType')
     } else {
-      // @ts-expect-error `decodeEntity` can return false for invalid named
-      // character references, but everything we’ve tokenized is valid.
-      value = decodeEntity(data)
+      // @ts-expect-error `decodeNamedCharacterReference` can return false for
+      // invalid named character references, but everything we’ve tokenized is
+      // valid.
+      value = decodeNamedCharacterReference(data)
     }
 
     const tail = this.stack.pop()

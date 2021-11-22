@@ -43,6 +43,7 @@
   "dependencies": {
     "@types/mdast": "^3.0.0",
     "@types/unist": "^2.0.0",
+    "decode-named-character-reference": "^1.0.0",
     "mdast-util-to-string": "^3.1.0",
     "micromark": "^3.0.0",
     "micromark-util-decode-numeric-character-reference": "^1.0.0",
@@ -50,7 +51,6 @@
     "micromark-util-normalize-identifier": "^1.0.0",
     "micromark-util-symbol": "^1.0.0",
     "micromark-util-types": "^1.0.0",
-    "parse-entities": "^3.0.0",
     "unist-util-stringify-position": "^3.0.0",
     "uvu": "^0.5.0"
   },
