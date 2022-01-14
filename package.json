@@ -59,7 +59,7 @@
     "@types/tape": "^4.0.0",
     "c8": "^7.0.0",
     "commonmark.json": "^0.30.0",
-    "esbuild": "^0.13.0",
+    "esbuild": "^0.14.0",
     "gzip-size-cli": "^5.0.0",
     "hast-util-to-html": "^8.0.0",
     "mdast-util-to-hast": "^12.0.0",
@@ -75,7 +75,7 @@
     "type-coverage": "^2.0.0",
     "typescript": "^4.0.0",
     "unified": "^10.0.0",
-    "xo": "^0.46.0"
+    "xo": "^0.47.0"
   },
   "scripts": {
     "build": "rimraf \"dev/**/*.d.ts\" \"test/**/*.d.ts\" && tsc && type-coverage && micromark-build && esbuild . --bundle --minify | terser | gzip-size --raw",
@@ -97,6 +97,7 @@
     "rules": {
       "complexity": "off",
       "node/file-extension-in-import": "off",
+      "unicorn/prefer-code-point": "off",
       "unicorn/prefer-switch": "off",
       "unicorn/prefer-node-protocol": "off"
     }
