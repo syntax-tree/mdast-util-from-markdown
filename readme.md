@@ -8,47 +8,91 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-**[mdast][]** utility to parse markdown.
+**[mdast][]** utility that turns markdown into a syntax tree.
 
-## When to use this
+## Contents
 
-Use this if you want to use **[micromark][]** but need an AST.
-Use **[remark][]** instead, which includes both to provide a nice interface and
-hundreds of plugins.
+*   [What is this?](#what-is-this)
+*   [When should I use this?](#when-should-i-use-this)
+*   [Install](#install)
+*   [Use](#use)
+*   [API](#api)
+    *   [`fromMarkdown(doc[, encoding][, options])`](#frommarkdowndoc-encoding-options)
+*   [List of extensions](#list-of-extensions)
+*   [Syntax](#syntax)
+*   [Syntax tree](#syntax-tree)
+*   [Types](#types)
+*   [Compatibility](#compatibility)
+*   [Security](#security)
+*   [Related](#related)
+*   [Contribute](#contribute)
+*   [License](#license)
+
+## What is this?
+
+This package is a utility that takes markdown input and turns it into an
+[mdast][] syntax tree.
+
+This utility uses [`micromark`][micromark], which turns markdown into tokens,
+while it turns those tokens into nodes.
+It’s used in [`remark-parse`][remark-parse], which focusses on making it easier
+to transform content by abstracting these internals away.
+
+## When should I use this?
+
+If you want to handle syntax trees manually, use this.
+Use [`micromark`][micromark] instead when you *just* want to turn markdown into
+HTML.
+For an easier time processing content, use the **[remark][]** ecosystem instead.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
-Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
-
-[npm][]:
+This package is [ESM only][esm].
+In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 
 ```sh
 npm install mdast-util-from-markdown
 ```
 
+In Deno with [Skypack][]:
+
+```js
+import {fromMarkdown} from 'https://cdn.skypack.dev/mdast-util-from-markdown@1?dts'
+```
+
+In browsers with [Skypack][]:
+
+```html
+<script type="module">
+  import {fromMarkdown} from 'https://cdn.skypack.dev/mdast-util-from-markdown@1?min'
+</script>
+```
+
 ## Use
 
-Say we have the following markdown file, `example.md`:
+Say we have the following markdown file `example.md`:
 
 ```markdown
 ## Hello, *World*!
 ```
 
-And our script, `example.js`, looks as follows:
+…and our module `example.js` looks as follows:
 
 ```js
-import fs from 'node:fs'
+import {promises as fs} from 'node:fs'
 import {fromMarkdown} from 'mdast-util-from-markdown'
 
-const doc = fs.readFileSync('example.md')
+main()
 
-const tree = fromMarkdown(doc)
+async function main() {
+  const doc = await fs.readFile('example.md')
+  const tree = fromMarkdown(doc)
 
-console.log(tree)
+  console.log(tree)
+}
 ```
 
-Now, running `node example` yields (positional info removed for brevity):
+…now running `node example.js` yields (positional info removed for brevity):
 
 ```js
 {
@@ -59,10 +103,7 @@ Now, running `node example` yields (positional info removed for brevity):
       depth: 2,
       children: [
         {type: 'text', value: 'Hello, '},
-        {
-          type: 'emphasis',
-          children: [{type: 'text', value: 'World'}]
-        },
+        {type: 'emphasis', children: [{type: 'text', value: 'World'}]},
         {type: 'text', value: '!'}
       ]
     }
@@ -82,7 +123,7 @@ Without this condition, production code is loaded.
 
 ### `fromMarkdown(doc[, encoding][, options])`
 
-Parse markdown to a **[mdast][]** tree.
+Turn markdown into a syntax tree.
 
 ##### Parameters
 
@@ -97,12 +138,12 @@ Value to parse (`string` or [`Buffer`][buffer]).
 
 ###### `options.extensions`
 
-Array of syntax extensions (`Array<MicromarkSyntaxExtension>`, default: `[]`).
-Passed to [`micromark` as `extensions`][micromark-extensions].
+List of syntax extensions (`Array<MicromarkSyntaxExtension>`, default: `[]`).
+Passed to [`micromark` as `options.extensions`][micromark-extensions].
 
 ###### `options.mdastExtensions`
 
-Array of mdast extensions (`Array<MdastExtension>`, default: `[]`).
+List of mdast extensions (`Array<MdastExtension>`, default: `[]`).
 
 ##### Returns
 
@@ -111,31 +152,56 @@ Array of mdast extensions (`Array<MdastExtension>`, default: `[]`).
 ## List of extensions
 
 *   [`syntax-tree/mdast-util-directive`](https://github.com/syntax-tree/mdast-util-directive)
-    — parse directives
+    — directives
 *   [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
-    — parse frontmatter (YAML, TOML, more)
+    — frontmatter (YAML, TOML, more)
 *   [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
-    — parse GFM
+    — GFM
 *   [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
-    — parse GFM autolink literals
+    — GFM autolink literals
 *   [`syntax-tree/mdast-util-gfm-footnote`](https://github.com/syntax-tree/mdast-util-gfm-footnote)
-    — parse GFM footnotes
+    — GFM footnotes
 *   [`syntax-tree/mdast-util-gfm-strikethrough`](https://github.com/syntax-tree/mdast-util-gfm-strikethrough)
-    — parse GFM strikethrough
+    — GFM strikethrough
 *   [`syntax-tree/mdast-util-gfm-table`](https://github.com/syntax-tree/mdast-util-gfm-table)
-    — parse GFM tables
+    — GFM tables
 *   [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
-    — parse GFM task list items
+    — GFM task list items
 *   [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
-    — parse math
+    — math
 *   [`syntax-tree/mdast-util-mdx`](https://github.com/syntax-tree/mdast-util-mdx)
-    — parse MDX or MDX.js
+    — MDX
 *   [`syntax-tree/mdast-util-mdx-expression`](https://github.com/syntax-tree/mdast-util-mdx-expression)
-    — parse MDX or MDX.js expressions
+    — MDX expressions
 *   [`syntax-tree/mdast-util-mdx-jsx`](https://github.com/syntax-tree/mdast-util-mdx-jsx)
-    — parse MDX or MDX.js JSX
+    — MDX JSX
 *   [`syntax-tree/mdast-util-mdxjs-esm`](https://github.com/syntax-tree/mdast-util-mdxjs-esm)
-    — parse MDX.js ESM
+    — MDX ESM
+
+## Syntax
+
+Markdown is parsed according to CommonMark.
+Extensions can add support for other syntax.
+If you’re interested in extending markdown,
+[more information is available in micromark’s readme][micromark-extend].
+
+## Syntax tree
+
+The syntax tree is [mdast][].
+
+## Types
+
+This package is fully typed with [TypeScript][].
+It exports the types `Value`, `Encoding`, `Options`, `Extension`, `Handle`,
+`Transform`, `Token`, `CompileContext`, `OnEnterError`, `OnExitError`, which
+model the interfaces used in parameters, options, and extensions.
+
+## Compatibility
+
+Projects maintained by the unified collective are compatible with all maintained
+versions of Node.js.
+As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
+Our projects sometimes work with older versions, but this is not guaranteed.
 
 ## Security
 
@@ -143,16 +209,16 @@ As markdown is sometimes used for HTML, and improper use of HTML can open you up
 to a [cross-site scripting (XSS)][xss] attack, use of `mdast-util-from-markdown`
 can also be unsafe.
 When going to HTML, use this utility in combination with
-[`hast-util-sanitize`][sanitize] to make the tree safe.
+[`hast-util-sanitize`][hast-util-sanitize] to make the tree safe.
 
 ## Related
 
-*   [`micromark/micromark`](https://github.com/micromark/micromark)
-    — the smallest commonmark-compliant markdown parser that exists
-*   [`remarkjs/remark`](https://github.com/remarkjs/remark)
-    — markdown processor powered by plugins
 *   [`syntax-tree/mdast-util-to-markdown`](https://github.com/syntax-tree/mdast-util-to-markdown)
-    — serialize mdast to markdown
+    — serialize mdast as markdown
+*   [`micromark/micromark`](https://github.com/micromark/micromark)
+    — parse markdown
+*   [`remarkjs/remark`](https://github.com/remarkjs/remark)
+    — process markdown
 
 ## Contribute
 
@@ -198,6 +264,8 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
+[skypack]: https://www.skypack.dev
+
 [license]: license
 
 [author]: https://wooorm.com
@@ -207,6 +275,10 @@ abide by its terms.
 [support]: https://github.com/syntax-tree/.github/blob/HEAD/support.md
 
 [coc]: https://github.com/syntax-tree/.github/blob/HEAD/code-of-conduct.md
+
+[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[typescript]: https://www.typescriptlang.org
 
 [mdast]: https://github.com/syntax-tree/mdast
 
@@ -218,10 +290,14 @@ abide by its terms.
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
-[sanitize]: https://github.com/syntax-tree/hast-util-sanitize
+[hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
 
 [micromark]: https://github.com/micromark/micromark
 
 [micromark-extensions]: https://github.com/micromark/micromark#optionsextensions
 
+[micromark-extend]: https://github.com/micromark/micromark#extensions
+
 [remark]: https://github.com/remarkjs/remark
+
+[remark-parse]: https://github.com/remarkjs/remark/tree/main/packages/remark-parse
