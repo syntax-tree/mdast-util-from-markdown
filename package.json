@@ -41,8 +41,6 @@
     "default": "./index.js"
   },
   "dependencies": {
-    "@types/mdast": "^3.0.0",
-    "@types/unist": "^2.0.0",
     "decode-named-character-reference": "^1.0.0",
     "mdast-util-to-string": "^3.1.0",
     "micromark": "^3.0.0",
@@ -55,8 +53,10 @@
     "uvu": "^0.5.0"
   },
   "devDependencies": {
+    "@types/mdast": "^3.0.0",
     "@types/power-assert": "^1.0.0",
     "@types/tape": "^4.0.0",
+    "@types/unist": "^2.0.0",
     "c8": "^7.0.0",
     "commonmark.json": "^0.30.0",
     "esbuild": "^0.14.0",
