@@ -64,7 +64,7 @@ In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import {toH} from 'https://esm.sh/mdast-util-from-markdown@1?bundle'
+  import {fromMarkdown} from 'https://esm.sh/mdast-util-from-markdown@1?bundle'
 </script>
 ```
 
