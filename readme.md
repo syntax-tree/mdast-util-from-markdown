@@ -45,6 +45,14 @@ Use [`micromark`][micromark] instead when you *just* want to turn markdown into
 HTML.
 For an easier time processing content, use the **[remark][]** ecosystem instead.
 
+You can combine this utility with other utilities to add syntax extensions.
+Notable examples that deeply integrate with it are
+[`mdast-util-gfm`][mdast-util-gfm],
+[`mdast-util-mdx`][mdast-util-mdx],
+[`mdast-util-frontmatter`][mdast-util-frontmatter],
+[`mdast-util-math`][mdast-util-math], and
+[`mdast-util-directive`][mdast-util-directive].
+
 ## Install
 
 This package is [ESM only][esm].
@@ -113,11 +121,10 @@ async function main() {
 
 ## API
 
-This package exports the following identifier: `fromMarkdown`.
+This package exports the identifier `fromMarkdown`.
 There is no default export.
 
-The export map supports the endorsed
-[`development` condition](https://nodejs.org/api/packages.html#packages_resolving_user_conditions).
+The export map supports the endorsed [`development` condition][development].
 Run `node --conditions development module.js` to get instrumented dev code.
 Without this condition, production code is loaded.
 
@@ -192,9 +199,9 @@ The syntax tree is [mdast][].
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports the types `Value`, `Encoding`, `Options`, `Extension`, `Handle`,
-`Transform`, `Token`, `CompileContext`, `OnEnterError`, `OnExitError`, which
-model the interfaces used in parameters, options, and extensions.
+It exports the additional types `Value`, `Encoding`, `Options`, `Extension`,
+`Handle`, `Transform`, `Token`, `CompileContext`, `OnEnterError`, and
+`OnExitError`.
 
 ## Compatibility
 
@@ -222,8 +229,8 @@ When going to HTML, use this utility in combination with
 
 ## Contribute
 
-See [`contributing.md` in `syntax-tree/.github`][contributing] for ways to get
-started.
+See [`contributing.md`][contributing] in [`syntax-tree/.github`][health] for
+ways to get started.
 See [`support.md`][support] for ways to get help.
 
 This project has a [code of conduct][coc].
@@ -270,17 +277,29 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
-[contributing]: https://github.com/syntax-tree/.github/blob/HEAD/contributing.md
+[health]: https://github.com/syntax-tree/.github
 
-[support]: https://github.com/syntax-tree/.github/blob/HEAD/support.md
+[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
 
-[coc]: https://github.com/syntax-tree/.github/blob/HEAD/code-of-conduct.md
+[support]: https://github.com/syntax-tree/.github/blob/main/support.md
+
+[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
 
 [esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 [typescript]: https://www.typescriptlang.org
 
 [mdast]: https://github.com/syntax-tree/mdast
+
+[mdast-util-gfm]: https://github.com/syntax-tree/mdast-util-gfm
+
+[mdast-util-mdx]: https://github.com/syntax-tree/mdast-util-mdx
+
+[mdast-util-frontmatter]: https://github.com/syntax-tree/mdast-util-frontmatter
+
+[mdast-util-math]: https://github.com/syntax-tree/mdast-util-math
+
+[mdast-util-directive]: https://github.com/syntax-tree/mdast-util-directive
 
 [root]: https://github.com/syntax-tree/mdast#root
 
@@ -301,3 +320,5 @@ abide by its terms.
 [remark]: https://github.com/remarkjs/remark
 
 [remark-parse]: https://github.com/remarkjs/remark/tree/main/packages/remark-parse
+
+[development]: https://nodejs.org/api/packages.html#packages_resolving_user_conditions
