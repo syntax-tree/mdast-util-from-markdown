@@ -525,7 +525,10 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {CompileContext['buffer']} */
+  /**
+   * @this {CompileContext}
+   * @returns {void}
+   */
   function buffer() {
     this.stack.push({type: 'fragment', children: []})
   }
@@ -617,12 +620,18 @@ function compiler(options = {}) {
   // Handlers.
   //
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onenterlistordered() {
     setData('expectingFirstListItemValue', true)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onenterlistitemvalue(token) {
     if (getData('expectingFirstListItemValue')) {
       const ancestor = /** @type {List} */ (this.stack[this.stack.length - 2])
@@ -634,21 +643,30 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcodefencedfenceinfo() {
     const data = this.resume()
     const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
     node.lang = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcodefencedfencemeta() {
     const data = this.resume()
     const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
     node.meta = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcodefencedfence() {
     // Exit if this is the closing fence.
     if (getData('flowCodeInside')) return
@@ -656,7 +674,10 @@ function compiler(options = {}) {
     setData('flowCodeInside', true)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcodefenced() {
     const data = this.resume()
     const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
@@ -666,7 +687,10 @@ function compiler(options = {}) {
     setData('flowCodeInside')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcodeindented() {
     const data = this.resume()
     const node = /** @type {Code} */ (this.stack[this.stack.length - 1])
@@ -674,7 +698,10 @@ function compiler(options = {}) {
     node.value = data.replace(/(\r?\n|\r)$/g, '')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitdefinitionlabelstring(token) {
     // Discard label, use the source content instead.
     const label = this.resume()
@@ -685,21 +712,30 @@ function compiler(options = {}) {
     ).toLowerCase()
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitdefinitiontitlestring() {
     const data = this.resume()
     const node = /** @type {Definition} */ (this.stack[this.stack.length - 1])
     node.title = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitdefinitiondestinationstring() {
     const data = this.resume()
     const node = /** @type {Definition} */ (this.stack[this.stack.length - 1])
     node.url = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitatxheadingsequence(token) {
     const node = /** @type {Heading} */ (this.stack[this.stack.length - 1])
     if (!node.depth) {
@@ -719,12 +755,18 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitsetextheadingtext() {
     setData('setextHeadingSlurpLineEnding', true)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitsetextheadinglinesequence(token) {
     const node = /** @type {Heading} */ (this.stack[this.stack.length - 1])
 
@@ -732,12 +774,19 @@ function compiler(options = {}) {
       this.sliceSerialize(token).charCodeAt(0) === codes.equalsTo ? 1 : 2
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitsetextheading() {
     setData('setextHeadingSlurpLineEnding')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onenterdata(token) {
     const parent = /** @type {Parent} */ (this.stack[this.stack.length - 1])
     /** @type {Node} */
@@ -755,7 +804,11 @@ function compiler(options = {}) {
     this.stack.push(tail)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitdata(token) {
     const tail = this.stack.pop()
     assert(tail, 'expected a `node` to be on the stack')
@@ -765,7 +818,11 @@ function compiler(options = {}) {
     tail.position.end = point(token.end)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitlineending(token) {
     const context = this.stack[this.stack.length - 1]
     assert(context, 'expected `node`')
@@ -789,33 +846,53 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexithardbreak() {
     setData('atHardBreak', true)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexithtmlflow() {
     const data = this.resume()
     const node = /** @type {HTML} */ (this.stack[this.stack.length - 1])
     node.value = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexithtmltext() {
     const data = this.resume()
     const node = /** @type {HTML} */ (this.stack[this.stack.length - 1])
     node.value = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitcodetext() {
     const data = this.resume()
     const node = /** @type {InlineCode} */ (this.stack[this.stack.length - 1])
     node.value = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitlink() {
     const context = /** @type {Link & {identifier: string, label: string}} */ (
       this.stack[this.stack.length - 1]
@@ -839,7 +916,11 @@ function compiler(options = {}) {
     setData('referenceType')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitimage() {
     const context = /** @type {Image & {identifier: string, label: string}} */ (
       this.stack[this.stack.length - 1]
@@ -863,7 +944,11 @@ function compiler(options = {}) {
     setData('referenceType')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitlabeltext(token) {
     const ancestor =
       /** @type {(Link|Image) & {identifier: string, label: string}} */ (
@@ -875,7 +960,11 @@ function compiler(options = {}) {
     ancestor.identifier = normalizeIdentifier(string).toLowerCase()
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitlabel() {
     const fragment = /** @type {Fragment} */ (this.stack[this.stack.length - 1])
     const value = this.resume()
@@ -895,31 +984,51 @@ function compiler(options = {}) {
     }
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitresourcedestinationstring() {
     const data = this.resume()
     const node = /** @type {Link|Image} */ (this.stack[this.stack.length - 1])
     node.url = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitresourcetitlestring() {
     const data = this.resume()
     const node = /** @type {Link|Image} */ (this.stack[this.stack.length - 1])
     node.title = data
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitresource() {
     setData('inReference')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onenterreference() {
     setData('referenceType', 'collapsed')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitreferencestring(token) {
     const label = this.resume()
     const node = /** @type {LinkReference|ImageReference} */ (
@@ -932,12 +1041,19 @@ function compiler(options = {}) {
     setData('referenceType', 'full')
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+
   function onexitcharacterreferencemarker(token) {
     setData('characterReferenceType', token.type)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitcharacterreferencevalue(token) {
     const data = this.sliceSerialize(token)
     const type = getData('characterReferenceType')
@@ -967,14 +1083,20 @@ function compiler(options = {}) {
     tail.position.end = point(token.end)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitautolinkprotocol(token) {
     onexitdata.call(this, token)
     const node = /** @type {Link} */ (this.stack[this.stack.length - 1])
     node.url = this.sliceSerialize(token)
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function onexitautolinkemail(token) {
     onexitdata.call(this, token)
     const node = /** @type {Link} */ (this.stack[this.stack.length - 1])

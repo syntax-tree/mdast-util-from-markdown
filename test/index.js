@@ -1070,8 +1070,14 @@ test('fixtures', (t) => {
 
 test('commonmark', (t) => {
   let index = -1
+  // Changes in living version of CommonMark.
+  const skip = new Set([623, 624])
 
   while (++index < commonmark.length) {
+    if (skip.has(index)) {
+      continue
+    }
+
     const example = commonmark[index]
     const root = fromMarkdown(example.markdown.slice(0, -1))
     const hast = toHast(root, {allowDangerousHtml: true})
