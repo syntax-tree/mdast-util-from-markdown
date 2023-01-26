@@ -2,21 +2,16 @@
  * @typedef {import('mdast').Root} Root
  */
 
+import assert from 'node:assert/strict'
 import {Buffer} from 'node:buffer'
-import fs from 'fs'
-import path from 'path'
-import assert from 'assert'
+import fs from 'node:fs/promises'
 import test from 'tape'
-import {unified} from 'unified'
-import rehypeParse from 'rehype-parse'
-import rehypeStringify from 'rehype-stringify'
 import {toHast} from 'mdast-util-to-hast'
 import {toString} from 'mdast-util-to-string'
+import {fromHtml} from 'hast-util-from-html'
 import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
 import {fromMarkdown} from '../dev/index.js'
-
-const join = path.join
 
 test('mdast-util-from-markdown', (t) => {
   t.equal(typeof fromMarkdown, 'function', 'should expose a function')
@@ -1040,26 +1035,32 @@ test('mdast-util-from-markdown', (t) => {
   t.end()
 })
 
-test('fixtures', (t) => {
-  const base = join('test', 'fixtures')
-  const files = fs.readdirSync(base).filter((d) => path.extname(d) === '.md')
+test('fixtures', async (t) => {
+  const base = new URL('fixtures/', import.meta.url)
+
+  const files = await fs.readdir(base)
   let index = -1
 
   while (++index < files.length) {
     const file = files[index]
-    const stem = path.basename(file, path.extname(file))
-    const fp = join(base, stem + '.json')
-    const doc = fs.readFileSync(join(base, stem + '.md'))
+
+    if (!/\.md$/i.test(file)) {
+      continue
+    }
+
+    const stem = file.split('.').slice(0, -1).join('.')
+    const fp = new URL(stem + '.json', base)
+    const doc = await fs.readFile(new URL(file, base))
     const actual = fromMarkdown(doc)
     /** @type {Root} */
     let expected
 
     try {
-      expected = JSON.parse(String(fs.readFileSync(fp)))
+      expected = JSON.parse(String(await fs.readFile(fp)))
     } catch {
       // New fixture.
       expected = actual
-      fs.writeFileSync(fp, JSON.stringify(actual, null, 2) + '\n')
+      await fs.writeFile(fp, JSON.stringify(actual, null, 2) + '\n')
     }
 
     t.deepEqual(actual, expected, stem)
@@ -1070,6 +1071,8 @@ test('fixtures', (t) => {
 
 test('commonmark', (t) => {
   let index = -1
+
+  // To do: update micromark.
   // Changes in living version of CommonMark.
   const skip = new Set([623, 624])
 
@@ -1079,23 +1082,19 @@ test('commonmark', (t) => {
     }
 
     const example = commonmark[index]
-    const root = fromMarkdown(example.markdown.slice(0, -1))
-    const hast = toHast(root, {allowDangerousHtml: true})
+    const input = example.markdown.slice(0, -1)
+    const output = example.html.slice(0, -1)
+
+    const mdast = fromMarkdown(input)
+    const hast = toHast(mdast, {allowDangerousHtml: true})
     assert(hast && hast.type === 'root', 'expected `root`')
-    const html = toHtml(hast, {
-      allowDangerousHtml: true,
-      entities: {useNamedReferences: true},
-      closeSelfClosing: true
-    })
+    const actual = toHtml(hast, {allowDangerousHtml: true})
 
-    const reformat = unified()
-      .use(rehypeParse, {fragment: true})
-      .use(rehypeStringify)
-
-    const actual = reformat.processSync(html).toString()
-    const expected = reformat.processSync(example.html.slice(0, -1)).toString()
-
-    t.deepLooseEqual(actual, expected, example.section + ' (' + index + ')')
+    t.deepLooseEqual(
+      toHtml(fromHtml(actual, {fragment: true})),
+      toHtml(fromHtml(output, {fragment: true})),
+      example.section + ' (' + index + ')'
+    )
   }
 
   t.end()
