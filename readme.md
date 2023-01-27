@@ -17,7 +17,17 @@
 *   [Install](#install)
 *   [Use](#use)
 *   [API](#api)
-    *   [`fromMarkdown(doc[, encoding][, options])`](#frommarkdowndoc-encoding-options)
+    *   [`fromMarkdown(value[, encoding][, options])`](#frommarkdownvalue-encoding-options)
+    *   [`CompileContext`](#compilecontext)
+    *   [`Encoding`](#encoding)
+    *   [`Extension`](#extension)
+    *   [`Handle`](#handle)
+    *   [`OnEnterError`](#onentererror)
+    *   [`OnExitError`](#onexiterror)
+    *   [`Options`](#options)
+    *   [`Token`](#token)
+    *   [`Transform`](#transform)
+    *   [`Value`](#value)
 *   [List of extensions](#list-of-extensions)
 *   [Syntax](#syntax)
 *   [Syntax tree](#syntax-tree)
@@ -34,19 +44,20 @@ This package is a utility that takes markdown input and turns it into an
 [mdast][] syntax tree.
 
 This utility uses [`micromark`][micromark], which turns markdown into tokens,
-while it turns those tokens into nodes.
-It’s used in [`remark-parse`][remark-parse], which focusses on making it easier
-to transform content by abstracting these internals away.
+and then turns those tokens into nodes.
+This package is used inside [`remark-parse`][remark-parse], which focusses on
+making it easier to transform content by abstracting these internals away.
 
 ## When should I use this?
 
 If you want to handle syntax trees manually, use this.
-Use [`micromark`][micromark] instead when you *just* want to turn markdown into
-HTML.
+When you *just* want to turn markdown into HTML, use [`micromark`][micromark]
+instead.
 For an easier time processing content, use the **[remark][]** ecosystem instead.
 
-You can combine this utility with other utilities to add syntax extensions.
-Notable examples that deeply integrate with it are
+You can combine this package with other packages to add syntax extensions to
+markdown.
+Notable examples that deeply integrate with this package are
 [`mdast-util-gfm`][mdast-util-gfm],
 [`mdast-util-mdx`][mdast-util-mdx],
 [`mdast-util-frontmatter`][mdast-util-frontmatter],
@@ -56,7 +67,7 @@ Notable examples that deeply integrate with it are
 ## Install
 
 This package is [ESM only][esm].
-In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
+In Node.js (version 14.14+ and 16.0+), install with [npm][]:
 
 ```sh
 npm install mdast-util-from-markdown
@@ -87,17 +98,13 @@ Say we have the following markdown file `example.md`:
 …and our module `example.js` looks as follows:
 
 ```js
-import {promises as fs} from 'node:fs'
+import fs from 'node:fs/promises'
 import {fromMarkdown} from 'mdast-util-from-markdown'
 
-main()
+const doc = await fs.readFile('example.md')
+const tree = fromMarkdown(doc)
 
-async function main() {
-  const doc = await fs.readFile('example.md')
-  const tree = fromMarkdown(doc)
-
-  console.log(tree)
-}
+console.log(tree)
 ```
 
 …now running `node example.js` yields (positional info removed for brevity):
@@ -121,40 +128,196 @@ async function main() {
 
 ## API
 
-This package exports the identifier `fromMarkdown`.
+This package exports the identifier [`fromMarkdown`][api-frommarkdown].
 There is no default export.
 
-The export map supports the endorsed [`development` condition][development].
-Run `node --conditions development module.js` to get instrumented dev code.
+The export map supports the [`development` condition][development].
+Run `node --conditions development example.js` to get instrumented dev code.
 Without this condition, production code is loaded.
 
-### `fromMarkdown(doc[, encoding][, options])`
+### `fromMarkdown(value[, encoding][, options])`
 
 Turn markdown into a syntax tree.
 
-##### Parameters
+###### Overloads
 
-###### `doc`
+*   `(value: Value, encoding: Encoding, options?: Options) => Root`
+*   `(value: Value, options?: Options) => Root`
 
-Value to parse (`string` or [`Buffer`][buffer]).
+###### Parameters
 
-###### `encoding`
+*   `value` ([`Value`][api-value])
+    — markdown to parse
+*   `encoding` ([`Encoding`][api-encoding], default: `'utf8'`)
+    — [character encoding][character-encoding] for when `value` is
+    [`Buffer`][buffer]
+*   `options` ([`Options`][api-options], optional)
+    — configuration
 
-[Character encoding][encoding] to understand `doc` as when it’s a
-[`Buffer`][buffer] (`string`, default: `'utf8'`).
+###### Returns
 
-###### `options.extensions`
+mdast tree ([`Root`][root]).
 
-List of syntax extensions (`Array<MicromarkSyntaxExtension>`, default: `[]`).
-Passed to [`micromark` as `options.extensions`][micromark-extensions].
+### `CompileContext`
 
-###### `options.mdastExtensions`
+mdast compiler context (TypeScript type).
 
-List of mdast extensions (`Array<MdastExtension>`, default: `[]`).
+###### Fields
 
-##### Returns
+*   `stack` ([`Array<Node>`][node])
+    — stack of nodes
+*   `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
+    — stack of tokens
+*   `getData` (`(key: string) => unknown`)
+    — get data from the key/value store
+*   `setData` (`(key: string, value?: unknown) => void`)
+    — set data into the key/value store
+*   `buffer` (`() => void`)
+    — capture some of the output data
+*   `resume` (`() => string`)
+    — stop capturing and access the output data
+*   `enter` (`(node: Node, token: Token, onError?: OnEnterError) => Node`)
+    — enter a token
+*   `exit` (`(token: Token, onError?: OnExitError) => Node`)
+    — exit a token
+*   `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
+    — get the string value of a token
+*   `config` (`Required<Extension>`)
+    — configuration
 
-[`Root`][root].
+### `Encoding`
+
+Encodings supported by the [`Buffer`][buffer] class (TypeScript type).
+
+<!-- To do: link to micromark type, when documented. -->
+
+See [`micromark`](https://github.com/micromark/micromark#api) for more info.
+
+###### Type
+
+```ts
+type Encoding = 'utf8' | /* … */
+```
+
+### `Extension`
+
+Change how markdown tokens from micromark are turned into mdast (TypeScript
+type).
+
+###### Properties
+
+*   `canContainEols` (`Array<string>`, optional)
+    — token types where line endings are used
+*   `enter` ([`Record<string, Handle>`][api-handle], optional)
+    — opening handles
+*   `exit` ([`Record<string, Handle>`][api-handle], optional)
+    — closing handles
+*   `transforms` ([`Array<Transform>`][api-transform], optional)
+    — tree transforms
+
+### `Handle`
+
+Handle a token (TypeScript type).
+
+###### Parameters
+
+*   `this` ([`CompileContext`][api-compilecontext])
+    — context
+*   `token` ([`Token`][api-token])
+    — current token
+
+###### Returns
+
+Nothing (`void`).
+
+### `OnEnterError`
+
+Handle the case where the `right` token is open, but it is closed (by the
+`left` token) or because we reached the end of the document (TypeScript type).
+
+###### Parameters
+
+*   `this` ([`CompileContext`][api-compilecontext])
+    — context
+*   `left` ([`Token`][api-token] or `undefined`)
+    — left token
+*   `right` ([`Token`][api-token])
+    — right token
+
+###### Returns
+
+Nothing (`void`).
+
+### `OnExitError`
+
+Handle the case where the `right` token is open but it is closed by
+exiting the `left` token (TypeScript type).
+
+###### Parameters
+
+*   `this` ([`CompileContext`][api-compilecontext])
+    — context
+*   `left` ([`Token`][api-token])
+    — left token
+*   `right` ([`Token`][api-token])
+    — right token
+
+###### Returns
+
+Nothing (`void`).
+
+### `Options`
+
+Configuration (TypeScript type).
+
+###### Properties
+
+*   `extensions` ([`Array<MicromarkExtension>`][micromark-extension], optional)
+    — micromark extensions to change how markdown is parsed
+*   `mdastExtensions` ([`Array<Extension | Array<Extension>>`][api-extension],
+    optional)
+    — extensions for this utility to change how tokens are turned into a tree
+
+### `Token`
+
+Token from micromark (TypeScript type).
+
+<!-- To do: link to micromark type, when documented. -->
+
+See [`micromark`](https://github.com/micromark/micromark#api) for more info.
+
+###### Type
+
+```ts
+type Token = { /* … */ }
+```
+
+### `Transform`
+
+Extra transform, to change the AST afterwards (TypeScript type).
+
+###### Parameters
+
+*   `tree` ([`Root`][root])
+    — tree to transform
+
+###### Returns
+
+New tree ([`Root`][root]) or nothing (in which case the current tree is used).
+
+### `Value`
+
+Contents of the file (TypeScript type).
+
+<!-- To do: link to micromark type, when documented. -->
+
+See [`micromark`](https://github.com/micromark/micromark#api) for more info.
+
+###### Type
+
+```ts
+type Value = string | Uint8Array
+```
 
 ## List of extensions
 
@@ -199,15 +362,22 @@ The syntax tree is [mdast][].
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports the additional types `Value`, `Encoding`, `Options`, `Extension`,
-`Handle`, `Transform`, `Token`, `CompileContext`, `OnEnterError`, and
-`OnExitError`.
+It exports the additional types [`CompileContext`][api-compilecontext],
+[`Encoding`][api-encoding],
+[`Extension`][api-extension],
+[`Handle`][api-handle],
+[`OnEnterError`][api-onentererror],
+[`OnExitError`][api-onexiterror],
+[`Options`][api-options],
+[`Token`][api-token],
+[`Transform`][api-transform], and
+[`Value`][api-value].
 
 ## Compatibility
 
 Projects maintained by the unified collective are compatible with all maintained
 versions of Node.js.
-As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
+As of now, that is Node.js 14.14+ and 16.0+.
 Our projects sometimes work with older versions, but this is not guaranteed.
 
 ## Security
@@ -291,6 +461,8 @@ abide by its terms.
 
 [mdast]: https://github.com/syntax-tree/mdast
 
+[node]: https://github.com/syntax-tree/mdast#nodes
+
 [mdast-util-gfm]: https://github.com/syntax-tree/mdast-util-gfm
 
 [mdast-util-mdx]: https://github.com/syntax-tree/mdast-util-mdx
@@ -303,7 +475,7 @@ abide by its terms.
 
 [root]: https://github.com/syntax-tree/mdast#root
 
-[encoding]: https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings
+[character-encoding]: https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings
 
 [buffer]: https://nodejs.org/api/buffer.html
 
@@ -313,7 +485,7 @@ abide by its terms.
 
 [micromark]: https://github.com/micromark/micromark
 
-[micromark-extensions]: https://github.com/micromark/micromark#optionsextensions
+[micromark-extension]: https://github.com/micromark/micromark#optionsextensions
 
 [micromark-extend]: https://github.com/micromark/micromark#extensions
 
@@ -322,3 +494,25 @@ abide by its terms.
 [remark-parse]: https://github.com/remarkjs/remark/tree/main/packages/remark-parse
 
 [development]: https://nodejs.org/api/packages.html#packages_resolving_user_conditions
+
+[api-frommarkdown]: #frommarkdownvalue-encoding-options
+
+[api-compilecontext]: #compilecontext
+
+[api-encoding]: #encoding
+
+[api-extension]: #extension
+
+[api-handle]: #handle
+
+[api-onentererror]: #onentererror
+
+[api-onexiterror]: #onexiterror
+
+[api-options]: #options
+
+[api-token]: #token
+
+[api-transform]: #transform
+
+[api-value]: #value

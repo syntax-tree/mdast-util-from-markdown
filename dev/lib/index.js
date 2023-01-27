@@ -64,7 +64,7 @@
  * @param {Root} tree
  *   Tree to transform.
  * @returns {Root | undefined | null | void}
- *   New tree (the default is to assume the tree is mutated).
+ *   New tree or nothing (in which case the current tree is used).
  *
  * @callback Handle
  *   Handle a token.
@@ -92,7 +92,7 @@
  *
  * @callback OnExitError
  *   Handle the case where the `right` token is open but it is closed by
- *   exitting the `left` token.
+ *   exiting the `left` token.
  * @param {Omit<CompileContext, 'sliceSerialize'>} this
  *   Context.
  * @param {Token} left
@@ -125,15 +125,15 @@
  *   Change how markdown tokens from micromark are turned into mdast.
  *
  * @typedef CompileContext
- *   mdast compiler context
+ *   mdast compiler context.
  * @property {Array<Node | Fragment>} stack
  *   Stack of nodes.
  * @property {Array<TokenTuple>} tokenStack
  *   Stack of tokens.
- * @property {<Key extends keyof CompileData>(key: Key, value?: CompileData[Key]) => void} setData
- *   Set data into the key-value store.
  * @property {<Key extends keyof CompileData>(key: Key) => CompileData[Key]} getData
- *   Get data from the key-value store.
+ *   Get data from the key/value store.
+ * @property {<Key extends keyof CompileData>(key: Key, value?: CompileData[Key]) => void} setData
+ *   Set data into the key/value store.
  * @property {(this: CompileContext) => void} buffer
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
@@ -150,9 +150,10 @@
  * @typedef FromMarkdownOptions
  *   Configuration for how to build mdast.
  * @property {Array<Extension | Array<Extension>> | null | undefined} [mdastExtensions]
- *   Extensions to change how tokens are turned into a tree.
+ *   Extensions for this utility to change how tokens are turned into a tree.
  *
  * @typedef {ParseOptions & FromMarkdownOptions} Options
+ *   Configuration.
  */
 
 // To do: micromark: create a registry of tokens?
@@ -177,9 +178,9 @@ const own = {}.hasOwnProperty
 
 /**
  * @param value
- *   Markdown to parse (`string` or `Buffer`).
+ *   Markdown to parse.
  * @param encoding
- *   Character encoding to understand `value` as when it’s a `Buffer` (`string`, default: `'utf8'`).
+ *   Character encoding for when `value` is `Buffer`.
  * @param options
  *   Configuration.
  * @returns
