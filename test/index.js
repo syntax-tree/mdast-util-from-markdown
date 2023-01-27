@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import {Buffer} from 'node:buffer'
 import fs from 'node:fs/promises'
-import test from 'tape'
+import test from 'node:test'
 import {toHast} from 'mdast-util-to-hast'
 import {toString} from 'mdast-util-to-string'
 import {fromHtml} from 'hast-util-from-html'
@@ -13,10 +13,10 @@ import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
 import {fromMarkdown} from '../dev/index.js'
 
-test('mdast-util-from-markdown', (t) => {
-  t.equal(typeof fromMarkdown, 'function', 'should expose a function')
+test('mdast-util-from-markdown', () => {
+  assert.equal(typeof fromMarkdown, 'function', 'should expose a function')
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown(''),
     {
       type: 'root',
@@ -29,7 +29,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an empty document'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\nb'),
     {
       type: 'root',
@@ -60,13 +60,13 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a paragraph'
   )
 
-  t.equal(
+  assert.equal(
     toString(fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]))),
     'brávo',
     'should support buffers'
   )
 
-  t.equal(
+  assert.equal(
     toString(
       fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
     ),
@@ -74,7 +74,7 @@ test('mdast-util-from-markdown', (t) => {
     'should support encoding'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\nb', {
       mdastExtensions: [
         {
@@ -128,7 +128,7 @@ test('mdast-util-from-markdown', (t) => {
     'should support extensions'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\nb', {
       mdastExtensions: [
         [
@@ -184,7 +184,7 @@ test('mdast-util-from-markdown', (t) => {
     'should support multiple extensions'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('*a*', {
       mdastExtensions: [
         {
@@ -226,7 +226,7 @@ test('mdast-util-from-markdown', (t) => {
     'should support `transforms` in extensions'
   )
 
-  t.throws(
+  assert.throws(
     () => {
       fromMarkdown('a', {
         mdastExtensions: [
@@ -245,7 +245,7 @@ test('mdast-util-from-markdown', (t) => {
     'should crash if a token is opened but not closed'
   )
 
-  t.throws(
+  assert.throws(
     () => {
       fromMarkdown('a', {
         mdastExtensions: [
@@ -263,7 +263,7 @@ test('mdast-util-from-markdown', (t) => {
     'should crash when closing a token that isn’t open'
   )
 
-  t.throws(
+  assert.throws(
     () => {
       fromMarkdown('a', {
         mdastExtensions: [
@@ -281,7 +281,7 @@ test('mdast-util-from-markdown', (t) => {
     'should crash when closing a token when a different one is open'
   )
 
-  t.throws(
+  assert.throws(
     () => {
       fromMarkdown('a', {
         mdastExtensions: [
@@ -291,8 +291,8 @@ test('mdast-util-from-markdown', (t) => {
                 this.exit(
                   Object.assign({}, token, {type: 'lol'}),
                   function (a, b) {
-                    t.equal(a.type, 'lol')
-                    t.equal(b.type, 'paragraph')
+                    assert.equal(a.type, 'lol')
+                    assert.equal(b.type, 'paragraph')
                     throw new Error('problem')
                   }
                 )
@@ -306,7 +306,7 @@ test('mdast-util-from-markdown', (t) => {
     'should crash when closing a token when a different one is open with a custom handler'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('<tel:123>').children[0],
     {
       type: 'paragraph',
@@ -339,7 +339,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an autolink (protocol)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('<aa@bb.cc>').children[0],
     {
       type: 'paragraph',
@@ -372,7 +372,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an autolink (email)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('> a').children[0],
     {
       type: 'blockquote',
@@ -403,7 +403,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a block quote'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\\*b').children[0],
     {
       type: 'paragraph',
@@ -425,7 +425,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a character escape'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a&amp;b').children[0],
     {
       type: 'paragraph',
@@ -447,7 +447,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a character reference'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('```a b\nc\n```').children[0],
     {
       type: 'code',
@@ -462,7 +462,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse code (fenced)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('    a').children[0],
     {
       type: 'code',
@@ -477,7 +477,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse code (indented)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('`a`').children[0],
     {
       type: 'paragraph',
@@ -499,7 +499,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse code (text)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[a]: b "c"').children[0],
     {
       type: 'definition',
@@ -515,7 +515,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a definition'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('*a*').children[0],
     {
       type: 'paragraph',
@@ -546,7 +546,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse emphasis'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\\\nb').children[0],
     {
       type: 'paragraph',
@@ -583,7 +583,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a hard break (escape)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a  \nb').children[0],
     {
       type: 'paragraph',
@@ -620,7 +620,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a hard break (prefix)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('## a').children[0],
     {
       type: 'heading',
@@ -643,7 +643,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a heading (atx)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('a\n=').children[0],
     {
       type: 'heading',
@@ -666,7 +666,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a heading (setext)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('<a>\nb\n</a>').children[0],
     {
       type: 'html',
@@ -679,7 +679,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse html (flow)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('<a>b</a>').children[0],
     {
       type: 'paragraph',
@@ -717,7 +717,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse html (text)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('![a]\n\n[a]: b').children[0],
     {
       type: 'paragraph',
@@ -742,7 +742,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an image (shortcut reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('![a][]\n\n[a]: b').children[0],
     {
       type: 'paragraph',
@@ -767,7 +767,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an image (collapsed reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('![a][b]\n\n[b]: c').children[0],
     {
       type: 'paragraph',
@@ -792,7 +792,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an image (full reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('![a](b "c")').children[0],
     {
       type: 'paragraph',
@@ -816,7 +816,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse an image (resource)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[a]\n\n[a]: b').children[0],
     {
       type: 'paragraph',
@@ -850,7 +850,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a link (shortcut reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[a][]\n\n[a]: b').children[0],
     {
       type: 'paragraph',
@@ -884,7 +884,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a link (collapsed reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[`a`][]\n\n[`a`]: b').children[0],
     {
       type: 'paragraph',
@@ -918,7 +918,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a link (collapsed reference) with inline code in the label'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[a][b]\n\n[b]: c').children[0],
     {
       type: 'paragraph',
@@ -952,7 +952,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse a link (full reference)'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('[a](b "c")').children[0],
     {
       type: 'paragraph',
@@ -987,7 +987,7 @@ test('mdast-util-from-markdown', (t) => {
 
   // List.
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('**a**').children[0],
     {
       type: 'paragraph',
@@ -1018,7 +1018,7 @@ test('mdast-util-from-markdown', (t) => {
     'should parse strong'
   )
 
-  t.deepEqual(
+  assert.deepEqual(
     fromMarkdown('***').children[0],
     {
       type: 'thematicBreak',
@@ -1029,11 +1029,9 @@ test('mdast-util-from-markdown', (t) => {
     },
     'should parse a thematic break'
   )
-
-  t.end()
 })
 
-test('fixtures', async (t) => {
+test('fixtures', async () => {
   const base = new URL('fixtures/', import.meta.url)
 
   const files = await fs.readdir(base)
@@ -1061,13 +1059,11 @@ test('fixtures', async (t) => {
       await fs.writeFile(fp, JSON.stringify(actual, null, 2) + '\n')
     }
 
-    t.deepEqual(actual, expected, stem)
+    assert.deepEqual(actual, expected, stem)
   }
-
-  t.end()
 })
 
-test('commonmark', (t) => {
+test('commonmark', () => {
   let index = -1
 
   // To do: update micromark.
@@ -1088,12 +1084,10 @@ test('commonmark', (t) => {
     assert(hast && hast.type === 'root', 'expected `root`')
     const actual = toHtml(hast, {allowDangerousHtml: true})
 
-    t.deepLooseEqual(
+    assert.equal(
       toHtml(fromHtml(actual, {fragment: true})),
       toHtml(fromHtml(output, {fragment: true})),
       example.section + ' (' + index + ')'
     )
   }
-
-  t.end()
 })
