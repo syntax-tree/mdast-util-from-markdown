@@ -12,9 +12,14 @@ import {fromHtml} from 'hast-util-from-html'
 import {toHtml} from 'hast-util-to-html'
 import {commonmark} from 'commonmark.json'
 import {fromMarkdown} from '../dev/index.js'
+import * as mod from '../dev/index.js'
 
-test('mdast-util-from-markdown', () => {
-  assert.equal(typeof fromMarkdown, 'function', 'should expose a function')
+test('fromMarkdown', () => {
+  assert.deepEqual(
+    Object.keys(mod).sort(),
+    ['fromMarkdown'],
+    'should expose the public api'
+  )
 
   assert.deepEqual(
     fromMarkdown(''),
