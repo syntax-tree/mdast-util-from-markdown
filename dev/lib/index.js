@@ -32,6 +32,7 @@
  * @typedef {import('mdast').Text} Text
  * @typedef {import('mdast').ThematicBreak} ThematicBreak
  * @typedef {import('mdast').ReferenceType} ReferenceType
+ * @typedef {import('../index.js').CompileData} CompileData
  */
 
 /**
@@ -42,23 +43,6 @@
  */
 
 /**
- * @typedef CompileData
- *   State.
- * @property {boolean | undefined} [atHardBreak]
- *   Whether we’re inside a hard break.
- * @property {'characterReferenceMarkerHexadecimal' | 'characterReferenceMarkerNumeric' | undefined} [characterReferenceType]
- *   Current character reference type.
- * @property {boolean | undefined} [expectingFirstListItemValue]
- *   Whether a first list item value (`1` in `1. a`) is expected.
- * @property {boolean | undefined} [flowCodeInside]
- *   Whether we’re in flow code.
- * @property {boolean | undefined} [inReference]
- *   Whether we’re in a reference.
- * @property {boolean | undefined} [setextHeadingSlurpLineEnding]
- *   Whether we’re expecting a line ending from a setext heading, which can be slurped.
- * @property {'collapsed' | 'full' | undefined} [referenceType]
- *   Current reference.
- *
  * @callback Transform
  *   Extra transform, to change the AST afterwards.
  * @param {Root} tree

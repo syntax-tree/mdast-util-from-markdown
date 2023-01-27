@@ -19,6 +19,7 @@
 *   [API](#api)
     *   [`fromMarkdown(value[, encoding][, options])`](#frommarkdownvalue-encoding-options)
     *   [`CompileContext`](#compilecontext)
+    *   [`CompileData`](#compiledata)
     *   [`Encoding`](#encoding)
     *   [`Extension`](#extension)
     *   [`Handle`](#handle)
@@ -169,9 +170,9 @@ mdast compiler context (TypeScript type).
 *   `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
     — stack of tokens
 *   `getData` (`(key: string) => unknown`)
-    — get data from the key/value store
+    — get data from the key/value store (see [`CompileData`][api-compiledata])
 *   `setData` (`(key: string, value?: unknown) => void`)
-    — set data into the key/value store
+    — set data into the key/value store (see [`CompileData`][api-compiledata])
 *   `buffer` (`() => void`)
     — capture some of the output data
 *   `resume` (`() => string`)
@@ -184,6 +185,28 @@ mdast compiler context (TypeScript type).
     — get the string value of a token
 *   `config` (`Required<Extension>`)
     — configuration
+
+### `CompileData`
+
+Interface of tracked data (TypeScript type).
+
+###### Type
+
+```ts
+interface CompileData { /* see code */ }
+```
+
+When working on extensions that use more data, extend the corresponding
+interface to register their types:
+
+```ts
+declare module 'mdast-util-from-markdown' {
+  interface CompileData {
+    // Register a new field.
+    mathFlowInside?: boolean | undefined
+  }
+}
+```
 
 ### `Encoding`
 
@@ -363,6 +386,7 @@ The syntax tree is [mdast][].
 
 This package is fully typed with [TypeScript][].
 It exports the additional types [`CompileContext`][api-compilecontext],
+[`CompileData`][api-compiledata],
 [`Encoding`][api-encoding],
 [`Extension`][api-extension],
 [`Handle`][api-handle],
@@ -498,6 +522,8 @@ abide by its terms.
 [api-frommarkdown]: #frommarkdownvalue-encoding-options
 
 [api-compilecontext]: #compilecontext
+
+[api-compiledata]: #compiledata
 
 [api-encoding]: #encoding
 
