@@ -78,8 +78,6 @@ test('mdast-util-from-markdown', (t) => {
     fromMarkdown('a\nb', {
       mdastExtensions: [
         {
-          // Unknown objects are used, but have no effect.
-          unknown: undefined,
           // `canContainEols` is an array.
           canContainEols: ['someType'],
           enter: {
