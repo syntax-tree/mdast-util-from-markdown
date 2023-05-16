@@ -37,8 +37,9 @@
     "index.js"
   ],
   "exports": {
-    "development": "./dev/index.js",
-    "default": "./index.js"
+    "./development": "./dev/index.js",
+    "./lib": "./lib/index.js",
+    ".": "./index.js"
   },
   "dependencies": {
     "@types/mdast": "^3.0.0",
