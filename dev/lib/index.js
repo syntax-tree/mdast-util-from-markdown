@@ -192,7 +192,6 @@ export const fromMarkdown =
 
       return compiler(options)(
         postprocess(
-          // @ts-expect-error: micromark types need to accept `null`.
           parse(options).document().write(preprocess()(value, encoding, true))
         )
       )
@@ -504,7 +503,6 @@ function compiler(options) {
             firstBlankLineIndex &&
             (!lineIndex || firstBlankLineIndex < lineIndex)
           ) {
-            // @ts-expect-error Patched.
             listItem._spread = true
           }
 
@@ -523,9 +521,10 @@ function compiler(options) {
         if (event[1].type === types.listItemPrefix) {
           listItem = {
             type: 'listItem',
-            // @ts-expect-error Patched
             _spread: false,
-            start: Object.assign({}, event[1].start)
+            start: Object.assign({}, event[1].start),
+            // @ts-expect-error: we’ll add `end` in a second.
+            end: undefined
           }
           // @ts-expect-error: `listItem` is most definitely defined, TS...
           events.splice(index, 0, ['enter', listItem, event[2]])
@@ -537,7 +536,6 @@ function compiler(options) {
       }
     }
 
-    // @ts-expect-error Patched.
     events[start][1]._spread = listSpread
     return length
   }
@@ -1339,7 +1337,6 @@ function compiler(options) {
       type: 'list',
       ordered: token.type === 'listOrdered',
       start: null,
-      // @ts-expect-error Patched.
       spread: token._spread,
       children: []
     }
@@ -1352,7 +1349,6 @@ function compiler(options) {
   function listItem(token) {
     return {
       type: 'listItem',
-      // @ts-expect-error Patched.
       spread: token._spread,
       checked: null,
       children: []

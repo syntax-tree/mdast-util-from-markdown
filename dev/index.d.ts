@@ -75,4 +75,16 @@ export interface CompileData {
   referenceType?: 'collapsed' | 'full' | undefined
 }
 
+declare module 'micromark-util-types' {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface TokenTypeMap {
+    listItem: 'listItem'
+  }
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Token {
+    _spread?: boolean
+  }
+}
+
 export {fromMarkdown} from './lib/index.js'
