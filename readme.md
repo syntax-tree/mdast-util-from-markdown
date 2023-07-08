@@ -339,7 +339,7 @@ See [`micromark`](https://github.com/micromark/micromark#api) for more info.
 ###### Type
 
 ```ts
-type Value = string | Uint8Array
+type Value = Uint8Array | string
 ```
 
 ## List of extensions
@@ -405,7 +405,7 @@ versions of Node.js.
 When we cut a new major release, we drop support for unmaintained versions of
 Node.
 This means we try to keep the current release line,
-`mdast-util-from-markdown@^1`, compatible with Node.js 12.
+`mdast-util-from-markdown@^2`, compatible with Node.js 16.
 
 ## Security
 
