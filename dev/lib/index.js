@@ -144,7 +144,7 @@
 // To do: next major: don’t return given `Node` from `enter`.
 // To do: next major: remove setter/getter.
 
-import {ok as assert} from 'uvu/assert'
+import {ok as assert} from 'devlop'
 import {toString} from 'mdast-util-to-string'
 import {parse, postprocess, preprocess} from 'micromark'
 import {decodeNumericCharacterReference} from 'micromark-util-decode-numeric-character-reference'

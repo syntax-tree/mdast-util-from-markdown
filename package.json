@@ -44,6 +44,7 @@
     "@types/mdast": "^3.0.0",
     "@types/unist": "^2.0.0",
     "decode-named-character-reference": "^1.0.0",
+    "devlop": "^1.0.0",
     "mdast-util-to-string": "^3.1.0",
     "micromark": "^4.0.0",
     "micromark-util-decode-numeric-character-reference": "^2.0.0",
@@ -51,8 +52,7 @@
     "micromark-util-normalize-identifier": "^2.0.0",
     "micromark-util-symbol": "^2.0.0",
     "micromark-util-types": "^2.0.0",
-    "unist-util-stringify-position": "^3.0.0",
-    "uvu": "^0.5.0"
+    "unist-util-stringify-position": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
