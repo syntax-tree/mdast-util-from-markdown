@@ -1,16 +1,4 @@
 /**
- * @typedef {import('micromark-util-types').Encoding} Encoding
- * @typedef {import('micromark-util-types').Event} Event
- * @typedef {import('micromark-util-types').ParseOptions} ParseOptions
- * @typedef {import('micromark-util-types').Token} Token
- * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
- * @typedef {import('micromark-util-types').Value} Value
- *
- * @typedef {import('unist').Point} Point
- *
- * @typedef {import('mdast').Parent} Parent
- * @typedef {import('mdast').PhrasingContent} PhrasingContent
- * @typedef {import('mdast').Nodes} Nodes
  * @typedef {import('mdast').Break} Break
  * @typedef {import('mdast').Blockquote} Blockquote
  * @typedef {import('mdast').Code} Code
@@ -23,18 +11,30 @@
  * @typedef {import('mdast').Link} Link
  * @typedef {import('mdast').List} List
  * @typedef {import('mdast').ListItem} ListItem
+ * @typedef {import('mdast').Nodes} Nodes
  * @typedef {import('mdast').Paragraph} Paragraph
+ * @typedef {import('mdast').Parent} Parent
+ * @typedef {import('mdast').PhrasingContent} PhrasingContent
+ * @typedef {import('mdast').ReferenceType} ReferenceType
  * @typedef {import('mdast').Root} Root
  * @typedef {import('mdast').Strong} Strong
  * @typedef {import('mdast').Text} Text
  * @typedef {import('mdast').ThematicBreak} ThematicBreak
- * @typedef {import('mdast').ReferenceType} ReferenceType
+ *
+ * @typedef {import('micromark-util-types').Encoding} Encoding
+ * @typedef {import('micromark-util-types').Event} Event
+ * @typedef {import('micromark-util-types').ParseOptions} ParseOptions
+ * @typedef {import('micromark-util-types').Token} Token
+ * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
+ * @typedef {import('micromark-util-types').Value} Value
+ *
+ * @typedef {import('unist').Point} Point
+ *
  * @typedef {import('../index.js').CompileData} CompileData
  */
 
 /**
- *
- * @typedef {Omit<Parent, 'type' | 'children'> & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
+ * @typedef {Omit<Parent, 'children' | 'type'> & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
  */
 
 /**
@@ -42,7 +42,7 @@
  *   Extra transform, to change the AST afterwards.
  * @param {Root} tree
  *   Tree to transform.
- * @returns {Root | undefined | null | void}
+ * @returns {Root | null | undefined | void}
  *   New tree or nothing (in which case the current tree is used).
  *
  * @callback Handle
@@ -51,7 +51,7 @@
  *   Context.
  * @param {Token} token
  *   Current token.
- * @returns {void}
+ * @returns {undefined | void}
  *   Nothing.
  *
  * @typedef {Record<string, Handle>} Handles
@@ -66,7 +66,7 @@
  *   Left token.
  * @param {Token} right
  *   Right token.
- * @returns {void}
+ * @returns {undefined}
  *   Nothing.
  *
  * @callback OnExitError
@@ -78,7 +78,7 @@
  *   Left token.
  * @param {Token} right
  *   Right token.
- * @returns {void}
+ * @returns {undefined}
  *   Nothing.
  *
  * @typedef {[Token, OnEnterError | undefined]} TokenTuple
@@ -105,15 +105,15 @@
  *
  * @typedef CompileContext
  *   mdast compiler context.
- * @property {Array<Nodes | Fragment>} stack
+ * @property {Array<Fragment | Nodes>} stack
  *   Stack of nodes.
  * @property {Array<TokenTuple>} tokenStack
  *   Stack of tokens.
  * @property {<Key extends keyof CompileData>(key: Key) => CompileData[Key]} getData
  *   Get data from the key/value store.
- * @property {<Key extends keyof CompileData>(key: Key, value?: CompileData[Key]) => void} setData
+ * @property {<Key extends keyof CompileData>(key: Key, value?: CompileData[Key]) => undefined} setData
  *   Set data into the key/value store.
- * @property {(this: CompileContext) => void} buffer
+ * @property {(this: CompileContext) => undefined} buffer
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
@@ -152,42 +152,40 @@ import {stringifyPosition} from 'unist-util-stringify-position'
 const own = {}.hasOwnProperty
 
 /**
- * @param value
+ * Turn markdown into a syntax tree.
+ *
+ * @overload
+ * @param {Value} value
+ * @param {Encoding | null | undefined} [encoding]
+ * @param {Options | null | undefined} [options]
+ * @returns {Root}
+ *
+ * @overload
+ * @param {Value} value
+ * @param {Options | null | undefined} [options]
+ * @returns {Root}
+ *
+ * @param {Value} value
  *   Markdown to parse.
- * @param encoding
+ * @param {Encoding | Options | null | undefined} [encoding]
  *   Character encoding for when `value` is `Buffer`.
- * @param options
+ * @param {Options | null | undefined} [options]
  *   Configuration.
- * @returns
+ * @returns {Root}
  *   mdast tree.
  */
-export const fromMarkdown =
-  /**
-   * @type {(
-   *   ((value: Value, encoding: Encoding, options?: Options | null | undefined) => Root) &
-   *   ((value: Value, options?: Options | null | undefined) => Root)
-   * )}
-   */
-  (
-    /**
-     * @param {Value} value
-     * @param {Encoding | Options | null | undefined} [encoding]
-     * @param {Options | null | undefined} [options]
-     * @returns {Root}
-     */
-    function (value, encoding, options) {
-      if (typeof encoding !== 'string') {
-        options = encoding
-        encoding = undefined
-      }
+export function fromMarkdown(value, encoding, options) {
+  if (typeof encoding !== 'string') {
+    options = encoding
+    encoding = undefined
+  }
 
-      return compiler(options)(
-        postprocess(
-          parse(options).document().write(preprocess()(value, encoding, true))
-        )
-      )
-    }
+  return compiler(options)(
+    postprocess(
+      parse(options).document().write(preprocess()(value, encoding, true))
+    )
   )
+}
 
 /**
  * Note this compiler only understand complete buffering, not streaming.
@@ -411,41 +409,51 @@ function compiler(options) {
     while (++index <= length) {
       const event = events[index]
 
-      if (
-        event[1].type === types.listUnordered ||
-        event[1].type === types.listOrdered ||
-        event[1].type === types.blockQuote
-      ) {
-        if (event[0] === 'enter') {
-          containerBalance++
-        } else {
-          containerBalance--
-        }
-
-        atMarker = undefined
-      } else if (event[1].type === types.lineEndingBlank) {
-        if (event[0] === 'enter') {
-          if (
-            listItem &&
-            !atMarker &&
-            !containerBalance &&
-            !firstBlankLineIndex
-          ) {
-            firstBlankLineIndex = index
+      switch (event[1].type) {
+        case types.listUnordered:
+        case types.listOrdered:
+        case types.blockQuote: {
+          if (event[0] === 'enter') {
+            containerBalance++
+          } else {
+            containerBalance--
           }
 
           atMarker = undefined
+
+          break
         }
-      } else if (
-        event[1].type === types.linePrefix ||
-        event[1].type === types.listItemValue ||
-        event[1].type === types.listItemMarker ||
-        event[1].type === types.listItemPrefix ||
-        event[1].type === types.listItemPrefixWhitespace
-      ) {
-        // Empty.
-      } else {
-        atMarker = undefined
+
+        case types.lineEndingBlank: {
+          if (event[0] === 'enter') {
+            if (
+              listItem &&
+              !atMarker &&
+              !containerBalance &&
+              !firstBlankLineIndex
+            ) {
+              firstBlankLineIndex = index
+            }
+
+            atMarker = undefined
+          }
+
+          break
+        }
+
+        case types.linePrefix:
+        case types.listItemValue:
+        case types.listItemMarker:
+        case types.listItemPrefix:
+        case types.listItemPrefixWhitespace: {
+          // Empty.
+
+          break
+        }
+
+        default: {
+          atMarker = undefined
+        }
       }
 
       if (
@@ -538,9 +546,9 @@ function compiler(options) {
    *   Field type.
    * @param {Key} key
    *   Key of field.
-   * @param {CompileData[Key]} [value]
+   * @param {CompileData[Key] | undefined} [value]
    *   New value.
-   * @returns {void}
+   * @returns {undefined}
    *   Nothing.
    */
   function setData(key, value) {
@@ -566,7 +574,7 @@ function compiler(options) {
    *
    * @param {(token: Token) => Nodes} create
    *   Create a node.
-   * @param {Handle} [and]
+   * @param {Handle | undefined} [and]
    *   Optional function to also run.
    * @returns {Handle}
    *   Handle.
@@ -577,7 +585,7 @@ function compiler(options) {
     /**
      * @this {CompileContext}
      * @param {Token} token
-     * @returns {void}
+     * @returns {undefined}
      */
     function open(token) {
       enter.call(this, create(token), token)
@@ -587,7 +595,7 @@ function compiler(options) {
 
   /**
    * @this {CompileContext}
-   * @returns {void}
+   * @returns {undefined}
    */
   function buffer() {
     this.stack.push({type: 'fragment', children: []})
@@ -623,7 +631,7 @@ function compiler(options) {
   /**
    * Create a closer handle.
    *
-   * @param {Handle} [and]
+   * @param {Handle | undefined} [and]
    *   Optional function to also run.
    * @returns {Handle}
    *   Handle.
@@ -634,7 +642,7 @@ function compiler(options) {
     /**
      * @this {CompileContext}
      * @param {Token} token
-     * @returns {void}
+     * @returns {undefined}
      */
     function close(token) {
       if (and) and.call(this, token)
@@ -865,7 +873,7 @@ function compiler(options) {
     assert(node.type === 'heading', 'expected heading on stack')
 
     node.depth =
-      this.sliceSerialize(token).charCodeAt(0) === codes.equalsTo ? 1 : 2
+      this.sliceSerialize(token).codePointAt(0) === codes.equalsTo ? 1 : 2
   }
 
   /**
@@ -1380,8 +1388,8 @@ function point(d) {
 
 /**
  * @param {Config} combined
- * @param {Array<Extension | Array<Extension>>} extensions
- * @returns {void}
+ * @param {Array<Array<Extension> | Extension>} extensions
+ * @returns {undefined}
  */
 function configure(combined, extensions) {
   let index = -1
@@ -1400,7 +1408,7 @@ function configure(combined, extensions) {
 /**
  * @param {Config} combined
  * @param {Extension} extension
- * @returns {void}
+ * @returns {undefined}
  */
 function extension(combined, extension) {
   /** @type {keyof Extension} */
@@ -1408,21 +1416,35 @@ function extension(combined, extension) {
 
   for (key in extension) {
     if (own.call(extension, key)) {
-      if (key === 'canContainEols') {
-        const right = extension[key]
-        if (right) {
-          combined[key].push(...right)
+      switch (key) {
+        case 'canContainEols': {
+          const right = extension[key]
+          if (right) {
+            combined[key].push(...right)
+          }
+
+          break
         }
-      } else if (key === 'transforms') {
-        const right = extension[key]
-        if (right) {
-          combined[key].push(...right)
+
+        case 'transforms': {
+          const right = extension[key]
+          if (right) {
+            combined[key].push(...right)
+          }
+
+          break
         }
-      } else if (key === 'enter' || key === 'exit') {
-        const right = extension[key]
-        if (right) {
-          Object.assign(combined[key], right)
+
+        case 'enter':
+        case 'exit': {
+          const right = extension[key]
+          if (right) {
+            Object.assign(combined[key], right)
+          }
+
+          break
         }
+        // No default
       }
     }
   }

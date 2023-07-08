@@ -34,7 +34,6 @@ export type OnError = OnEnterError
  * }
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface CompileData {
   /**
    * Whether we’re inside a hard break.
@@ -76,12 +75,10 @@ export interface CompileData {
 }
 
 declare module 'micromark-util-types' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface TokenTypeMap {
     listItem: 'listItem'
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Token {
     _spread?: boolean
   }

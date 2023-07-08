@@ -171,9 +171,9 @@ mdast compiler context (TypeScript type).
     — stack of tokens
 *   `getData` (`(key: string) => unknown`)
     — get data from the key/value store (see [`CompileData`][api-compiledata])
-*   `setData` (`(key: string, value?: unknown) => void`)
+*   `setData` (`(key: string, value?: unknown) => undefined`)
     — set data into the key/value store (see [`CompileData`][api-compiledata])
-*   `buffer` (`() => void`)
+*   `buffer` (`() => undefined`)
     — capture some of the output data
 *   `resume` (`() => string`)
     — stop capturing and access the output data
@@ -251,7 +251,7 @@ Handle a token (TypeScript type).
 
 ###### Returns
 
-Nothing (`void`).
+Nothing (`undefined`).
 
 ### `OnEnterError`
 
@@ -269,7 +269,7 @@ Handle the case where the `right` token is open, but it is closed (by the
 
 ###### Returns
 
-Nothing (`void`).
+Nothing (`undefined`).
 
 ### `OnExitError`
 
@@ -287,7 +287,7 @@ exiting the `left` token (TypeScript type).
 
 ###### Returns
 
-Nothing (`void`).
+Nothing (`undefined`).
 
 ### `Options`
 

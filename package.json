@@ -102,6 +102,12 @@
   "xo": {
     "overrides": [
       {
+        "files": "**/*.ts",
+        "rules": {
+          "@typescript-eslint/consistent-type-definitions": "off"
+        }
+      },
+      {
         "files": "test/**/*.js",
         "rules": {
           "no-await-in-loop": "off"
@@ -111,10 +117,7 @@
     "prettier": true,
     "rules": {
       "complexity": "off",
-      "n/file-extension-in-import": "off",
-      "unicorn/prefer-code-point": "off",
-      "unicorn/prefer-switch": "off",
-      "unicorn/prefer-node-protocol": "off"
+      "max-depth": "off"
     }
   }
 }
