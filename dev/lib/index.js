@@ -6,24 +6,21 @@
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
  * @typedef {import('micromark-util-types').Value} Value
  *
- * @typedef {import('unist').Parent} UnistParent
  * @typedef {import('unist').Point} Point
  *
+ * @typedef {import('mdast').Parent} Parent
  * @typedef {import('mdast').PhrasingContent} PhrasingContent
- * @typedef {import('mdast').StaticPhrasingContent} StaticPhrasingContent
- * @typedef {import('mdast').Content} Content
+ * @typedef {import('mdast').Nodes} Nodes
  * @typedef {import('mdast').Break} Break
  * @typedef {import('mdast').Blockquote} Blockquote
  * @typedef {import('mdast').Code} Code
  * @typedef {import('mdast').Definition} Definition
  * @typedef {import('mdast').Emphasis} Emphasis
  * @typedef {import('mdast').Heading} Heading
- * @typedef {import('mdast').HTML} HTML
+ * @typedef {import('mdast').Html} Html
  * @typedef {import('mdast').Image} Image
- * @typedef {import('mdast').ImageReference} ImageReference
  * @typedef {import('mdast').InlineCode} InlineCode
  * @typedef {import('mdast').Link} Link
- * @typedef {import('mdast').LinkReference} LinkReference
  * @typedef {import('mdast').List} List
  * @typedef {import('mdast').ListItem} ListItem
  * @typedef {import('mdast').Paragraph} Paragraph
@@ -36,10 +33,8 @@
  */
 
 /**
- * @typedef {Root | Content} Node
- * @typedef {Extract<Node, UnistParent>} Parent
  *
- * @typedef {Omit<UnistParent, 'type' | 'children'> & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
+ * @typedef {Omit<Parent, 'type' | 'children'> & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
  */
 
 /**
@@ -110,7 +105,7 @@
  *
  * @typedef CompileContext
  *   mdast compiler context.
- * @property {Array<Node | Fragment>} stack
+ * @property {Array<Nodes | Fragment>} stack
  *   Stack of nodes.
  * @property {Array<TokenTuple>} tokenStack
  *   Stack of tokens.
@@ -122,9 +117,9 @@
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
- * @property {<Kind extends Node>(this: CompileContext, node: Kind, token: Token, onError?: OnEnterError) => Kind} enter
+ * @property {<Kind extends Nodes>(this: CompileContext, node: Kind, token: Token, onError?: OnEnterError) => Kind} enter
  *   Enter a token.
- * @property {(this: CompileContext, token: Token, onError?: OnExitError) => Node} exit
+ * @property {(this: CompileContext, token: Token, onError?: OnExitError) => Nodes} exit
  *   Exit a token.
  * @property {TokenizeContext['sliceSerialize']} sliceSerialize
  *   Get the string value of a token.
@@ -141,7 +136,7 @@
  */
 
 // To do: micromark: create a registry of tokens?
-// To do: next major: don’t return given `Node` from `enter`.
+// To do: next major: don’t return given `Nodes` from `enter`.
 // To do: next major: remove setter/getter.
 
 import {ok as assert} from 'devlop'
@@ -569,7 +564,7 @@ function compiler(options) {
   /**
    * Create an opener handle.
    *
-   * @param {(token: Token) => Node} create
+   * @param {(token: Token) => Nodes} create
    *   Create a node.
    * @param {Handle} [and]
    *   Optional function to also run.
@@ -599,7 +594,7 @@ function compiler(options) {
   }
 
   /**
-   * @template {Node} Kind
+   * @template {Nodes} Kind
    *   Node type.
    * @this {CompileContext}
    *   Context.
@@ -654,7 +649,7 @@ function compiler(options) {
    *   Corresponding token.
    * @param {OnExitError | undefined} [onExitError]
    *   Handle the case where another token is open.
-   * @returns {Node}
+   * @returns {Nodes}
    *   The closed node.
    */
   function exit(token, onExitError) {
@@ -1108,8 +1103,7 @@ function compiler(options) {
     setData('inReference', true)
 
     if (node.type === 'link') {
-      /** @type {Array<StaticPhrasingContent>} */
-      // @ts-expect-error: Assume static phrasing content.
+      /** @type {Array<PhrasingContent>} */
       const children = fragment.children
 
       node.children = children
@@ -1309,7 +1303,7 @@ function compiler(options) {
     return {type: 'break'}
   }
 
-  /** @returns {HTML} */
+  /** @returns {Html} */
   function html() {
     return {type: 'html', value: ''}
   }
