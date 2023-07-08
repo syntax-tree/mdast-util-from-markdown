@@ -68,7 +68,7 @@ Notable examples that deeply integrate with this package are
 ## Install
 
 This package is [ESM only][esm].
-In Node.js (version 14.14+ and 16.0+), install with [npm][]:
+In Node.js (version 16+), install with [npm][]:
 
 ```sh
 npm install mdast-util-from-markdown
@@ -129,7 +129,7 @@ console.log(tree)
 
 ## API
 
-This package exports the identifier [`fromMarkdown`][api-frommarkdown].
+This package exports the identifier [`fromMarkdown`][api-from-markdown].
 There is no default export.
 
 The export map supports the [`development` condition][development].
@@ -170,9 +170,9 @@ mdast compiler context (TypeScript type).
 *   `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
     — stack of tokens
 *   `getData` (`(key: string) => unknown`)
-    — get data from the key/value store (see [`CompileData`][api-compiledata])
+    — get data from the key/value store (see [`CompileData`][api-compile-data])
 *   `setData` (`(key: string, value?: unknown) => undefined`)
-    — set data into the key/value store (see [`CompileData`][api-compiledata])
+    — set data into the key/value store (see [`CompileData`][api-compile-data])
 *   `buffer` (`() => undefined`)
     — capture some of the output data
 *   `resume` (`() => string`)
@@ -244,7 +244,7 @@ Handle a token (TypeScript type).
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compilecontext])
+*   `this` ([`CompileContext`][api-compile-context])
     — context
 *   `token` ([`Token`][api-token])
     — current token
@@ -260,7 +260,7 @@ Handle the case where the `right` token is open, but it is closed (by the
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compilecontext])
+*   `this` ([`CompileContext`][api-compile-context])
     — context
 *   `left` ([`Token`][api-token] or `undefined`)
     — left token
@@ -278,7 +278,7 @@ exiting the `left` token (TypeScript type).
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compilecontext])
+*   `this` ([`CompileContext`][api-compile-context])
     — context
 *   `left` ([`Token`][api-token])
     — left token
@@ -385,13 +385,13 @@ The syntax tree is [mdast][].
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports the additional types [`CompileContext`][api-compilecontext],
-[`CompileData`][api-compiledata],
+It exports the additional types [`CompileContext`][api-compile-context],
+[`CompileData`][api-compile-data],
 [`Encoding`][api-encoding],
 [`Extension`][api-extension],
 [`Handle`][api-handle],
-[`OnEnterError`][api-onentererror],
-[`OnExitError`][api-onexiterror],
+[`OnEnterError`][api-on-enter-error],
+[`OnExitError`][api-on-exit-error],
 [`Options`][api-options],
 [`Token`][api-token],
 [`Transform`][api-transform], and
@@ -399,10 +399,13 @@ It exports the additional types [`CompileContext`][api-compilecontext],
 
 ## Compatibility
 
-Projects maintained by the unified collective are compatible with all maintained
+Projects maintained by the unified collective are compatible with maintained
 versions of Node.js.
-As of now, that is Node.js 14.14+ and 16.0+.
-Our projects sometimes work with older versions, but this is not guaranteed.
+
+When we cut a new major release, we drop support for unmaintained versions of
+Node.
+This means we try to keep the current release line,
+`mdast-util-from-markdown@^1`, compatible with Node.js 12.
 
 ## Security
 
@@ -449,9 +452,9 @@ abide by its terms.
 
 [downloads]: https://www.npmjs.com/package/mdast-util-from-markdown
 
-[size-badge]: https://img.shields.io/bundlephobia/minzip/mdast-util-from-markdown.svg
+[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size&query=$.size.compressedSize&url=https://deno.bundlejs.com/?q=mdast-util-from-markdown
 
-[size]: https://bundlephobia.com/result?p=mdast-util-from-markdown
+[size]: https://bundlejs.com/?q=mdast-util-from-markdown
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
@@ -519,11 +522,11 @@ abide by its terms.
 
 [development]: https://nodejs.org/api/packages.html#packages_resolving_user_conditions
 
-[api-frommarkdown]: #frommarkdownvalue-encoding-options
+[api-from-markdown]: #frommarkdownvalue-encoding-options
 
-[api-compilecontext]: #compilecontext
+[api-compile-context]: #compilecontext
 
-[api-compiledata]: #compiledata
+[api-compile-data]: #compiledata
 
 [api-encoding]: #encoding
 
@@ -531,9 +534,9 @@ abide by its terms.
 
 [api-handle]: #handle
 
-[api-onentererror]: #onentererror
+[api-on-enter-error]: #onentererror
 
-[api-onexiterror]: #onexiterror
+[api-on-exit-error]: #onexiterror
 
 [api-options]: #options
 

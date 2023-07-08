@@ -135,7 +135,6 @@
  *   Configuration.
  */
 
-// To do: micromark: create a registry of tokens?
 // To do: next major: don’t return given `Nodes` from `enter`.
 // To do: next major: remove setter/getter.
 
