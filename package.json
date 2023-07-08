@@ -28,18 +28,16 @@
   ],
   "sideEffects": false,
   "type": "module",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "exports": {
+    "development": "./dev/index.js",
+    "default": "./index.js"
+  },
   "files": [
     "dev/",
     "lib/",
     "index.d.ts",
     "index.js"
   ],
-  "exports": {
-    "development": "./dev/index.js",
-    "default": "./index.js"
-  },
   "dependencies": {
     "@types/mdast": "^4.0.0",
     "@types/unist": "^3.0.0",

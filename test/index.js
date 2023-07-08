@@ -9,14 +9,15 @@ import {commonmark} from 'commonmark.json'
 import {fromHtml} from 'hast-util-from-html'
 import {toHtml} from 'hast-util-to-html'
 import {toHast} from 'mdast-util-to-hast'
+import {fromMarkdown} from 'mdast-util-from-markdown'
 import {toString} from 'mdast-util-to-string'
-import {fromMarkdown} from '../dev/index.js'
 
 test('fromMarkdown', async function (t) {
   await t.test('should expose the public api', async function () {
-    assert.deepEqual(Object.keys(await import('../dev/index.js')).sort(), [
-      'fromMarkdown'
-    ])
+    assert.deepEqual(
+      Object.keys(await import('mdast-util-from-markdown')).sort(),
+      ['fromMarkdown']
+    )
   })
 
   await t.test('should parse an empty document', async function () {

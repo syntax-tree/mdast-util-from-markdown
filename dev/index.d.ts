@@ -1,5 +1,3 @@
-import type {OnEnterError} from './lib/index.js'
-
 export type {
   CompileContext,
   Encoding,
@@ -12,6 +10,8 @@ export type {
   Transform,
   Value
 } from './lib/index.js'
+
+export {fromMarkdown} from './lib/index.js'
 
 /**
  * Interface of tracked data.
@@ -77,5 +77,3 @@ declare module 'micromark-util-types' {
     _spread?: boolean
   }
 }
-
-export {fromMarkdown} from './lib/index.js'
