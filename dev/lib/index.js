@@ -146,15 +146,11 @@
 
 import {ok as assert} from 'uvu/assert'
 import {toString} from 'mdast-util-to-string'
-import {parse} from 'micromark/lib/parse.js'
-import {preprocess} from 'micromark/lib/preprocess.js'
-import {postprocess} from 'micromark/lib/postprocess.js'
+import {parse, postprocess, preprocess} from 'micromark'
 import {decodeNumericCharacterReference} from 'micromark-util-decode-numeric-character-reference'
 import {decodeString} from 'micromark-util-decode-string'
 import {normalizeIdentifier} from 'micromark-util-normalize-identifier'
-import {codes} from 'micromark-util-symbol/codes.js'
-import {constants} from 'micromark-util-symbol/constants.js'
-import {types} from 'micromark-util-symbol/types.js'
+import {codes, constants, types} from 'micromark-util-symbol'
 import {decodeNamedCharacterReference} from 'decode-named-character-reference'
 import {stringifyPosition} from 'unist-util-stringify-position'
 

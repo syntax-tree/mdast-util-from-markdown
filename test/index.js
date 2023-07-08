@@ -3,7 +3,6 @@
  */
 
 import assert from 'node:assert/strict'
-import {Buffer} from 'node:buffer'
 import fs from 'node:fs/promises'
 import test from 'node:test'
 import {toHast} from 'mdast-util-to-hast'
@@ -65,17 +64,33 @@ test('fromMarkdown', () => {
     'should parse a paragraph'
   )
 
+  assert.deepEqual(
+    fromMarkdown(new Uint8Array()),
+    {
+      type: 'root',
+      children: [],
+      position: {
+        start: {line: 1, column: 1, offset: 0},
+        end: {line: 1, column: 1, offset: 0}
+      }
+    },
+    'should support empty typed arrays'
+  )
+
   assert.equal(
-    toString(fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]))),
-    'brávo',
-    'should support buffers'
+    toString(fromMarkdown(new TextEncoder().encode('<admin@example.com>'))),
+    'admin@example.com',
+    'should support types arrays'
   )
 
   assert.equal(
     toString(
-      fromMarkdown(Buffer.from([0x62, 0x72, 0xc3, 0xa1, 0x76, 0x6f]), 'ascii')
+      fromMarkdown(
+        new Uint8Array([0xff, 0xfe, 0x61, 0x00, 0x62, 0x00, 0x63, 0x00]),
+        'utf-16le'
+      )
     ),
-    'brC!vo',
+    'abc',
     'should support encoding'
   )
 

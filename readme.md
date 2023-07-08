@@ -150,8 +150,8 @@ Turn markdown into a syntax tree.
 *   `value` ([`Value`][api-value])
     — markdown to parse
 *   `encoding` ([`Encoding`][api-encoding], default: `'utf8'`)
-    — [character encoding][character-encoding] for when `value` is
-    [`Buffer`][buffer]
+    — [character encoding][encoding] for when `value` is
+    [`Uint8Array`][uint8-array]
 *   `options` ([`Options`][api-options], optional)
     — configuration
 
@@ -210,7 +210,7 @@ declare module 'mdast-util-from-markdown' {
 
 ### `Encoding`
 
-Encodings supported by the [`Buffer`][buffer] class (TypeScript type).
+Encodings supported by the [`Uint8Array`][uint8-array] class (TypeScript type).
 
 <!-- To do: link to micromark type, when documented. -->
 
@@ -499,9 +499,9 @@ abide by its terms.
 
 [root]: https://github.com/syntax-tree/mdast#root
 
-[character-encoding]: https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings
+[uint8-array]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
 
-[buffer]: https://nodejs.org/api/buffer.html
+[encoding]: https://nodejs.org/api/util.html#whatwg-supported-encodings
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
