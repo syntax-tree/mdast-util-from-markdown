@@ -74,7 +74,9 @@
     "prepack": "npm run build && npm run format",
     "build": "tsc --build --clean && tsc --build && type-coverage && micromark-build && esbuild . --bundle --minify | terser | gzip-size --raw",
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "test-api": "node --conditions development test/index.js",
+    "test-api-dev": "node --conditions development test/index.js",
+    "test-api-prod": "node --conditions production test/index.js",
+    "test-api": "npm run test-api-dev && npm run test-api-prod",
     "test-coverage": "c8 --100 --reporter lcov npm run test-api",
     "test": "npm run build && npm run format && npm run test-coverage"
   },
