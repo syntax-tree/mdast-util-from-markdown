@@ -56,9 +56,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "c8": "^7.0.0",
+    "c8": "^8.0.0",
     "commonmark.json": "^0.30.0",
-    "esbuild": "^0.17.0",
+    "esbuild": "^0.18.0",
     "gzip-size-cli": "^5.0.0",
     "hast-util-from-html": "^1.0.0",
     "hast-util-to-html": "^8.0.0",
