@@ -14,12 +14,6 @@ export type {
 } from './lib/index.js'
 
 /**
- * Deprecated: use `OnEnterError`.
- */
-// To do: next major: remove.
-export type OnError = OnEnterError
-
-/**
  * Interface of tracked data.
  *
  * When working on extensions that use more data, extend the corresponding
