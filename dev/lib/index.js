@@ -109,22 +109,20 @@
  *   Stack of nodes.
  * @property {Array<TokenTuple>} tokenStack
  *   Stack of tokens.
- * @property {<Key extends keyof CompileData>(key: Key) => CompileData[Key]} getData
- *   Get data from the key/value store.
- * @property {<Key extends keyof CompileData>(key: Key, value?: CompileData[Key]) => undefined} setData
- *   Set data into the key/value store.
  * @property {(this: CompileContext) => undefined} buffer
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
  * @property {(this: CompileContext, node: Nodes, token: Token, onError?: OnEnterError) => undefined} enter
- *   Enter a token.
+ *   Enter a node.
  * @property {(this: CompileContext, token: Token, onError?: OnExitError) => undefined} exit
- *   Exit a token.
+ *   Exit a node.
  * @property {TokenizeContext['sliceSerialize']} sliceSerialize
  *   Get the string value of a token.
  * @property {Config} config
  *   Configuration.
+ * @property {CompileData} data
+ *   Info passed around; key/value store.
  *
  * @typedef FromMarkdownOptions
  *   Configuration for how to build mdast.
@@ -134,8 +132,6 @@
  * @typedef {ParseOptions & FromMarkdownOptions} Options
  *   Configuration.
  */
-
-// To do: next major: remove setter/getter.
 
 import {ok as assert} from 'devlop'
 import {toString} from 'mdast-util-to-string'
@@ -317,8 +313,7 @@ function compiler(options) {
       exit,
       buffer,
       resume,
-      setData,
-      getData
+      data
     }
     /** @type {Array<number>} */
     const listStack = []
@@ -539,36 +534,6 @@ function compiler(options) {
   }
 
   /**
-   * Set data.
-   *
-   * @template {keyof CompileData} Key
-   *   Field type.
-   * @param {Key} key
-   *   Key of field.
-   * @param {CompileData[Key] | undefined} [value]
-   *   New value.
-   * @returns {undefined}
-   *   Nothing.
-   */
-  function setData(key, value) {
-    data[key] = value
-  }
-
-  /**
-   * Get data.
-   *
-   * @template {keyof CompileData} Key
-   *   Field type.
-   * @param {Key} key
-   *   Key of field.
-   * @returns {CompileData[Key]}
-   *   Value.
-   */
-  function getData(key) {
-    return data[key]
-  }
-
-  /**
    * Create an opener handle.
    *
    * @param {(token: Token) => Nodes} create
@@ -704,7 +669,7 @@ function compiler(options) {
    * @type {Handle}
    */
   function onenterlistordered() {
-    setData('expectingFirstListItemValue', true)
+    this.data.expectingFirstListItemValue = true
   }
 
   /**
@@ -712,7 +677,7 @@ function compiler(options) {
    * @type {Handle}
    */
   function onenterlistitemvalue(token) {
-    if (getData('expectingFirstListItemValue')) {
+    if (this.data.expectingFirstListItemValue) {
       const ancestor = this.stack[this.stack.length - 2]
       assert(ancestor, 'expected nodes on stack')
       assert(ancestor.type === 'list', 'expected list on stack')
@@ -720,7 +685,7 @@ function compiler(options) {
         this.sliceSerialize(token),
         constants.numericBaseDecimal
       )
-      setData('expectingFirstListItemValue')
+      this.data.expectingFirstListItemValue = undefined
     }
   }
 
@@ -754,9 +719,9 @@ function compiler(options) {
    */
   function onexitcodefencedfence() {
     // Exit if this is the closing fence.
-    if (getData('flowCodeInside')) return
+    if (this.data.flowCodeInside) return
     this.buffer()
-    setData('flowCodeInside', true)
+    this.data.flowCodeInside = true
   }
 
   /**
@@ -770,7 +735,7 @@ function compiler(options) {
     assert(node.type === 'code', 'expected code on stack')
 
     node.value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, '')
-    setData('flowCodeInside')
+    this.data.flowCodeInside = undefined
   }
 
   /**
@@ -859,7 +824,7 @@ function compiler(options) {
    * @type {Handle}
    */
   function onexitsetextheadingtext() {
-    setData('setextHeadingSlurpLineEnding', true)
+    this.data.setextHeadingSlurpLineEnding = true
   }
 
   /**
@@ -880,7 +845,7 @@ function compiler(options) {
    * @type {Handle}
    */
   function onexitsetextheading() {
-    setData('setextHeadingSlurpLineEnding')
+    this.data.setextHeadingSlurpLineEnding = undefined
   }
 
   /**
@@ -935,17 +900,17 @@ function compiler(options) {
     assert(context, 'expected `node`')
 
     // If we’re at a hard break, include the line ending in there.
-    if (getData('atHardBreak')) {
+    if (this.data.atHardBreak) {
       assert('children' in context, 'expected `parent`')
       const tail = context.children[context.children.length - 1]
       assert(tail.position, 'expected tail to have a starting position')
       tail.position.end = point(token.end)
-      setData('atHardBreak')
+      this.data.atHardBreak = undefined
       return
     }
 
     if (
-      !getData('setextHeadingSlurpLineEnding') &&
+      !this.data.setextHeadingSlurpLineEnding &&
       config.canContainEols.includes(context.type)
     ) {
       onenterdata.call(this, token)
@@ -959,7 +924,7 @@ function compiler(options) {
    */
 
   function onexithardbreak() {
-    setData('atHardBreak', true)
+    this.data.atHardBreak = true
   }
 
   /**
@@ -1018,9 +983,9 @@ function compiler(options) {
     // These are used / cleaned here.
 
     // To do: clean.
-    if (getData('inReference')) {
+    if (this.data.inReference) {
       /** @type {ReferenceType} */
-      const referenceType = getData('referenceType') || 'shortcut'
+      const referenceType = this.data.referenceType || 'shortcut'
 
       node.type += 'Reference'
       // @ts-expect-error: mutate.
@@ -1035,7 +1000,7 @@ function compiler(options) {
       delete node.label
     }
 
-    setData('referenceType')
+    this.data.referenceType = undefined
   }
 
   /**
@@ -1052,9 +1017,9 @@ function compiler(options) {
     // These are used / cleaned here.
 
     // To do: clean.
-    if (getData('inReference')) {
+    if (this.data.inReference) {
       /** @type {ReferenceType} */
-      const referenceType = getData('referenceType') || 'shortcut'
+      const referenceType = this.data.referenceType || 'shortcut'
 
       node.type += 'Reference'
       // @ts-expect-error: mutate.
@@ -1069,7 +1034,7 @@ function compiler(options) {
       delete node.label
     }
 
-    setData('referenceType')
+    this.data.referenceType = undefined
   }
 
   /**
@@ -1111,7 +1076,7 @@ function compiler(options) {
     )
 
     // Assume a reference.
-    setData('inReference', true)
+    this.data.inReference = true
 
     if (node.type === 'link') {
       /** @type {Array<PhrasingContent>} */
@@ -1161,7 +1126,7 @@ function compiler(options) {
    */
 
   function onexitresource() {
-    setData('inReference')
+    this.data.inReference = undefined
   }
 
   /**
@@ -1170,7 +1135,7 @@ function compiler(options) {
    */
 
   function onenterreference() {
-    setData('referenceType', 'collapsed')
+    this.data.referenceType = 'collapsed'
   }
 
   /**
@@ -1194,7 +1159,7 @@ function compiler(options) {
     node.identifier = normalizeIdentifier(
       this.sliceSerialize(token)
     ).toLowerCase()
-    setData('referenceType', 'full')
+    this.data.referenceType = 'full'
   }
 
   /**
@@ -1207,7 +1172,7 @@ function compiler(options) {
       token.type === 'characterReferenceMarkerNumeric' ||
         token.type === 'characterReferenceMarkerHexadecimal'
     )
-    setData('characterReferenceType', token.type)
+    this.data.characterReferenceType = token.type
   }
 
   /**
@@ -1216,7 +1181,7 @@ function compiler(options) {
    */
   function onexitcharacterreferencevalue(token) {
     const data = this.sliceSerialize(token)
-    const type = getData('characterReferenceType')
+    const type = this.data.characterReferenceType
     /** @type {string} */
     let value
 
@@ -1227,7 +1192,7 @@ function compiler(options) {
           ? constants.numericBaseDecimal
           : constants.numericBaseHexadecimal
       )
-      setData('characterReferenceType')
+      this.data.characterReferenceType = undefined
     } else {
       const result = decodeNamedCharacterReference(data)
       assert(result !== false, 'expected reference to decode')

@@ -169,18 +169,16 @@ mdast compiler context (TypeScript type).
     — stack of nodes
 *   `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
     — stack of tokens
-*   `getData` (`(key: string) => unknown`)
-    — get data from the key/value store (see [`CompileData`][api-compile-data])
-*   `setData` (`(key: string, value?: unknown) => undefined`)
-    — set data into the key/value store (see [`CompileData`][api-compile-data])
+*   `data` ([`CompileData`][api-compile-data])
+    — info passed around; key/value store
 *   `buffer` (`() => undefined`)
     — capture some of the output data
 *   `resume` (`() => string`)
     — stop capturing and access the output data
 *   `enter` (`(node: Node, token: Token, onError?: OnEnterError) => undefined`)
-    — enter a token
+    — enter a node
 *   `exit` (`(token: Token, onError?: OnExitError) => undefined`)
-    — exit a token
+    — exit a node
 *   `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
     — get the string value of a token
 *   `config` (`Required<Extension>`)
