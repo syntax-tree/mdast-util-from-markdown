@@ -212,9 +212,7 @@ declare module 'mdast-util-from-markdown' {
 
 Encodings supported by the [`Uint8Array`][uint8-array] class (TypeScript type).
 
-<!-- To do: link to micromark type, when documented. -->
-
-See [`micromark`](https://github.com/micromark/micromark#api) for more info.
+See [`micromark`][micromark-api] for more info.
 
 ###### Type
 
@@ -305,10 +303,6 @@ Configuration (TypeScript type).
 
 Token from micromark (TypeScript type).
 
-<!-- To do: link to micromark type, when documented. -->
-
-See [`micromark`](https://github.com/micromark/micromark#api) for more info.
-
 ###### Type
 
 ```ts
@@ -332,9 +326,7 @@ New tree ([`Root`][root]) or nothing (in which case the current tree is used).
 
 Contents of the file (TypeScript type).
 
-<!-- To do: link to micromark type, when documented. -->
-
-See [`micromark`](https://github.com/micromark/micromark#api) for more info.
+See [`micromark`][micromark-api] for more info.
 
 ###### Type
 
@@ -376,7 +368,7 @@ type Value = Uint8Array | string
 Markdown is parsed according to CommonMark.
 Extensions can add support for other syntax.
 If you’re interested in extending markdown,
-[more information is available in micromark’s readme][micromark-extend].
+[more information is available in micromark’s readme][micromark-extension].
 
 ## Syntax tree
 
@@ -512,9 +504,9 @@ abide by its terms.
 
 [micromark]: https://github.com/micromark/micromark
 
-[micromark-extension]: https://github.com/micromark/micromark#optionsextensions
+[micromark-api]: https://github.com/micromark/micromark/tree/main/packages/micromark#micromarkvalue-encoding-options
 
-[micromark-extend]: https://github.com/micromark/micromark#extensions
+[micromark-extension]: https://github.com/micromark/micromark#extensions
 
 [remark]: https://github.com/remarkjs/remark
 
