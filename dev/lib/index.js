@@ -117,9 +117,9 @@
  *   Capture some of the output data.
  * @property {(this: CompileContext) => string} resume
  *   Stop capturing and access the output data.
- * @property {<Kind extends Nodes>(this: CompileContext, node: Kind, token: Token, onError?: OnEnterError) => Kind} enter
+ * @property {(this: CompileContext, node: Nodes, token: Token, onError?: OnEnterError) => undefined} enter
  *   Enter a token.
- * @property {(this: CompileContext, token: Token, onError?: OnExitError) => Nodes} exit
+ * @property {(this: CompileContext, token: Token, onError?: OnExitError) => undefined} exit
  *   Exit a token.
  * @property {TokenizeContext['sliceSerialize']} sliceSerialize
  *   Get the string value of a token.
@@ -135,7 +135,6 @@
  *   Configuration.
  */
 
-// To do: next major: don’t return given `Nodes` from `enter`.
 // To do: next major: remove setter/getter.
 
 import {ok as assert} from 'devlop'
@@ -517,15 +516,16 @@ function compiler(options) {
 
         // Create a new list item.
         if (event[1].type === types.listItemPrefix) {
-          listItem = {
+          /** @type {Token} */
+          const item = {
             type: 'listItem',
             _spread: false,
             start: Object.assign({}, event[1].start),
             // @ts-expect-error: we’ll add `end` in a second.
             end: undefined
           }
-          // @ts-expect-error: `listItem` is most definitely defined, TS...
-          events.splice(index, 0, ['enter', listItem, event[2]])
+          listItem = item
+          events.splice(index, 0, ['enter', item, event[2]])
           index++
           length++
           firstBlankLineIndex = undefined
@@ -601,30 +601,31 @@ function compiler(options) {
   }
 
   /**
-   * @template {Nodes} Kind
-   *   Node type.
    * @this {CompileContext}
    *   Context.
-   * @param {Kind} node
+   * @param {Nodes} node
    *   Node to enter.
    * @param {Token} token
    *   Corresponding token.
    * @param {OnEnterError | undefined} [errorHandler]
    *   Handle the case where this token is open, but it is closed by something else.
-   * @returns {Kind}
-   *   The given node.
+   * @returns {undefined}
+   *   Nothing.
    */
   function enter(node, token, errorHandler) {
     const parent = this.stack[this.stack.length - 1]
     assert(parent, 'expected `parent`')
     assert('children' in parent, 'expected `parent`')
-    // @ts-expect-error: Assume `Node` can exist as a child of `parent`.
-    parent.children.push(node)
+    /** @type {Array<Nodes>} */
+    const siblings = parent.children
+    siblings.push(node)
     this.stack.push(node)
     this.tokenStack.push([token, errorHandler])
-    // @ts-expect-error: `end` will be patched later.
-    node.position = {start: point(token.start)}
-    return node
+    node.position = {
+      start: point(token.start),
+      // @ts-expect-error: `end` will be patched later.
+      end: undefined
+    }
   }
 
   /**
@@ -656,8 +657,8 @@ function compiler(options) {
    *   Corresponding token.
    * @param {OnExitError | undefined} [onExitError]
    *   Handle the case where another token is open.
-   * @returns {Nodes}
-   *   The closed node.
+   * @returns {undefined}
+   *   Nothing.
    */
   function exit(token, onExitError) {
     const node = this.stack.pop()
@@ -684,7 +685,6 @@ function compiler(options) {
     assert(node.type !== 'fragment', 'unexpected fragment `exit`ed')
     assert(node.position, 'expected `position` to be defined')
     node.position.end = point(token.end)
-    return node
   }
 
   /**
@@ -892,16 +892,20 @@ function compiler(options) {
     const node = this.stack[this.stack.length - 1]
     assert(node, 'expected node on stack')
     assert('children' in node, 'expected parent on stack')
+    /** @type {Array<Nodes>} */
+    const siblings = node.children
 
-    let tail = node.children[node.children.length - 1]
+    let tail = siblings[siblings.length - 1]
 
     if (!tail || tail.type !== 'text') {
       // Add a new text node.
       tail = text()
-      // @ts-expect-error: we’ll add `end` later.
-      tail.position = {start: point(token.start)}
-      // @ts-expect-error: Assume `parent` accepts `text`.
-      node.children.push(tail)
+      tail.position = {
+        start: point(token.start),
+        // @ts-expect-error: we’ll add `end` later.
+        end: undefined
+      }
+      siblings.push(tail)
     }
 
     this.stack.push(tail)
@@ -1301,8 +1305,12 @@ function compiler(options) {
 
   /** @returns {Heading} */
   function heading() {
-    // @ts-expect-error `depth` will be set later.
-    return {type: 'heading', depth: undefined, children: []}
+    return {
+      type: 'heading',
+      // @ts-expect-error `depth` will be set later.
+      depth: 0,
+      children: []
+    }
   }
 
   /** @returns {Break} */

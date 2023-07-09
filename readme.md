@@ -177,9 +177,9 @@ mdast compiler context (TypeScript type).
     — capture some of the output data
 *   `resume` (`() => string`)
     — stop capturing and access the output data
-*   `enter` (`(node: Node, token: Token, onError?: OnEnterError) => Node`)
+*   `enter` (`(node: Node, token: Token, onError?: OnEnterError) => undefined`)
     — enter a token
-*   `exit` (`(token: Token, onError?: OnExitError) => Node`)
+*   `exit` (`(token: Token, onError?: OnExitError) => undefined`)
     — exit a token
 *   `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
     — get the string value of a token
