@@ -12,32 +12,32 @@
 
 ## Contents
 
-*   [What is this?](#what-is-this)
-*   [When should I use this?](#when-should-i-use-this)
-*   [Install](#install)
-*   [Use](#use)
-*   [API](#api)
-    *   [`fromMarkdown(value[, encoding][, options])`](#frommarkdownvalue-encoding-options)
-    *   [`CompileContext`](#compilecontext)
-    *   [`CompileData`](#compiledata)
-    *   [`Encoding`](#encoding)
-    *   [`Extension`](#extension)
-    *   [`Handle`](#handle)
-    *   [`OnEnterError`](#onentererror)
-    *   [`OnExitError`](#onexiterror)
-    *   [`Options`](#options)
-    *   [`Token`](#token)
-    *   [`Transform`](#transform)
-    *   [`Value`](#value)
-*   [List of extensions](#list-of-extensions)
-*   [Syntax](#syntax)
-*   [Syntax tree](#syntax-tree)
-*   [Types](#types)
-*   [Compatibility](#compatibility)
-*   [Security](#security)
-*   [Related](#related)
-*   [Contribute](#contribute)
-*   [License](#license)
+* [What is this?](#what-is-this)
+* [When should I use this?](#when-should-i-use-this)
+* [Install](#install)
+* [Use](#use)
+* [API](#api)
+  * [`fromMarkdown(value[, encoding][, options])`](#frommarkdownvalue-encoding-options)
+  * [`CompileContext`](#compilecontext)
+  * [`CompileData`](#compiledata)
+  * [`Encoding`](#encoding)
+  * [`Extension`](#extension)
+  * [`Handle`](#handle)
+  * [`OnEnterError`](#onentererror)
+  * [`OnExitError`](#onexiterror)
+  * [`Options`](#options)
+  * [`Token`](#token)
+  * [`Transform`](#transform)
+  * [`Value`](#value)
+* [List of extensions](#list-of-extensions)
+* [Syntax](#syntax)
+* [Syntax tree](#syntax-tree)
+* [Types](#types)
+* [Compatibility](#compatibility)
+* [Security](#security)
+* [Related](#related)
+* [Contribute](#contribute)
+* [License](#license)
 
 ## What is this?
 
@@ -142,18 +142,18 @@ Turn markdown into a syntax tree.
 
 ###### Overloads
 
-*   `(value: Value, encoding: Encoding, options?: Options) => Root`
-*   `(value: Value, options?: Options) => Root`
+* `(value: Value, encoding: Encoding, options?: Options) => Root`
+* `(value: Value, options?: Options) => Root`
 
 ###### Parameters
 
-*   `value` ([`Value`][api-value])
-    — markdown to parse
-*   `encoding` ([`Encoding`][api-encoding], default: `'utf8'`)
-    — [character encoding][encoding] for when `value` is
-    [`Uint8Array`][uint8-array]
-*   `options` ([`Options`][api-options], optional)
-    — configuration
+* `value` ([`Value`][api-value])
+  — markdown to parse
+* `encoding` ([`Encoding`][api-encoding], default: `'utf8'`)
+  — [character encoding][encoding] for when `value` is
+  [`Uint8Array`][uint8-array]
+* `options` ([`Options`][api-options], optional)
+  — configuration
 
 ###### Returns
 
@@ -165,24 +165,24 @@ mdast compiler context (TypeScript type).
 
 ###### Fields
 
-*   `stack` ([`Array<Node>`][node])
-    — stack of nodes
-*   `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
-    — stack of tokens
-*   `data` ([`CompileData`][api-compile-data])
-    — info passed around; key/value store
-*   `buffer` (`() => undefined`)
-    — capture some of the output data
-*   `resume` (`() => string`)
-    — stop capturing and access the output data
-*   `enter` (`(node: Node, token: Token, onError?: OnEnterError) => undefined`)
-    — enter a node
-*   `exit` (`(token: Token, onError?: OnExitError) => undefined`)
-    — exit a node
-*   `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
-    — get the string value of a token
-*   `config` (`Required<Extension>`)
-    — configuration
+* `stack` ([`Array<Node>`][node])
+  — stack of nodes
+* `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
+  — stack of tokens
+* `data` ([`CompileData`][api-compile-data])
+  — info passed around; key/value store
+* `buffer` (`() => undefined`)
+  — capture some of the output data
+* `resume` (`() => string`)
+  — stop capturing and access the output data
+* `enter` (`(node: Node, token: Token, onError?: OnEnterError) => undefined`)
+  — enter a node
+* `exit` (`(token: Token, onError?: OnExitError) => undefined`)
+  — exit a node
+* `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
+  — get the string value of a token
+* `config` (`Required<Extension>`)
+  — configuration
 
 ### `CompileData`
 
@@ -225,14 +225,14 @@ type).
 
 ###### Properties
 
-*   `canContainEols` (`Array<string>`, optional)
-    — token types where line endings are used
-*   `enter` ([`Record<string, Handle>`][api-handle], optional)
-    — opening handles
-*   `exit` ([`Record<string, Handle>`][api-handle], optional)
-    — closing handles
-*   `transforms` ([`Array<Transform>`][api-transform], optional)
-    — tree transforms
+* `canContainEols` (`Array<string>`, optional)
+  — token types where line endings are used
+* `enter` ([`Record<string, Handle>`][api-handle], optional)
+  — opening handles
+* `exit` ([`Record<string, Handle>`][api-handle], optional)
+  — closing handles
+* `transforms` ([`Array<Transform>`][api-transform], optional)
+  — tree transforms
 
 ### `Handle`
 
@@ -240,10 +240,10 @@ Handle a token (TypeScript type).
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compile-context])
-    — context
-*   `token` ([`Token`][api-token])
-    — current token
+* `this` ([`CompileContext`][api-compile-context])
+  — context
+* `token` ([`Token`][api-token])
+  — current token
 
 ###### Returns
 
@@ -256,12 +256,12 @@ Handle the case where the `right` token is open, but it is closed (by the
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compile-context])
-    — context
-*   `left` ([`Token`][api-token] or `undefined`)
-    — left token
-*   `right` ([`Token`][api-token])
-    — right token
+* `this` ([`CompileContext`][api-compile-context])
+  — context
+* `left` ([`Token`][api-token] or `undefined`)
+  — left token
+* `right` ([`Token`][api-token])
+  — right token
 
 ###### Returns
 
@@ -274,12 +274,12 @@ exiting the `left` token (TypeScript type).
 
 ###### Parameters
 
-*   `this` ([`CompileContext`][api-compile-context])
-    — context
-*   `left` ([`Token`][api-token])
-    — left token
-*   `right` ([`Token`][api-token])
-    — right token
+* `this` ([`CompileContext`][api-compile-context])
+  — context
+* `left` ([`Token`][api-token])
+  — left token
+* `right` ([`Token`][api-token])
+  — right token
 
 ###### Returns
 
@@ -291,11 +291,11 @@ Configuration (TypeScript type).
 
 ###### Properties
 
-*   `extensions` ([`Array<MicromarkExtension>`][micromark-extension], optional)
-    — micromark extensions to change how markdown is parsed
-*   `mdastExtensions` ([`Array<Extension | Array<Extension>>`][api-extension],
-    optional)
-    — extensions for this utility to change how tokens are turned into a tree
+* `extensions` ([`Array<MicromarkExtension>`][micromark-extension], optional)
+  — micromark extensions to change how markdown is parsed
+* `mdastExtensions` ([`Array<Extension | Array<Extension>>`][api-extension],
+  optional)
+  — extensions for this utility to change how tokens are turned into a tree
 
 ### `Token`
 
@@ -313,8 +313,8 @@ Extra transform, to change the AST afterwards (TypeScript type).
 
 ###### Parameters
 
-*   `tree` ([`Root`][root])
-    — tree to transform
+* `tree` ([`Root`][root])
+  — tree to transform
 
 ###### Returns
 
@@ -334,32 +334,32 @@ type Value = Uint8Array | string
 
 ## List of extensions
 
-*   [`syntax-tree/mdast-util-directive`](https://github.com/syntax-tree/mdast-util-directive)
-    — directives
-*   [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
-    — frontmatter (YAML, TOML, more)
-*   [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
-    — GFM
-*   [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
-    — GFM autolink literals
-*   [`syntax-tree/mdast-util-gfm-footnote`](https://github.com/syntax-tree/mdast-util-gfm-footnote)
-    — GFM footnotes
-*   [`syntax-tree/mdast-util-gfm-strikethrough`](https://github.com/syntax-tree/mdast-util-gfm-strikethrough)
-    — GFM strikethrough
-*   [`syntax-tree/mdast-util-gfm-table`](https://github.com/syntax-tree/mdast-util-gfm-table)
-    — GFM tables
-*   [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
-    — GFM task list items
-*   [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
-    — math
-*   [`syntax-tree/mdast-util-mdx`](https://github.com/syntax-tree/mdast-util-mdx)
-    — MDX
-*   [`syntax-tree/mdast-util-mdx-expression`](https://github.com/syntax-tree/mdast-util-mdx-expression)
-    — MDX expressions
-*   [`syntax-tree/mdast-util-mdx-jsx`](https://github.com/syntax-tree/mdast-util-mdx-jsx)
-    — MDX JSX
-*   [`syntax-tree/mdast-util-mdxjs-esm`](https://github.com/syntax-tree/mdast-util-mdxjs-esm)
-    — MDX ESM
+* [`syntax-tree/mdast-util-directive`](https://github.com/syntax-tree/mdast-util-directive)
+  — directives
+* [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
+  — frontmatter (YAML, TOML, more)
+* [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
+  — GFM
+* [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
+  — GFM autolink literals
+* [`syntax-tree/mdast-util-gfm-footnote`](https://github.com/syntax-tree/mdast-util-gfm-footnote)
+  — GFM footnotes
+* [`syntax-tree/mdast-util-gfm-strikethrough`](https://github.com/syntax-tree/mdast-util-gfm-strikethrough)
+  — GFM strikethrough
+* [`syntax-tree/mdast-util-gfm-table`](https://github.com/syntax-tree/mdast-util-gfm-table)
+  — GFM tables
+* [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
+  — GFM task list items
+* [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
+  — math
+* [`syntax-tree/mdast-util-mdx`](https://github.com/syntax-tree/mdast-util-mdx)
+  — MDX
+* [`syntax-tree/mdast-util-mdx-expression`](https://github.com/syntax-tree/mdast-util-mdx-expression)
+  — MDX expressions
+* [`syntax-tree/mdast-util-mdx-jsx`](https://github.com/syntax-tree/mdast-util-mdx-jsx)
+  — MDX JSX
+* [`syntax-tree/mdast-util-mdxjs-esm`](https://github.com/syntax-tree/mdast-util-mdxjs-esm)
+  — MDX ESM
 
 ## Syntax
 
@@ -407,12 +407,12 @@ When going to HTML, use this utility in combination with
 
 ## Related
 
-*   [`syntax-tree/mdast-util-to-markdown`](https://github.com/syntax-tree/mdast-util-to-markdown)
-    — serialize mdast as markdown
-*   [`micromark/micromark`](https://github.com/micromark/micromark)
-    — parse markdown
-*   [`remarkjs/remark`](https://github.com/remarkjs/remark)
-    — process markdown
+* [`syntax-tree/mdast-util-to-markdown`](https://github.com/syntax-tree/mdast-util-to-markdown)
+  — serialize mdast as markdown
+* [`micromark/micromark`](https://github.com/micromark/micromark)
+  — parse markdown
+* [`remarkjs/remark`](https://github.com/remarkjs/remark)
+  — process markdown
 
 ## Contribute
 

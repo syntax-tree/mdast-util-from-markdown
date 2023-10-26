@@ -176,7 +176,9 @@ export function fromMarkdown(value, encoding, options) {
 
   return compiler(options)(
     postprocess(
-      parse(options).document().write(preprocess()(value, encoding, true))
+      parse(options)
+        .document()
+        .write(preprocess()(value, encoding, true))
     )
   )
 }
