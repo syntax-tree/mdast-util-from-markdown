@@ -54,9 +54,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "c8": "^8.0.0",
+    "c8": "^9.0.0",
     "commonmark.json": "^0.30.0",
-    "esbuild": "^0.19.0",
+    "esbuild": "^0.21.0",
     "gzip-size-cli": "^5.0.0",
     "hast-util-from-html": "^2.0.0",
     "hast-util-to-html": "^9.0.0",
@@ -64,12 +64,11 @@
     "micromark-build": "^2.0.0",
     "prettier": "^3.0.0",
     "remark-cli": "^12.0.0",
-    "remark-gfm": "^4.0.0",
-    "remark-preset-wooorm": "^9.0.0",
+    "remark-preset-wooorm": "^10.0.0",
     "terser": "^5.0.0",
     "type-coverage": "^2.0.0",
     "typescript": "^5.0.0",
-    "xo": "^0.56.0"
+    "xo": "^0.58.0"
   },
   "scripts": {
     "prepack": "npm run build && npm run format",
@@ -91,16 +90,7 @@
   },
   "remarkConfig": {
     "plugins": [
-      "remark-preset-wooorm",
-      [
-        "remark-preset-wooorm/node_modules/remark-gfm/index.js",
-        false
-      ],
-      [
-        "remark-lint-list-item-indent",
-        "space"
-      ],
-      "remark-gfm"
+      "remark-preset-wooorm"
     ]
   },
   "typeCoverage": {

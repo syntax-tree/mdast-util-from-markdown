@@ -1023,8 +1023,8 @@ test('fixtures', async function (t) {
 
     await t.test(stem, async function () {
       const fp = new URL(stem + '.json', base)
-      const doc = await fs.readFile(new URL(file, base))
-      const actual = fromMarkdown(doc)
+      const document = await fs.readFile(new URL(file, base))
+      const actual = fromMarkdown(document)
       /** @type {Root} */
       let expected
 
