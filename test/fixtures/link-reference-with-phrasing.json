@@ -36,8 +36,8 @@
               "offset": 7
             }
           },
-          "identifier": "`f`",
           "label": "`f`",
+          "identifier": "`f`",
           "referenceType": "collapsed"
         },
         {
@@ -70,8 +70,8 @@
                 },
                 "end": {
                   "line": 2,
-                  "column": 7,
-                  "offset": 14
+                  "column": 8,
+                  "offset": 15
                 }
               }
             }
@@ -88,8 +88,8 @@
               "offset": 18
             }
           },
-          "identifier": "&semi;",
           "label": ";",
+          "identifier": "&semi;",
           "referenceType": "collapsed"
         },
         {
@@ -140,8 +140,8 @@
               "offset": 25
             }
           },
-          "identifier": "\\;",
           "label": ";",
+          "identifier": "\\;",
           "referenceType": "collapsed"
         },
         {
@@ -192,8 +192,8 @@
               "offset": 31
             }
           },
-          "identifier": ";",
           "label": ";",
+          "identifier": ";",
           "referenceType": "collapsed"
         },
         {
@@ -242,8 +242,8 @@
                 },
                 "end": {
                   "line": 5,
-                  "column": 10,
-                  "offset": 41
+                  "column": 11,
+                  "offset": 42
                 }
               }
             }
@@ -260,8 +260,8 @@
               "offset": 45
             }
           },
-          "identifier": "`f`&semi;",
           "label": "`f`;",
+          "identifier": "`f`&semi;",
           "referenceType": "collapsed"
         },
         {
@@ -328,8 +328,8 @@
               "offset": 55
             }
           },
-          "identifier": "`f`\\;",
           "label": "`f`;",
+          "identifier": "`f`\\;",
           "referenceType": "collapsed"
         },
         {
@@ -396,8 +396,8 @@
               "offset": 64
             }
           },
-          "identifier": "`f`;",
           "label": "`f`;",
+          "identifier": "`f`;",
           "referenceType": "collapsed"
         }
       ],

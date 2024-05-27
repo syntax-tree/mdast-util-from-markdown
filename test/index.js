@@ -4,6 +4,7 @@
 
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
+import process from 'node:process'
 import test from 'node:test'
 import {commonmark} from 'commonmark.json'
 import {fromHtml} from 'hast-util-from-html'
@@ -1029,6 +1030,10 @@ test('fixtures', async function (t) {
       let expected
 
       try {
+        if ('UPDATE' in process.env) {
+          throw new Error('Update')
+        }
+
         expected = JSON.parse(String(await fs.readFile(fp)))
       } catch {
         // New fixture.

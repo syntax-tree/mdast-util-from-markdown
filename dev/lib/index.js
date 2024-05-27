@@ -247,6 +247,7 @@ function compiler(options) {
       characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
       characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
       characterReferenceValue: onexitcharacterreferencevalue,
+      characterReference: onexitcharacterreference,
       codeFenced: closer(onexitcodefenced),
       codeFencedFence: onexitcodefencedfence,
       codeFencedFenceInfo: onexitcodefencedfenceinfo,
@@ -1201,11 +1202,20 @@ function compiler(options) {
       value = result
     }
 
+    const tail = this.stack[this.stack.length - 1]
+    assert(tail, 'expected `node`')
+    assert('value' in tail, 'expected `node.value`')
+    tail.value += value
+  }
+
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
+  function onexitcharacterreference(token) {
     const tail = this.stack.pop()
     assert(tail, 'expected `node`')
     assert(tail.position, 'expected `node.position`')
-    assert('value' in tail, 'expected `node.value`')
-    tail.value += value
     tail.position.end = point(token.end)
   }
 
