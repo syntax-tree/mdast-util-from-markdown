@@ -14,7 +14,6 @@
  *   List,
  *   Nodes,
  *   Paragraph,
- *   Parent,
  *   PhrasingContent,
  *   ReferenceType,
  *   Root,
@@ -25,113 +24,19 @@
  * @import {
  *   Encoding,
  *   Event,
- *   ParseOptions,
- *   TokenizeContext,
  *   Token,
  *   Value
  * } from 'micromark-util-types'
  * @import {Point} from 'unist'
- * @import {CompileData} from 'mdast-util-from-markdown'
- */
-
-/**
- * @typedef {Omit<Parent, 'children' | 'type'> & {type: 'fragment', children: Array<PhrasingContent>}} Fragment
- */
-
-/**
- * @callback Transform
- *   Extra transform, to change the AST afterwards.
- * @param {Root} tree
- *   Tree to transform.
- * @returns {Root | null | undefined | void}
- *   New tree or nothing (in which case the current tree is used).
- *
- * @callback Handle
- *   Handle a token.
- * @param {CompileContext} this
- *   Context.
- * @param {Token} token
- *   Current token.
- * @returns {undefined | void}
- *   Nothing.
- *
- * @typedef {Record<string, Handle>} Handles
- *   Token types mapping to handles
- *
- * @callback OnEnterError
- *   Handle the case where the `right` token is open, but it is closed (by the
- *   `left` token) or because we reached the end of the document.
- * @param {Omit<CompileContext, 'sliceSerialize'>} this
- *   Context.
- * @param {Token | undefined} left
- *   Left token.
- * @param {Token} right
- *   Right token.
- * @returns {undefined}
- *   Nothing.
- *
- * @callback OnExitError
- *   Handle the case where the `right` token is open but it is closed by
- *   exiting the `left` token.
- * @param {Omit<CompileContext, 'sliceSerialize'>} this
- *   Context.
- * @param {Token} left
- *   Left token.
- * @param {Token} right
- *   Right token.
- * @returns {undefined}
- *   Nothing.
- *
- * @typedef {[Token, OnEnterError | undefined]} TokenTuple
- *   Open token on the stack, with an optional error handler for when
- *   that token isn’t closed properly.
- */
-
-/**
- * @typedef Config
- *   Configuration.
- *
- *   We have our defaults, but extensions will add more.
- * @property {Array<string>} canContainEols
- *   Token types where line endings are used.
- * @property {Handles} enter
- *   Opening handles.
- * @property {Handles} exit
- *   Closing handles.
- * @property {Array<Transform>} transforms
- *   Tree transforms.
- *
- * @typedef {Partial<Config>} Extension
- *   Change how markdown tokens from micromark are turned into mdast.
- *
- * @typedef CompileContext
- *   mdast compiler context.
- * @property {Array<Fragment | Nodes>} stack
- *   Stack of nodes.
- * @property {Array<TokenTuple>} tokenStack
- *   Stack of tokens.
- * @property {(this: CompileContext) => undefined} buffer
- *   Capture some of the output data.
- * @property {(this: CompileContext) => string} resume
- *   Stop capturing and access the output data.
- * @property {(this: CompileContext, node: Nodes, token: Token, onError?: OnEnterError) => undefined} enter
- *   Enter a node.
- * @property {(this: CompileContext, token: Token, onError?: OnExitError) => undefined} exit
- *   Exit a node.
- * @property {TokenizeContext['sliceSerialize']} sliceSerialize
- *   Get the string value of a token.
- * @property {Config} config
- *   Configuration.
- * @property {CompileData} data
- *   Info passed around; key/value store.
- *
- * @typedef FromMarkdownOptions
- *   Configuration for how to build mdast.
- * @property {Array<Extension | Array<Extension>> | null | undefined} [mdastExtensions]
- *   Extensions for this utility to change how tokens are turned into a tree.
- *
- * @typedef {ParseOptions & FromMarkdownOptions} Options
- *   Configuration.
+ * @import {
+ *   CompileContext,
+ *   CompileData,
+ *   Config,
+ *   Extension,
+ *   Handle,
+ *   OnEnterError,
+ *   Options
+ * } from './types.js'
  */
 
 import {ok as assert} from 'devlop'
@@ -562,24 +467,14 @@ function compiler(options) {
   }
 
   /**
-   * @this {CompileContext}
-   * @returns {undefined}
+   * @type {CompileContext['buffer']}
    */
   function buffer() {
     this.stack.push({type: 'fragment', children: []})
   }
 
   /**
-   * @this {CompileContext}
-   *   Context.
-   * @param {Nodes} node
-   *   Node to enter.
-   * @param {Token} token
-   *   Corresponding token.
-   * @param {OnEnterError | undefined} [errorHandler]
-   *   Handle the case where this token is open, but it is closed by something else.
-   * @returns {undefined}
-   *   Nothing.
+   * @type {CompileContext['enter']}
    */
   function enter(node, token, errorHandler) {
     const parent = this.stack[this.stack.length - 1]
@@ -589,7 +484,7 @@ function compiler(options) {
     const siblings = parent.children
     siblings.push(node)
     this.stack.push(node)
-    this.tokenStack.push([token, errorHandler])
+    this.tokenStack.push([token, errorHandler || undefined])
     node.position = {
       start: point(token.start),
       // @ts-expect-error: `end` will be patched later.
@@ -620,14 +515,7 @@ function compiler(options) {
   }
 
   /**
-   * @this {CompileContext}
-   *   Context.
-   * @param {Token} token
-   *   Corresponding token.
-   * @param {OnExitError | undefined} [onExitError]
-   *   Handle the case where another token is open.
-   * @returns {undefined}
-   *   Nothing.
+   * @type {CompileContext['exit']}
    */
   function exit(token, onExitError) {
     const node = this.stack.pop()
@@ -657,8 +545,7 @@ function compiler(options) {
   }
 
   /**
-   * @this {CompileContext}
-   * @returns {string}
+   * @type {CompileContext['resume']}
    */
   function resume() {
     return toString(this.stack.pop())

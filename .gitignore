@@ -8,4 +8,5 @@
 coverage/
 node_modules/
 yarn.lock
+!/dev/lib/types.d.ts
 !/dev/index.d.ts
