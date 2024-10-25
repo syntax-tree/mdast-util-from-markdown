@@ -1,36 +1,37 @@
 /**
- * @typedef {import('mdast').Break} Break
- * @typedef {import('mdast').Blockquote} Blockquote
- * @typedef {import('mdast').Code} Code
- * @typedef {import('mdast').Definition} Definition
- * @typedef {import('mdast').Emphasis} Emphasis
- * @typedef {import('mdast').Heading} Heading
- * @typedef {import('mdast').Html} Html
- * @typedef {import('mdast').Image} Image
- * @typedef {import('mdast').InlineCode} InlineCode
- * @typedef {import('mdast').Link} Link
- * @typedef {import('mdast').List} List
- * @typedef {import('mdast').ListItem} ListItem
- * @typedef {import('mdast').Nodes} Nodes
- * @typedef {import('mdast').Paragraph} Paragraph
- * @typedef {import('mdast').Parent} Parent
- * @typedef {import('mdast').PhrasingContent} PhrasingContent
- * @typedef {import('mdast').ReferenceType} ReferenceType
- * @typedef {import('mdast').Root} Root
- * @typedef {import('mdast').Strong} Strong
- * @typedef {import('mdast').Text} Text
- * @typedef {import('mdast').ThematicBreak} ThematicBreak
- *
- * @typedef {import('micromark-util-types').Encoding} Encoding
- * @typedef {import('micromark-util-types').Event} Event
- * @typedef {import('micromark-util-types').ParseOptions} ParseOptions
- * @typedef {import('micromark-util-types').Token} Token
- * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
- * @typedef {import('micromark-util-types').Value} Value
- *
- * @typedef {import('unist').Point} Point
- *
- * @typedef {import('../index.js').CompileData} CompileData
+ * @import {
+ *   Break,
+ *   Blockquote,
+ *   Code,
+ *   Definition,
+ *   Emphasis,
+ *   Heading,
+ *   Html,
+ *   Image,
+ *   InlineCode,
+ *   Link,
+ *   ListItem,
+ *   List,
+ *   Nodes,
+ *   Paragraph,
+ *   Parent,
+ *   PhrasingContent,
+ *   ReferenceType,
+ *   Root,
+ *   Strong,
+ *   Text,
+ *   ThematicBreak
+ * } from 'mdast'
+ * @import {
+ *   Encoding,
+ *   Event,
+ *   ParseOptions,
+ *   TokenizeContext,
+ *   Token,
+ *   Value
+ * } from 'micromark-util-types'
+ * @import {Point} from 'unist'
+ * @import {CompileData} from 'mdast-util-from-markdown'
  */
 
 /**

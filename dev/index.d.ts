@@ -1,14 +1,12 @@
+export type {Encoding, Token, Value} from 'micromark-util-types'
 export type {
   CompileContext,
-  Encoding,
   Extension,
   Handle,
   OnEnterError,
   OnExitError,
   Options,
-  Token,
-  Transform,
-  Value
+  Transform
 } from './lib/index.js'
 
 export {fromMarkdown} from './lib/index.js'

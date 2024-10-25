@@ -1,5 +1,5 @@
 /**
- * @typedef {import('mdast').Root} Root
+ * @import {Root} from 'mdast'
  */
 
 import assert from 'node:assert/strict'
