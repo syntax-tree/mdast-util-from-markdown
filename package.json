@@ -35,7 +35,7 @@
     "terser": "^5.0.0",
     "type-coverage": "^2.0.0",
     "typescript": "^5.0.0",
-    "xo": "^0.59.0"
+    "xo": "^0.60.0"
   },
   "exports": {
     "development": "./dev/index.js",
