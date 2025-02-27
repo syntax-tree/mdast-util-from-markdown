@@ -1,14 +1,11 @@
 # mdast-util-from-markdown
 
-[![Build][build-badge]][build]
-[![Coverage][coverage-badge]][coverage]
-[![Downloads][downloads-badge]][downloads]
-[![Size][size-badge]][size]
-[![Sponsors][sponsors-badge]][collective]
-[![Backers][backers-badge]][collective]
-[![Chat][chat-badge]][chat]
+[![Build][badge-build-image]][badge-build-url]
+[![Coverage][badge-coverage-image]][badge-coverage-url]
+[![Downloads][badge-downloads-image]][badge-downloads-url]
+[![Size][badge-size-image]][badge-size-url]
 
-**[mdast][]** utility that turns markdown into a syntax tree.
+**[mdast][github-mdast]** utility that turns markdown into a syntax tree.
 
 ## Contents
 
@@ -42,33 +39,36 @@
 ## What is this?
 
 This package is a utility that takes markdown input and turns it into an
-[mdast][] syntax tree.
+[mdast][github-mdast] syntax tree.
 
-This utility uses [`micromark`][micromark], which turns markdown into tokens,
+This utility uses [`micromark`][github-micromark],
+which turns markdown into tokens,
 and then turns those tokens into nodes.
-This package is used inside [`remark-parse`][remark-parse], which focusses on
+This package is used inside [`remark-parse`][github-remark-parse],
+which focusses on
 making it easier to transform content by abstracting these internals away.
 
 ## When should I use this?
 
 If you want to handle syntax trees manually, use this.
-When you *just* want to turn markdown into HTML, use [`micromark`][micromark]
-instead.
-For an easier time processing content, use the **[remark][]** ecosystem instead.
+When you *just* want to turn markdown into HTML,
+use [`micromark`][github-micromark] instead.
+For an easier time processing content,
+use the **[remark][github-remark]** ecosystem instead.
 
 You can combine this package with other packages to add syntax extensions to
 markdown.
 Notable examples that deeply integrate with this package are
-[`mdast-util-gfm`][mdast-util-gfm],
-[`mdast-util-mdx`][mdast-util-mdx],
-[`mdast-util-frontmatter`][mdast-util-frontmatter],
-[`mdast-util-math`][mdast-util-math], and
-[`mdast-util-directive`][mdast-util-directive].
+[`mdast-util-mdx`][github-mdast-util-mdx],
+[`mdast-util-gfm`][github-mdast-util-gfm],
+[`mdast-util-frontmatter`][github-mdast-util-frontmatter],
+[`mdast-util-math`][github-mdast-util-math], and
+[`mdast-util-directive`][github-mdast-util-directive].
 
 ## Install
 
-This package is [ESM only][esm].
-In Node.js (version 16+), install with [npm][]:
+This package is [ESM only][github-gist-esm].
+In Node.js (version 16+), install with [npm][npmjs-install]:
 
 ```sh
 npm install mdast-util-from-markdown
@@ -132,7 +132,7 @@ console.log(tree)
 This package exports the identifier [`fromMarkdown`][api-from-markdown].
 There is no default export.
 
-The export map supports the [`development` condition][development].
+The export map supports the [`development` condition][node-packages-conditions].
 Run `node --conditions development example.js` to get instrumented dev code.
 Without this condition, production code is loaded.
 
@@ -150,14 +150,14 @@ Turn markdown into a syntax tree.
 * `value` ([`Value`][api-value])
   — markdown to parse
 * `encoding` ([`Encoding`][api-encoding], default: `'utf8'`)
-  — [character encoding][encoding] for when `value` is
-  [`Uint8Array`][uint8-array]
+  — [character encoding][node-util-encoding] for when `value` is
+  [`Uint8Array`][mozilla-uint8-array]
 * `options` ([`Options`][api-options], optional)
   — configuration
 
 ###### Returns
 
-mdast tree ([`Root`][root]).
+mdast tree ([`Root`][github-mdast-root]).
 
 ### `CompileContext`
 
@@ -165,7 +165,7 @@ mdast compiler context (TypeScript type).
 
 ###### Fields
 
-* `stack` ([`Array<Node>`][node])
+* `stack` ([`Array<Node>`][github-mdast-nodes])
   — stack of nodes
 * `tokenStack` (`Array<[Token, OnEnterError | undefined]>`)
   — stack of tokens
@@ -208,9 +208,10 @@ declare module 'mdast-util-from-markdown' {
 
 ### `Encoding`
 
-Encodings supported by the [`Uint8Array`][uint8-array] class (TypeScript type).
+Encodings supported by the [`Uint8Array`][mozilla-uint8-array] class
+(TypeScript type).
 
-See [`micromark`][micromark-api] for more info.
+See [`micromark`][github-micromark-api] for more info.
 
 ###### Type
 
@@ -291,9 +292,11 @@ Configuration (TypeScript type).
 
 ###### Properties
 
-* `extensions` ([`Array<MicromarkExtension>`][micromark-extension], optional)
+* `extensions`
+  ([`Array<MicromarkExtension>`][github-micromark-extension], optional)
   — micromark extensions to change how markdown is parsed
-* `mdastExtensions` ([`Array<Extension | Array<Extension>>`][api-extension],
+* `mdastExtensions`
+  ([`Array<Extension | Array<Extension>>`][api-extension],
   optional)
   — extensions for this utility to change how tokens are turned into a tree
 
@@ -313,18 +316,19 @@ Extra transform, to change the AST afterwards (TypeScript type).
 
 ###### Parameters
 
-* `tree` ([`Root`][root])
+* `tree` ([`Root`][github-mdast-root])
   — tree to transform
 
 ###### Returns
 
-New tree ([`Root`][root]) or nothing (in which case the current tree is used).
+New tree ([`Root`][github-mdast-root]) or nothing
+(in which case the current tree is used).
 
 ### `Value`
 
 Contents of the file (TypeScript type).
 
-See [`micromark`][micromark-api] for more info.
+See [`micromark`][github-micromark-api] for more info.
 
 ###### Type
 
@@ -334,11 +338,11 @@ type Value = Uint8Array | string
 
 ## List of extensions
 
-* [`syntax-tree/mdast-util-directive`](https://github.com/syntax-tree/mdast-util-directive)
+* [`syntax-tree/mdast-util-directive`][github-mdast-util-directive]
   — directives
-* [`syntax-tree/mdast-util-frontmatter`](https://github.com/syntax-tree/mdast-util-frontmatter)
+* [`syntax-tree/mdast-util-frontmatter`][github-mdast-util-frontmatter]
   — frontmatter (YAML, TOML, more)
-* [`syntax-tree/mdast-util-gfm`](https://github.com/syntax-tree/mdast-util-gfm)
+* [`syntax-tree/mdast-util-gfm`][github-mdast-util-gfm]
   — GFM
 * [`syntax-tree/mdast-util-gfm-autolink-literal`](https://github.com/syntax-tree/mdast-util-gfm-autolink-literal)
   — GFM autolink literals
@@ -350,9 +354,9 @@ type Value = Uint8Array | string
   — GFM tables
 * [`syntax-tree/mdast-util-gfm-task-list-item`](https://github.com/syntax-tree/mdast-util-gfm-task-list-item)
   — GFM task list items
-* [`syntax-tree/mdast-util-math`](https://github.com/syntax-tree/mdast-util-math)
+* [`syntax-tree/mdast-util-math`][github-mdast-util-math]
   — math
-* [`syntax-tree/mdast-util-mdx`](https://github.com/syntax-tree/mdast-util-mdx)
+* [`syntax-tree/mdast-util-mdx`][github-mdast-util-mdx]
   — MDX
 * [`syntax-tree/mdast-util-mdx-expression`](https://github.com/syntax-tree/mdast-util-mdx-expression)
   — MDX expressions
@@ -366,16 +370,18 @@ type Value = Uint8Array | string
 Markdown is parsed according to CommonMark.
 Extensions can add support for other syntax.
 If you’re interested in extending markdown,
-[more information is available in micromark’s readme][micromark-extension].
+[more information is available in micromark’s
+readme][github-micromark-extension].
 
 ## Syntax tree
 
-The syntax tree is [mdast][].
+The syntax tree is [mdast][github-mdast].
 
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports the additional types [`CompileContext`][api-compile-context],
+It exports the additional types
+[`CompileContext`][api-compile-context],
 [`CompileData`][api-compile-data],
 [`Encoding`][api-encoding],
 [`Extension`][api-extension],
@@ -400,119 +406,37 @@ This means we try to keep the current release line,
 ## Security
 
 As markdown is sometimes used for HTML, and improper use of HTML can open you up
-to a [cross-site scripting (XSS)][xss] attack, use of `mdast-util-from-markdown`
+to a [cross-site scripting (XSS)][wikipedia-xss] attack, use of `mdast-util-from-markdown`
 can also be unsafe.
 When going to HTML, use this utility in combination with
-[`hast-util-sanitize`][hast-util-sanitize] to make the tree safe.
+[`hast-util-sanitize`][github-hast-util-sanitize] to make the tree safe.
 
 ## Related
 
 * [`syntax-tree/mdast-util-to-markdown`](https://github.com/syntax-tree/mdast-util-to-markdown)
   — serialize mdast as markdown
-* [`micromark/micromark`](https://github.com/micromark/micromark)
+* [`micromark/micromark`][github-micromark]
   — parse markdown
-* [`remarkjs/remark`](https://github.com/remarkjs/remark)
+* [`remarkjs/remark`][github-remark]
   — process markdown
 
 ## Contribute
 
-See [`contributing.md`][contributing] in [`syntax-tree/.github`][health] for
-ways to get started.
-See [`support.md`][support] for ways to get help.
+See [`contributing.md`][health-contributing]
+in
+[`syntax-tree/.github`][health]
+for ways to get started.
+See [`support.md`][health-support] for ways to get help.
 
-This project has a [code of conduct][coc].
+This project has a [code of conduct][health-coc].
 By interacting with this repository, organization, or community you agree to
 abide by its terms.
 
 ## License
 
-[MIT][license] © [Titus Wormer][author]
+[MIT][file-license] © [Titus Wormer][wooorm]
 
 <!-- Definitions -->
-
-[build-badge]: https://github.com/syntax-tree/mdast-util-from-markdown/workflows/main/badge.svg
-
-[build]: https://github.com/syntax-tree/mdast-util-from-markdown/actions
-
-[coverage-badge]: https://img.shields.io/codecov/c/github/syntax-tree/mdast-util-from-markdown.svg
-
-[coverage]: https://codecov.io/github/syntax-tree/mdast-util-from-markdown
-
-[downloads-badge]: https://img.shields.io/npm/dm/mdast-util-from-markdown.svg
-
-[downloads]: https://www.npmjs.com/package/mdast-util-from-markdown
-
-[size-badge]: https://img.shields.io/badge/dynamic/json?label=minzipped%20size&query=$.size.compressedSize&url=https://deno.bundlejs.com/?q=mdast-util-from-markdown
-
-[size]: https://bundlejs.com/?q=mdast-util-from-markdown
-
-[sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
-
-[backers-badge]: https://opencollective.com/unified/backers/badge.svg
-
-[collective]: https://opencollective.com/unified
-
-[chat-badge]: https://img.shields.io/badge/chat-discussions-success.svg
-
-[chat]: https://github.com/syntax-tree/unist/discussions
-
-[npm]: https://docs.npmjs.com/cli/install
-
-[esmsh]: https://esm.sh
-
-[license]: license
-
-[author]: https://wooorm.com
-
-[health]: https://github.com/syntax-tree/.github
-
-[contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
-
-[support]: https://github.com/syntax-tree/.github/blob/main/support.md
-
-[coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
-
-[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
-
-[typescript]: https://www.typescriptlang.org
-
-[mdast]: https://github.com/syntax-tree/mdast
-
-[node]: https://github.com/syntax-tree/mdast#nodes
-
-[mdast-util-gfm]: https://github.com/syntax-tree/mdast-util-gfm
-
-[mdast-util-mdx]: https://github.com/syntax-tree/mdast-util-mdx
-
-[mdast-util-frontmatter]: https://github.com/syntax-tree/mdast-util-frontmatter
-
-[mdast-util-math]: https://github.com/syntax-tree/mdast-util-math
-
-[mdast-util-directive]: https://github.com/syntax-tree/mdast-util-directive
-
-[root]: https://github.com/syntax-tree/mdast#root
-
-[uint8-array]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
-
-[encoding]: https://nodejs.org/api/util.html#whatwg-supported-encodings
-
-[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
-
-[hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
-
-[micromark]: https://github.com/micromark/micromark
-
-[micromark-api]: https://github.com/micromark/micromark/tree/main/packages/micromark#micromarkvalue-encoding-options
-
-[micromark-extension]: https://github.com/micromark/micromark#extensions
-
-[remark]: https://github.com/remarkjs/remark
-
-[remark-parse]: https://github.com/remarkjs/remark/tree/main/packages/remark-parse
-
-[development]: https://nodejs.org/api/packages.html#packages_resolving_user_conditions
-
-[api-from-markdown]: #frommarkdownvalue-encoding-options
 
 [api-compile-context]: #compilecontext
 
@@ -521,6 +445,8 @@ abide by its terms.
 [api-encoding]: #encoding
 
 [api-extension]: #extension
+
+[api-from-markdown]: #frommarkdownvalue-encoding-options
 
 [api-handle]: #handle
 
@@ -535,3 +461,75 @@ abide by its terms.
 [api-transform]: #transform
 
 [api-value]: #value
+
+[badge-build-image]: https://github.com/syntax-tree/mdast-util-from-markdown/workflows/main/badge.svg
+
+[badge-build-url]: https://github.com/syntax-tree/mdast-util-from-markdown/actions
+
+[badge-coverage-image]: https://img.shields.io/codecov/c/github/syntax-tree/mdast-util-from-markdown.svg
+
+[badge-coverage-url]: https://codecov.io/github/syntax-tree/mdast-util-from-markdown
+
+[badge-downloads-image]: https://img.shields.io/npm/dm/mdast-util-from-markdown.svg
+
+[badge-downloads-url]: https://www.npmjs.com/package/mdast-util-from-markdown
+
+[badge-size-image]: https://img.shields.io/bundlejs/size/mdast-util-from-markdown
+
+[badge-size-url]: https://bundlejs.com/?q=mdast-util-from-markdown
+
+[esmsh]: https://esm.sh
+
+[file-license]: license
+
+[github-gist-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[github-hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
+
+[github-mdast]: https://github.com/syntax-tree/mdast
+
+[github-mdast-nodes]: https://github.com/syntax-tree/mdast#nodes
+
+[github-mdast-root]: https://github.com/syntax-tree/mdast#root
+
+[github-mdast-util-directive]: https://github.com/syntax-tree/mdast-util-directive
+
+[github-mdast-util-frontmatter]: https://github.com/syntax-tree/mdast-util-frontmatter
+
+[github-mdast-util-gfm]: https://github.com/syntax-tree/mdast-util-gfm
+
+[github-mdast-util-math]: https://github.com/syntax-tree/mdast-util-math
+
+[github-mdast-util-mdx]: https://github.com/syntax-tree/mdast-util-mdx
+
+[github-micromark]: https://github.com/micromark/micromark
+
+[github-micromark-api]: https://github.com/micromark/micromark/tree/main/packages/micromark#micromarkvalue-encoding-options
+
+[github-micromark-extension]: https://github.com/micromark/micromark#extensions
+
+[github-remark]: https://github.com/remarkjs/remark
+
+[github-remark-parse]: https://github.com/remarkjs/remark/tree/main/packages/remark-parse
+
+[health]: https://github.com/syntax-tree/.github
+
+[health-coc]: https://github.com/syntax-tree/.github/blob/main/code-of-conduct.md
+
+[health-contributing]: https://github.com/syntax-tree/.github/blob/main/contributing.md
+
+[health-support]: https://github.com/syntax-tree/.github/blob/main/support.md
+
+[mozilla-uint8-array]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+
+[node-packages-conditions]: https://nodejs.org/api/packages.html#packages_resolving_user_conditions
+
+[node-util-encoding]: https://nodejs.org/api/util.html#whatwg-supported-encodings
+
+[npmjs-install]: https://docs.npmjs.com/cli/install
+
+[typescript]: https://www.typescriptlang.org
+
+[wikipedia-xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
+
+[wooorm]: https://wooorm.com
