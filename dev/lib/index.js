@@ -239,7 +239,7 @@ function compiler(options) {
           listStack.push(index)
         } else {
           const tail = listStack.pop()
-          assert(typeof tail === 'number', 'expected list ot be open')
+          assert(typeof tail === 'number', 'expected list to be open')
           index = prepareList(events, tail, index)
         }
       }
