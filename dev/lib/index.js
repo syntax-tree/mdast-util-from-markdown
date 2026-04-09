@@ -307,6 +307,10 @@ function compiler(options) {
     let firstBlankLineIndex
     /** @type {boolean | undefined} */
     let atMarker
+    /** @type {Array<number>} */
+    const insertPositions = []
+    /** @type {Array<Event>} */
+    const insertEvents = []
 
     while (++index <= length) {
       const event = events[index]
@@ -371,7 +375,7 @@ function compiler(options) {
           let tailIndex = index
           lineIndex = undefined
 
-          while (tailIndex--) {
+          while (tailIndex-- > start) {
             const tailEvent = events[tailIndex]
 
             if (
@@ -413,9 +417,8 @@ function compiler(options) {
             lineIndex ? events[lineIndex][1].start : event[1].end
           )
 
-          events.splice(lineIndex || index, 0, ['exit', listItem, event[2]])
-          index++
-          length++
+          insertPositions.push(lineIndex || index)
+          insertEvents.push(['exit', listItem, event[2]])
         }
 
         // Create a new list item.
@@ -429,17 +432,44 @@ function compiler(options) {
             end: undefined
           }
           listItem = item
-          events.splice(index, 0, ['enter', item, event[2]])
-          index++
-          length++
+          insertPositions.push(index)
+          insertEvents.push(['enter', item, event[2]])
           firstBlankLineIndex = undefined
           atMarker = true
         }
       }
     }
 
+    // Apply deferred insertions in a single backward merge pass.
+    const insertCount = insertPositions.length
+
+    if (insertCount > 0) {
+      const previousLength = events.length
+      const rangeEnd = length
+      events.length = previousLength + insertCount
+
+      // Shift the tail (events after the list range) to make room.
+      for (let t = previousLength - 1; t > rangeEnd; t--) {
+        events[t + insertCount] = events[t]
+      }
+
+      // Merge original events with insertions, writing backwards.
+      let writeIndex = rangeEnd + insertCount
+      let readIndex = rangeEnd
+
+      for (let i = insertCount - 1; i >= 0; i--) {
+        const position = insertPositions[i]
+
+        while (readIndex >= position) {
+          events[writeIndex--] = events[readIndex--]
+        }
+
+        events[writeIndex--] = insertEvents[i]
+      }
+    }
+
     events[start][1]._spread = listSpread
-    return length
+    return length + insertCount
   }
 
   /**
