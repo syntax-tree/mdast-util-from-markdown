@@ -485,9 +485,8 @@ function compiler(options) {
 
         const rangeLength = length - start + 1
         /** @type {Array<Event>} */
-        const replacement = Array.from({
-          length: rangeLength + insertions.length
-        })
+        // eslint-disable-next-line unicorn/no-new-array
+        const replacement = new Array(rangeLength + insertions.length)
         let writeIndex = 0
         let insertionIndex = 0
         let sourceIndex = start
