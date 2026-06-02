@@ -66,6 +66,9 @@
   ],
   "license": "MIT",
   "name": "mdast-util-from-markdown",
+  "overrides": {
+    "yargs": "^18.0.0"
+  },
   "prettier": {
     "bracketSpacing": false,
     "semi": false,

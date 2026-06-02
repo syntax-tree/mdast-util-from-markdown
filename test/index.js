@@ -1089,6 +1089,59 @@ test('fromMarkdown', async function (t) {
       }
     })
   })
+
+  await t.test(
+    'should parse a wide list via the batched rebuild path',
+    async function () {
+      // 1000 items queue 2000 listItem insertions, well above
+      // SMALL_LIST_LIMIT, so prepareList rebuilds the events array. Spot-
+      // check the count and the last item's start.line so a misalignment
+      // bug in the suffix shift cannot pass on count alone.
+      const wideCount = 1000
+      const tree = fromMarkdown('- a\n'.repeat(wideCount))
+      if (tree.children[0].type !== 'list') throw new Error('expected list')
+      assert.equal(tree.children[0].children.length, wideCount)
+
+      const lastItemPosition = tree.children[0].children[wideCount - 1].position
+      if (!lastItemPosition) throw new Error('expected position')
+      assert.equal(lastItemPosition.start.line, wideCount)
+    }
+  )
+
+  await t.test(
+    'should produce the same first item in fast-path and rebuild-path tight lists',
+    async function () {
+      // 4 items queue 8 insertions (= SMALL_LIST_LIMIT) → fast splice path.
+      // 1000 items queue 2000 insertions → rebuild path. The first item
+      // must be structurally identical because per-item shape and position
+      // do not depend on list length.
+      const fast = fromMarkdown('- a\n'.repeat(4))
+      const rebuild = fromMarkdown('- a\n'.repeat(1000))
+      if (fast.children[0].type !== 'list') throw new Error('expected list')
+      if (rebuild.children[0].type !== 'list') throw new Error('expected list')
+      assert.deepEqual(
+        rebuild.children[0].children[0],
+        fast.children[0].children[0]
+      )
+    }
+  )
+
+  await t.test(
+    'should produce the same first item and infer spread in fast-path and rebuild-path loose lists',
+    async function () {
+      // Same as the tight test but with blank-separated items, so the
+      // list's spread should be inferred as true on both paths.
+      const fast = fromMarkdown('- a\n\n'.repeat(4))
+      const rebuild = fromMarkdown('- a\n\n'.repeat(1000))
+      if (fast.children[0].type !== 'list') throw new Error('expected list')
+      if (rebuild.children[0].type !== 'list') throw new Error('expected list')
+      assert.deepEqual(
+        rebuild.children[0].children[0],
+        fast.children[0].children[0]
+      )
+      assert.equal(rebuild.children[0].spread, true)
+    }
+  )
 })
 
 test('fixtures', async function (t) {
