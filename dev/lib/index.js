@@ -212,7 +212,7 @@ function compiler(options) {
    */
   function compile(events) {
     /** @type {Root} */
-    let tree = {type: 'root', children: []}
+    let tree = {type: 'root', children: [], position: undefined}
     /** @type {Omit<CompileContext, 'sliceSerialize'>} */
     const context = {
       stack: [tree],
@@ -1235,19 +1235,31 @@ function compiler(options) {
   // Creaters.
   //
 
+  // Each node factory pre-declares `position` as undefined as the trailing
+  // property. enter() patches it to a real value, but the property already
+  // exists, so V8 sees a single hidden class for each node type from
+  // construction through the rest of the pipeline. Without the pre-declare,
+  // each node took a hidden-class transition when enter() added position.
+
   /** @returns {Blockquote} */
   function blockQuote() {
-    return {type: 'blockquote', children: []}
+    return {type: 'blockquote', children: [], position: undefined}
   }
 
   /** @returns {Code} */
   function codeFlow() {
-    return {type: 'code', lang: null, meta: null, value: ''}
+    return {
+      type: 'code',
+      lang: null,
+      meta: null,
+      value: '',
+      position: undefined
+    }
   }
 
   /** @returns {InlineCode} */
   function codeText() {
-    return {type: 'inlineCode', value: ''}
+    return {type: 'inlineCode', value: '', position: undefined}
   }
 
   /** @returns {Definition} */
@@ -1257,13 +1269,14 @@ function compiler(options) {
       identifier: '',
       label: null,
       title: null,
-      url: ''
+      url: '',
+      position: undefined
     }
   }
 
   /** @returns {Emphasis} */
   function emphasis() {
-    return {type: 'emphasis', children: []}
+    return {type: 'emphasis', children: [], position: undefined}
   }
 
   /** @returns {Heading} */
@@ -1272,28 +1285,41 @@ function compiler(options) {
       type: 'heading',
       // @ts-expect-error `depth` will be set later.
       depth: 0,
-      children: []
+      children: [],
+      position: undefined
     }
   }
 
   /** @returns {Break} */
   function hardBreak() {
-    return {type: 'break'}
+    return {type: 'break', position: undefined}
   }
 
   /** @returns {Html} */
   function html() {
-    return {type: 'html', value: ''}
+    return {type: 'html', value: '', position: undefined}
   }
 
   /** @returns {Image} */
   function image() {
-    return {type: 'image', title: null, url: '', alt: null}
+    return {
+      type: 'image',
+      title: null,
+      url: '',
+      alt: null,
+      position: undefined
+    }
   }
 
   /** @returns {Link} */
   function link() {
-    return {type: 'link', title: null, url: '', children: []}
+    return {
+      type: 'link',
+      title: null,
+      url: '',
+      children: [],
+      position: undefined
+    }
   }
 
   /**
@@ -1306,7 +1332,8 @@ function compiler(options) {
       ordered: token.type === 'listOrdered',
       start: null,
       spread: token._spread,
-      children: []
+      children: [],
+      position: undefined
     }
   }
 
@@ -1319,28 +1346,29 @@ function compiler(options) {
       type: 'listItem',
       spread: token._spread,
       checked: null,
-      children: []
+      children: [],
+      position: undefined
     }
   }
 
   /** @returns {Paragraph} */
   function paragraph() {
-    return {type: 'paragraph', children: []}
+    return {type: 'paragraph', children: [], position: undefined}
   }
 
   /** @returns {Strong} */
   function strong() {
-    return {type: 'strong', children: []}
+    return {type: 'strong', children: [], position: undefined}
   }
 
   /** @returns {Text} */
   function text() {
-    return {type: 'text', value: ''}
+    return {type: 'text', value: '', position: undefined}
   }
 
   /** @returns {ThematicBreak} */
   function thematicBreak() {
-    return {type: 'thematicBreak'}
+    return {type: 'thematicBreak', position: undefined}
   }
 }
 
