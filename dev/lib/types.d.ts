@@ -3,6 +3,15 @@ import type {ParseOptions, Token} from 'micromark-util-types'
 
 /**
  * Compiler context.
+ *
+ * The object passed to handlers as `this` is scoped to a single handler
+ * call. A fresh object is constructed for every event in the dispatch loop,
+ * so handlers must not retain a `this` reference between events nor reassign
+ * its top-level fields and expect the change to leak into subsequent events.
+ * Cross-event state belongs in `this.data`, which is the shared key/value
+ * store described below; mutations through `this.stack`, `this.tokenStack`,
+ * and the `enter`/`exit`/`buffer`/`resume` helpers go to the same shared
+ * underlying objects and remain visible across events as before.
  */
 export interface CompileContext {
   /**

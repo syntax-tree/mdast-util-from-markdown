@@ -247,16 +247,32 @@ function compiler(options) {
 
     index = -1
 
+    // The handler this-binding receives the same fields as `context` plus a
+    // per-event `sliceSerialize`. Build the merged object as a stable-shape
+    // literal so V8 keeps a single hidden class for it and can inline the
+    // construction; the previous Object.assign({sliceSerialize: ...}, context)
+    // form created the same object but went through a copy-loop and gave V8
+    // less to optimize. A fresh object per event preserves the previous
+    // contract that handlers may capture `this` or reassign top-level fields
+    // without leaking into subsequent events.
     while (++index < events.length) {
-      const handler = config[events[index][0]]
+      const event = events[index]
+      const handler = config[event[0]]
 
-      if (own.call(handler, events[index][1].type)) {
-        handler[events[index][1].type].call(
-          Object.assign(
-            {sliceSerialize: events[index][2].sliceSerialize},
-            context
-          ),
-          events[index][1]
+      if (own.call(handler, event[1].type)) {
+        handler[event[1].type].call(
+          {
+            sliceSerialize: event[2].sliceSerialize,
+            stack: context.stack,
+            tokenStack: context.tokenStack,
+            config: context.config,
+            enter: context.enter,
+            exit: context.exit,
+            buffer: context.buffer,
+            resume: context.resume,
+            data: context.data
+          },
+          event[1]
         )
       }
     }
