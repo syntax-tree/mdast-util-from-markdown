@@ -248,7 +248,10 @@ Handle a token (TypeScript type).
 
 ###### Returns
 
-Nothing (`undefined`).
+Nothing, if the token was fully handled and should be ignored by previous
+extensions / default logic.
+Or `false`, if the token has not been handled here and the parser should fall
+back to preceding logic.
 
 ### `OnEnterError`
 

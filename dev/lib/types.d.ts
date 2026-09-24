@@ -226,9 +226,13 @@ export type Handles = Record<string, Handle>
  * @param token
  *   Current token.
  * @returns
- *   Nothing.
+ *   Nothing, if the token was fully handled by this extension and should be ignored by previous extensions / default logic.
+ *   Or `false`, if the token has not been handled by this extension and handling should fall back to preceding logic.
  */
-export type Handle = (this: CompileContext, token: Token) => undefined | void
+export type Handle = (
+  this: CompileContext,
+  token: Token
+) => undefined | void | false
 
 /**
  * Handle the case where the `right` token is open, but it is closed (by the

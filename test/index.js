@@ -145,6 +145,51 @@ test('fromMarkdown', async function (t) {
     )
   })
 
+  await t.test(
+    'should allow extension handlers to fall through',
+    async function () {
+      assert.deepEqual(
+        fromMarkdown('a\nb', {
+          mdastExtensions: [
+            {
+              enter: {
+                paragraph() {
+                  return false
+                }
+              }
+            }
+          ]
+        }),
+        {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  value: 'a\nb',
+                  position: {
+                    start: {line: 1, column: 1, offset: 0},
+                    end: {line: 2, column: 2, offset: 3}
+                  }
+                }
+              ],
+              position: {
+                start: {line: 1, column: 1, offset: 0},
+                end: {line: 2, column: 2, offset: 3}
+              }
+            }
+          ],
+          position: {
+            start: {line: 1, column: 1, offset: 0},
+            end: {line: 2, column: 2, offset: 3}
+          }
+        }
+      )
+    }
+  )
+
   await t.test('should support multiple extensions', async function () {
     assert.deepEqual(
       fromMarkdown('a\nb', {
