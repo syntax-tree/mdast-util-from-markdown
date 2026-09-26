@@ -294,7 +294,7 @@ test('fromMarkdown', async function (t) {
           {
             transforms: [
               function (tree) {
-                assert.ok(tree.children[0].type === 'paragraph')
+                assert.equal(tree.children[0].type, 'paragraph')
                 tree.children[0].children[0].type = 'strong'
               }
             ]
@@ -1116,8 +1116,8 @@ test('fromMarkdown', async function (t) {
       // must be structurally identical because per-item shape and position
       // do not depend on list length.
       const fast = fromMarkdown('- a\n'.repeat(4))
-      const rebuild = fromMarkdown('- a\n'.repeat(1000))
       if (fast.children[0].type !== 'list') throw new Error('expected list')
+      const rebuild = fromMarkdown('- a\n'.repeat(1000))
       if (rebuild.children[0].type !== 'list') throw new Error('expected list')
       assert.deepEqual(
         rebuild.children[0].children[0],
@@ -1132,8 +1132,8 @@ test('fromMarkdown', async function (t) {
       // Same as the tight test but with blank-separated items, so the
       // list's spread should be inferred as true on both paths.
       const fast = fromMarkdown('- a\n\n'.repeat(4))
-      const rebuild = fromMarkdown('- a\n\n'.repeat(1000))
       if (fast.children[0].type !== 'list') throw new Error('expected list')
+      const rebuild = fromMarkdown('- a\n\n'.repeat(1000))
       if (rebuild.children[0].type !== 'list') throw new Error('expected list')
       assert.deepEqual(
         rebuild.children[0].children[0],
@@ -1195,7 +1195,7 @@ test('commonmark', async function (t) {
 
       const mdast = fromMarkdown(input)
       const hast = toHast(mdast, {allowDangerousHtml: true})
-      assert.ok(hast && hast.type === 'root', 'expected `root`')
+      assert.equal(hast.type, 'root', 'expected `root`')
       const actual = toHtml(hast, {allowDangerousHtml: true})
 
       assert.equal(

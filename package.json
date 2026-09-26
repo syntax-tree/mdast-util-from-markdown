@@ -20,9 +20,9 @@
   },
   "description": "mdast utility to parse markdown",
   "devDependencies": {
-    "@types/node": "^25.0.0",
+    "@types/node": "^26.0.0",
     "commonmark.json": "^0.31.0",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.28.0",
     "gzip-size-cli": "^5.0.0",
     "hast-util-from-html": "^2.0.0",
     "hast-util-to-html": "^9.0.0",
@@ -33,8 +33,8 @@
     "remark-preset-wooorm": "^11.0.0",
     "terser": "^5.0.0",
     "type-coverage": "^2.0.0",
-    "typescript": "^5.0.0",
-    "xo": "^1.0.0"
+    "typescript": "^6.0.0",
+    "xo": "^5.0.0"
   },
   "exports": {
     "development": "./dev/index.js",
@@ -65,9 +65,6 @@
   ],
   "license": "MIT",
   "name": "mdast-util-from-markdown",
-  "overrides": {
-    "yargs": "^18.0.0"
-  },
   "prettier": {
     "bracketSpacing": false,
     "semi": false,

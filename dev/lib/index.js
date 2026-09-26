@@ -628,7 +628,9 @@ function compiler(options) {
           stringifyPosition({start: token.start, end: token.end}) +
           '): it’s not open'
       )
-    } else if (open[0].type !== token.type) {
+    }
+
+    if (open[0].type !== token.type) {
       if (onExitError) {
         onExitError.call(this, token, open[0])
       } else {
@@ -1462,13 +1464,13 @@ function defaultOnError(left, right) {
         stringifyPosition({start: right.start, end: right.end}) +
         ') is open'
     )
-  } else {
-    throw new Error(
-      'Cannot close document, a token (`' +
-        right.type +
-        '`, ' +
-        stringifyPosition({start: right.start, end: right.end}) +
-        ') is still open'
-    )
   }
+
+  throw new Error(
+    'Cannot close document, a token (`' +
+      right.type +
+      '`, ' +
+      stringifyPosition({start: right.start, end: right.end}) +
+      ') is still open'
+  )
 }
