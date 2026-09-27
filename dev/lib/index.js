@@ -251,11 +251,9 @@ function compiler(options) {
       const handler = config[events[index][0]]
 
       if (own.call(handler, events[index][1].type)) {
+        // Note: spread first, V8 has optimizations for object shape cloning.
         handler[events[index][1].type].call(
-          Object.assign(
-            {sliceSerialize: events[index][2].sliceSerialize},
-            context
-          ),
+          {...context, sliceSerialize: events[index][2].sliceSerialize},
           events[index][1]
         )
       }
