@@ -1142,6 +1142,50 @@ test('fromMarkdown', async function (t) {
       assert.equal(rebuild.children[0].spread, true)
     }
   )
+
+  await t.test(
+    'should parse many small lists with nested lists',
+    async function () {
+      const count = 1000
+      const tree = fromMarkdown('- a\n  - b\n- c\n\nd\n\n'.repeat(count))
+      assert.equal(tree.children.length, count * 2)
+
+      const first = tree.children[0]
+      const last = tree.children.at(-2)
+      if (first.type !== 'list' || last?.type !== 'list')
+        throw new Error('expected list')
+      assert.equal(last.children.length, 2)
+      assert.equal(last.spread, first.spread)
+
+      const nested = last.children[0].children[1]
+      if (nested.type !== 'list') throw new Error('expected list')
+      assert.equal(nested.children.length, 1)
+
+      const lastItemPosition = last.children[1].position
+      if (!lastItemPosition) throw new Error('expected position')
+      const lastListLine = (count - 1) * 6
+      assert.equal(lastItemPosition.start.line, lastListLine + 3)
+    }
+  )
+
+  await t.test(
+    'should parse a wide nested list followed by more items',
+    async function () {
+      const count = 6000
+      const tree = fromMarkdown(`- a\n${'  - b\n'.repeat(count)}- c\n`)
+      const list = tree.children[0]
+      if (list.type !== 'list') throw new Error('expected list')
+      assert.equal(list.children.length, 2)
+
+      const nested = list.children[0].children[1]
+      if (nested.type !== 'list') throw new Error('expected list')
+      assert.equal(nested.children.length, count)
+
+      const lastItemPosition = list.children[1].position
+      if (!lastItemPosition) throw new Error('expected position')
+      assert.equal(lastItemPosition.start.line, count + 2)
+    }
+  )
 })
 
 test('fixtures', async function (t) {

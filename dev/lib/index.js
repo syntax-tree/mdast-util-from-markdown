@@ -227,6 +227,9 @@ function compiler(options) {
     /** @type {Array<number>} */
     const listStack = []
     let index = -1
+    /** @type {Array<Event> | undefined} */
+    let rebuilt
+    let copied = 0
 
     while (++index < events.length) {
       // We preprocess lists to add `listItem` tokens, and to infer whether
@@ -240,9 +243,25 @@ function compiler(options) {
         } else {
           const tail = listStack.pop()
           assert(typeof tail === 'number', 'expected list to be open')
-          index = prepareList(events, tail, index)
+
+          if (listStack.length === 0) {
+            if (events.length - index > index - tail) {
+              rebuilt ||= []
+              while (copied < tail) rebuilt.push(events[copied++])
+              const start = rebuilt.length
+              while (copied <= index) rebuilt.push(events[copied++])
+              prepareLists(rebuilt, start, rebuilt.length - 1)
+            } else {
+              index = prepareLists(events, tail, index)
+            }
+          }
         }
       }
+    }
+
+    if (rebuilt) {
+      while (copied < events.length) rebuilt.push(events[copied++])
+      events = rebuilt
     }
 
     index = -1
@@ -287,6 +306,37 @@ function compiler(options) {
     }
 
     return tree
+  }
+
+  /**
+   * @param {Array<Event>} events
+   * @param {number} start
+   * @param {number} end
+   * @returns {number}
+   */
+  function prepareLists(events, start, end) {
+    /** @type {Array<number>} */
+    const listStack = []
+    let index = start - 1
+
+    while (++index <= end) {
+      if (
+        events[index][1].type === types.listOrdered ||
+        events[index][1].type === types.listUnordered
+      ) {
+        if (events[index][0] === 'enter') {
+          listStack.push(index)
+        } else {
+          const tail = listStack.pop()
+          assert(typeof tail === 'number', 'expected list to be open')
+          const exit = prepareList(events, tail, index)
+          end += exit - index
+          index = exit
+        }
+      }
+    }
+
+    return end
   }
 
   /**
