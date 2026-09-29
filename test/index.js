@@ -1090,31 +1090,23 @@ test('fromMarkdown', async function (t) {
     })
   })
 
-  await t.test(
-    'should parse a wide list via the batched rebuild path',
-    async function () {
-      // 1000 items queue 2000 listItem insertions, well above
-      // SMALL_LIST_LIMIT, so prepareList rebuilds the events array. Spot-
-      // check the count and the last item's start.line so a misalignment
-      // bug in the suffix shift cannot pass on count alone.
-      const wideCount = 1000
-      const tree = fromMarkdown('- a\n'.repeat(wideCount))
-      if (tree.children[0].type !== 'list') throw new Error('expected list')
-      assert.equal(tree.children[0].children.length, wideCount)
+  await t.test('should parse a wide list', async function () {
+    // Spot-check the last item's start.line so a misaligned merge of the
+    // `listItem` events cannot pass on count alone.
+    const wideCount = 1000
+    const tree = fromMarkdown('- a\n'.repeat(wideCount))
+    if (tree.children[0].type !== 'list') throw new Error('expected list')
+    assert.equal(tree.children[0].children.length, wideCount)
 
-      const lastItemPosition = tree.children[0].children[wideCount - 1].position
-      if (!lastItemPosition) throw new Error('expected position')
-      assert.equal(lastItemPosition.start.line, wideCount)
-    }
-  )
+    const lastItemPosition = tree.children[0].children[wideCount - 1].position
+    if (!lastItemPosition) throw new Error('expected position')
+    assert.equal(lastItemPosition.start.line, wideCount)
+  })
 
   await t.test(
-    'should produce the same first item in fast-path and rebuild-path tight lists',
+    'should produce the same first item in short and wide tight lists',
     async function () {
-      // 4 items queue 8 insertions (= SMALL_LIST_LIMIT) → fast splice path.
-      // 1000 items queue 2000 insertions → rebuild path. The first item
-      // must be structurally identical because per-item shape and position
-      // do not depend on list length.
+      // Per-item shape and position do not depend on list length.
       const fast = fromMarkdown('- a\n'.repeat(4))
       if (fast.children[0].type !== 'list') throw new Error('expected list')
       const rebuild = fromMarkdown('- a\n'.repeat(1000))
@@ -1127,10 +1119,10 @@ test('fromMarkdown', async function (t) {
   )
 
   await t.test(
-    'should produce the same first item and infer spread in fast-path and rebuild-path loose lists',
+    'should produce the same first item and infer spread in short and wide loose lists',
     async function () {
       // Same as the tight test but with blank-separated items, so the
-      // list's spread should be inferred as true on both paths.
+      // list's spread should be inferred as true for both.
       const fast = fromMarkdown('- a\n\n'.repeat(4))
       if (fast.children[0].type !== 'list') throw new Error('expected list')
       const rebuild = fromMarkdown('- a\n\n'.repeat(1000))
@@ -1140,6 +1132,72 @@ test('fromMarkdown', async function (t) {
         fast.children[0].children[0]
       )
       assert.equal(rebuild.children[0].spread, true)
+    }
+  )
+
+  await t.test(
+    'should parse many small lists with nested lists',
+    async function () {
+      const count = 1000
+      const tree = fromMarkdown('- a\n  - b\n- c\n\nd\n\n'.repeat(count))
+      assert.equal(tree.children.length, count * 2)
+
+      const first = tree.children[0]
+      const last = tree.children.at(-2)
+      if (first.type !== 'list' || last?.type !== 'list')
+        throw new Error('expected list')
+      assert.equal(last.children.length, 2)
+      assert.equal(first.spread, false)
+      assert.equal(last.spread, false)
+
+      const nested = last.children[0].children[1]
+      if (nested.type !== 'list') throw new Error('expected list')
+      assert.equal(nested.children.length, 1)
+
+      const lastItemPosition = last.children[1].position
+      if (!lastItemPosition) throw new Error('expected position')
+      const lastListLine = (count - 1) * 6
+      assert.equal(lastItemPosition.start.line, lastListLine + 3)
+    }
+  )
+
+  await t.test(
+    'should parse a wide nested list followed by more items',
+    async function () {
+      const count = 6000
+      const tree = fromMarkdown(`- a\n${'  - b\n'.repeat(count)}- c\n`)
+      const list = tree.children[0]
+      if (list.type !== 'list') throw new Error('expected list')
+      assert.equal(list.children.length, 2)
+
+      const nested = list.children[0].children[1]
+      if (nested.type !== 'list') throw new Error('expected list')
+      assert.equal(nested.children.length, count)
+
+      const lastItemPosition = list.children[1].position
+      if (!lastItemPosition) throw new Error('expected position')
+      assert.equal(lastItemPosition.start.line, count + 2)
+    }
+  )
+
+  await t.test(
+    'should parse a wide list with a nested list in each item',
+    async function () {
+      const count = 1000
+      const tree = fromMarkdown('- a\n  - b\n  - c\n'.repeat(count))
+      const list = tree.children[0]
+      if (list.type !== 'list') throw new Error('expected list')
+      assert.equal(list.children.length, count)
+      assert.equal(list.spread, false)
+
+      const last = list.children[count - 1]
+      const nested = last.children[1]
+      if (nested.type !== 'list') throw new Error('expected list')
+      assert.equal(nested.children.length, 2)
+
+      const lastNestedPosition = nested.children[1].position
+      if (!lastNestedPosition) throw new Error('expected position')
+      assert.equal(lastNestedPosition.start.line, count * 3)
     }
   )
 })

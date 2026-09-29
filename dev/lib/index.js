@@ -226,24 +226,30 @@ function compiler(options) {
     }
     /** @type {Array<number>} */
     const listStack = []
+    /** @type {Array<Event>} */
+    const prepared = []
     let index = -1
 
+    // Add `listItem` tokens and infer spread.
+    // Each list is prepared while it is last in `prepared`, so nothing shifts.
     while (++index < events.length) {
-      // We preprocess lists to add `listItem` tokens, and to infer whether
-      // items the list itself are spread out.
+      prepared.push(events[index])
+
       if (
         events[index][1].type === types.listOrdered ||
         events[index][1].type === types.listUnordered
       ) {
         if (events[index][0] === 'enter') {
-          listStack.push(index)
+          listStack.push(prepared.length - 1)
         } else {
           const tail = listStack.pop()
           assert(typeof tail === 'number', 'expected list to be open')
-          index = prepareList(events, tail, index)
+          prepareList(prepared, tail)
         }
       }
     }
+
+    events = prepared
 
     index = -1
 
@@ -291,11 +297,13 @@ function compiler(options) {
 
   /**
    * @param {Array<Event>} events
+   *   Events, ending with the list to prepare.
    * @param {number} start
-   * @param {number} length
-   * @returns {number}
+   *   Index of the list enter.
+   * @returns {undefined}
    */
-  function prepareList(events, start, length) {
+  function prepareList(events, start) {
+    const end = events.length - 1
     let index = start - 1
     let containerBalance = -1
     let listSpread = false
@@ -308,15 +316,14 @@ function compiler(options) {
     /** @type {boolean | undefined} */
     let atMarker
     /**
-     * Insertions accumulated in walk order: each {at, event} maps to an
-     * `events.splice(at, 0, event)` in the original implementation. Applied
-     * once at the end so a wide list's per-item O(n) splice cost collapses
-     * to a single batched rebuild.
+     * `listItem` events to insert before the event at `at`, in walk order.
+     * Merged in after the walk, as inserting while walking would shift the
+     * rest of the list once per item.
      * @type {Array<{at: number, event: Event}>}
      */
     const insertions = []
 
-    while (++index <= length) {
+    while (++index <= end) {
       const event = events[index]
 
       switch (event[1].type) {
@@ -445,99 +452,27 @@ function compiler(options) {
       }
     }
 
-    // Apply queued insertions outside the loop so a wide list's O(n*k)
-    // shift cost collapses into one batched pass. Small lists take the
-    // splice fast path; wider lists rebuild the replacement once, then
-    // either spread it back in one splice or shift the suffix in place
-    // when the replacement is too large to spread safely.
-    if (insertions.length > 0) {
-      // Fast path: one splice per insertion, shifting the suffix each
-      // time. Cheap when there are few insertions, expensive when many.
-      // Rebuild path: one allocation plus one splice. Cheap once K grows,
-      // but pays allocation overhead even on tiny ranges. The crossover
-      // depends on document shape; 8 was picked by sweeping representative
-      // inputs.
-      const SMALL_LIST_LIMIT = 8
-      if (insertions.length <= SMALL_LIST_LIMIT) {
-        // Splice last-to-first so unspliced positions stay valid. Within
-        // a same-`at` group this reverses the walk order, which still
-        // produces the original loop's final ordering (exit before enter).
-        let insertion = insertions.length
-        while (insertion-- > 0) {
-          events.splice(
-            insertions[insertion].at,
-            0,
-            insertions[insertion].event
-          )
-        }
-      } else {
-        // Pass-1 visits events left-to-right and records exit-then-enter at
-        // non-decreasing `at` values, so no sort is needed. The assert
-        // below verifies that in development; micromark-build strips it
-        // (including the `.every()` callback) in production.
-        assert(
-          insertions.every(
-            (insertion, position) =>
-              position === 0 || insertion.at >= insertions[position - 1].at
-          ),
-          'expected insertions to be in non-decreasing `at` order'
-        )
+    // The list is at the end of `events`: take it off, then push it back with
+    // the insertions merged in.
+    // Nothing follows the list, so nothing shifts.
+    const listEvents = events.splice(start)
+    let insertion = 0
+    index = -1
 
-        const rangeLength = length - start + 1
-        /** @type {Array<Event>} */
-        // eslint-disable-next-line unicorn/no-new-array
-        const replacement = new Array(rangeLength + insertions.length)
-        let writeIndex = 0
-        let insertionIndex = 0
-        let sourceIndex = start
-        while (sourceIndex <= length) {
-          while (
-            insertionIndex < insertions.length &&
-            insertions[insertionIndex].at === sourceIndex
-          ) {
-            replacement[writeIndex++] = insertions[insertionIndex].event
-            insertionIndex++
-          }
-
-          replacement[writeIndex++] = events[sourceIndex++]
-        }
-
-        // Splice with a single spread when the replacement fits under
-        // V8's stack-arg limit. Above that, looping smaller splices would
-        // re-shift the suffix each time, so instead resize the array
-        // once, shift the suffix to its target position, and overwrite
-        // the vacated range. Both paths are O(suffix + replacement.length).
-        // The threshold matches micromark-util-chunked's own splice helper.
-        const SAFE_SPREAD = 10_000
-        if (replacement.length <= SAFE_SPREAD) {
-          events.splice(start, rangeLength, ...replacement)
-        } else {
-          const oldEnd = start + rangeLength
-          const newEnd = start + replacement.length
-          const delta = newEnd - oldEnd
-          assert(
-            delta > 0,
-            'expected the replacement to be longer than the original range'
-          )
-
-          const oldEventsLength = events.length
-          events.length = oldEventsLength + delta
-          let shiftIndex = events.length
-          while (shiftIndex-- > newEnd) {
-            events[shiftIndex] = events[shiftIndex - delta]
-          }
-
-          let writeIndex = 0
-          while (writeIndex < replacement.length) {
-            events[start + writeIndex] = replacement[writeIndex]
-            writeIndex++
-          }
-        }
+    while (++index < listEvents.length) {
+      while (
+        insertion < insertions.length &&
+        insertions[insertion].at === start + index
+      ) {
+        events.push(insertions[insertion++].event)
       }
+
+      events.push(listEvents[index])
     }
 
+    assert(insertion === insertions.length, 'expected insertions to be merged')
+
     events[start][1]._spread = listSpread
-    return length + insertions.length
   }
 
   /**
