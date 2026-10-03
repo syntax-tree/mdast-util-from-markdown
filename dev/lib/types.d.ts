@@ -160,6 +160,14 @@ export interface CompileData {
  */
 export interface Config {
   /**
+   * Listeners called for every token, after closing handles.
+   */
+  afterExit: Array<Handle>
+  /**
+   * Listeners called for every token, before opening handles.
+   */
+  beforeEnter: Array<Handle>
+  /**
    * Token types where line endings are used.
    */
   canContainEols: Array<string>
@@ -179,8 +187,26 @@ export interface Config {
 
 /**
  * Change how markdown tokens from micromark are turned into mdast.
+ *
+ * ###### Notes
+ *
+ * Handles (`enter`, `exit`) create the tree;
+ * a later handle for a token type from an extension overwrites earlier ones.
+ * Listeners (`afterExit`, `beforeEnter`) observe all tokens including unhandled
+ * ones.
+ * The point of listeners is that they *do not* interfere with handling,
+ * potentially changed by extensions.
+ * Don’t modify unexpected things!
  */
 export interface Extension {
+  /**
+   * Listener called for every token, after closing handles.
+   */
+  afterExit?: Handle | null | undefined
+  /**
+   * Listener called for every token, before opening handles.
+   */
+  beforeEnter?: Handle | null | undefined
   /**
    * Token types where line endings are used.
    */

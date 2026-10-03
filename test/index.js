@@ -414,6 +414,77 @@ test('fromMarkdown', async function (t) {
     }
   )
 
+  await t.test(
+    'should call `afterExit` after exit and `beforeEnter` before enter',
+    async function () {
+      /** @type {Array<[string, string, string | undefined]>} */
+      const calls = []
+      fromMarkdown('*a*', {
+        mdastExtensions: [
+          {
+            afterExit(token) {
+              calls.push(['exit', token.type, this.stack.at(-1)?.type])
+            },
+            beforeEnter(token) {
+              calls.push(['enter', token.type, this.stack.at(-1)?.type])
+            }
+          }
+        ]
+      })
+
+      assert.deepEqual(calls, [
+        ['enter', 'content', 'root'],
+        ['enter', 'paragraph', 'root'],
+        ['enter', 'emphasis', 'paragraph'],
+        ['enter', 'emphasisSequence', 'emphasis'],
+        ['exit', 'emphasisSequence', 'emphasis'],
+        ['enter', 'emphasisText', 'emphasis'],
+        ['enter', 'data', 'emphasis'],
+        ['exit', 'data', 'emphasis'],
+        ['exit', 'emphasisText', 'emphasis'],
+        ['enter', 'emphasisSequence', 'emphasis'],
+        ['exit', 'emphasisSequence', 'emphasis'],
+        ['exit', 'emphasis', 'paragraph'],
+        ['exit', 'paragraph', 'root'],
+        ['exit', 'content', 'root']
+      ])
+    }
+  )
+
+  await t.test(
+    'should support listeners on several extensions',
+    async function () {
+      /** @type {Array<string>} */
+      const calls = []
+
+      fromMarkdown('a', {
+        mdastExtensions: [
+          {
+            afterExit(token) {
+              if (token.type === 'paragraph') calls.push('c')
+            },
+            beforeEnter(token) {
+              if (token.type === 'paragraph') calls.push('a')
+            }
+          },
+          [
+            {
+              afterExit(token) {
+                if (token.type === 'paragraph') calls.push('d')
+              },
+              beforeEnter(token) {
+                if (token.type === 'paragraph') calls.push('b')
+              }
+            }
+          ],
+          {afterExit: null, beforeEnter: undefined}
+        ]
+      })
+
+      assert.deepEqual(calls, ['a', 'b', 'c', 'd'])
+    }
+  )
+
   await t.test('should parse an autolink (protocol)', async function () {
     assert.deepEqual(fromMarkdown('<tel:123>').children[0], {
       type: 'paragraph',

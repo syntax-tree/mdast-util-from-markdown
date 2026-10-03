@@ -181,7 +181,7 @@ mdast compiler context (TypeScript type).
   — exit a node
 * `sliceSerialize` (`(token: Token, expandTabs?: boolean) => string`)
   — get the string value of a token
-* `config` (`Required<Extension>`)
+* `config` (`Config`)
   — configuration
 
 ### `CompileData`
@@ -226,6 +226,10 @@ type).
 
 ###### Properties
 
+* `afterExit` ([`Handle`][api-handle], optional)
+  — listener called for every token, after closing handles
+* `beforeEnter` ([`Handle`][api-handle], optional)
+  — listener called for every token, before opening handles
 * `canContainEols` (`Array<string>`, optional)
   — token types where line endings are used
 * `enter` ([`Record<string, Handle>`][api-handle], optional)
@@ -234,6 +238,16 @@ type).
   — closing handles
 * `transforms` ([`Array<Transform>`][api-transform], optional)
   — tree transforms
+
+###### Notes
+
+Handles (`enter`, `exit`) create the tree;
+a later handle for a token type from an extension overwrites earlier ones.
+Listeners (`afterExit`, `beforeEnter`) observe all tokens including unhandled
+ones.
+The point of listeners is that they *do not* interfere with handling,
+potentially changed by extensions.
+Don’t modify unexpected things!
 
 ### `Handle`
 
