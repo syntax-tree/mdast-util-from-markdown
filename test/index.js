@@ -1162,7 +1162,7 @@ test('fromMarkdown', async function (t) {
   })
 
   await t.test('should parse a wide list', async function () {
-    // Spot-check the last item's start.line so a misaligned merge of the
+    // Spot-check the last item’s start.line so a misaligned merge of the
     // `listItem` events cannot pass on count alone.
     const wideCount = 1000
     const tree = fromMarkdown('- a\n'.repeat(wideCount))
@@ -1193,7 +1193,7 @@ test('fromMarkdown', async function (t) {
     'should produce the same first item and infer spread in short and wide loose lists',
     async function () {
       // Same as the tight test but with blank-separated items, so the
-      // list's spread should be inferred as true for both.
+      // list’s spread should be inferred as true for both.
       const fast = fromMarkdown('- a\n\n'.repeat(4))
       if (fast.children[0].type !== 'list') throw new Error('expected list')
       const rebuild = fromMarkdown('- a\n\n'.repeat(1000))
