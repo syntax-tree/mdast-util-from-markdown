@@ -97,6 +97,8 @@ export function fromMarkdown(value, encoding, options) {
 function compiler(options) {
   /** @type {Config} */
   const config = {
+    afterExit: [],
+    beforeEnter: [],
     transforms: [],
     canContainEols: ['emphasis', 'fragment', 'heading', 'paragraph', 'strong'],
     enter: {
@@ -250,9 +252,25 @@ function compiler(options) {
     while (++index < events.length) {
       const handler = config[events[index][0]]
 
+      if (events[index][0] === 'enter' && config.beforeEnter.length > 0) {
+        callListeners(
+          config.beforeEnter,
+          {...context, sliceSerialize: events[index][2].sliceSerialize},
+          events[index][1]
+        )
+      }
+
       if (own.call(handler, events[index][1].type)) {
         // Note: spread first, V8 has optimizations for object shape cloning.
         handler[events[index][1].type].call(
+          {...context, sliceSerialize: events[index][2].sliceSerialize},
+          events[index][1]
+        )
+      }
+
+      if (events[index][0] === 'exit' && config.afterExit.length > 0) {
+        callListeners(
+          config.afterExit,
           {...context, sliceSerialize: events[index][2].sliceSerialize},
           events[index][1]
         )
@@ -285,6 +303,24 @@ function compiler(options) {
     }
 
     return tree
+  }
+
+  /**
+   * @param {Array<Handle>} listeners
+   *   Listeners.
+   * @param {CompileContext} context
+   *   Context.
+   * @param {Token} token
+   *   Token.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  function callListeners(listeners, context, token) {
+    let index = -1
+
+    while (++index < listeners.length) {
+      listeners[index].call(context, token)
+    }
   }
 
   /**
@@ -1428,6 +1464,16 @@ function extension(combined, extension) {
           const right = extension[key]
           if (right) {
             combined[key].push(...right)
+          }
+
+          break
+        }
+
+        case 'afterExit':
+        case 'beforeEnter': {
+          const right = extension[key]
+          if (right) {
+            combined[key].push(right)
           }
 
           break
