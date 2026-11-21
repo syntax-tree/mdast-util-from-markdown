@@ -507,6 +507,10 @@ function compiler(options) {
     assert(insertion === insertions.length, 'expected insertions to be merged')
 
     events[start][1]._spread = listSpread
+
+    // The list token can include trailing blank lines (in a block quote):
+    // end the list where its last item ends.
+    if (listItem) events[start][1].end = Object.assign({}, listItem.end)
   }
 
   /**
