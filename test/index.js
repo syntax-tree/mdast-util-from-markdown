@@ -1271,6 +1271,18 @@ test('fromMarkdown', async function (t) {
       assert.equal(lastNestedPosition.start.line, count * 3)
     }
   )
+
+  await t.test(
+    'should end a list in a block quote at its last item, not at trailing blank lines',
+    async function () {
+      const tree = fromMarkdown('> - a\n>\n> b')
+      const quote = tree.children[0]
+      if (quote.type !== 'blockquote') throw new Error('expected blockquote')
+      const list = quote.children[0]
+      if (list.type !== 'list') throw new Error('expected list')
+      assert.deepEqual(list.position?.end, list.children[0].position?.end)
+    }
+  )
 })
 
 test('fixtures', async function (t) {
